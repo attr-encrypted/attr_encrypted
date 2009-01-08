@@ -102,6 +102,55 @@ You can pass a proc object as the `:key` option as well:
 	end
 
 
+### Custom encryptor ###
+
+You may use your own custom encryptor by specifying the `:encryptor`, `:encrypt_method`, and `:decrypt_method` options
+
+Lets suppose you'd like to use this custom encryptor class:
+
+	class SillyEncryptor
+	  def self.silly_encrypt(options)
+	    (options[:value] + options[:secret_key]).reverse
+	  end
+	
+	  def self.silly_decrypt(options)
+	    options[:value].reverse.gsub(/#{options[:secret_key]}$/, '')
+	  end
+	end
+
+Simply set up your class like so:
+
+	class User
+	  attr_encrypted :email, :secret_key => 'a secret key', :encryptor => SillyEncryptor, :encrypt_method => :silly_encrypt, :decrypt_method => :silly_decrypt
+	end
+
+Any options that you pass to `attr_encrypted` will be passed to the encryptor along with the `:value` option which contains the string to encrypt/decrypt.
+Notice it uses `:secret_key` instead of `:key`.
+
+
+### Default options ###
+
+Let's imagine that you have a few attributes that you want to encrypt with different keys, but you don't like the `encrypted_#{attribute}` naming convention.
+Instead of having to define your class like this:
+
+	class User
+	  attr_encrypted :email, :key => 'a secret key', :prefix => '', :suffix => '_crypted'
+	  attr_encrypted :ssn, :key => 'a different secret key', :prefix => '', :suffix => '_crypted'
+	  attr_encrypted :credit_card, :key => 'another secret key', :prefix => '', :suffix => '_crypted'
+	end
+
+You can simply define some default options like so:
+
+	class User
+	  attr_encrypted_options.merge(:prefix => '', :suffix => '_crypted')
+	  attr_encrypted :email, :key => 'a secret key'
+	  attr_encrypted :ssn, :key => 'a different secret key'
+	  attr_encrypted :credit_card, :key => 'another secret key'
+	end
+
+This should help keep your classes clean and DRY.
+
+
 Contact
 -------
 
