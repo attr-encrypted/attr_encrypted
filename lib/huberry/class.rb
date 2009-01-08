@@ -63,6 +63,8 @@ module Huberry
       #
       #   @user.configuration = { :time_zone => 'UTC' }
       #   @user.encrypted_configuration # returns the encrypted version of configuration
+      #
+      #   See README for more examples
       def attr_encrypted(*attrs)
         options = { 
           :prefix => 'encrypted_', 
