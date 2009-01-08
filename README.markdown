@@ -217,11 +217,13 @@ This should help keep your classes clean and DRY.
 ### Encoding ###
 
 You're probably going to be storing your encrypted attributes somehow (e.g. filesystem, database, etc) and may run into some issues trying to store a weird
-encrypted string. I've had this problem myself using MySQL. You can simply pass the `:encode` option to automatically base64 encode/decode when encrypting/decrypting.
+encrypted string. I've had this problem myself using MySQL. You can simply pass the `:encode` option to automatically encode/decode when encrypting/decrypting.
 
 	class User
 	  attr_encrypted :email, :key => 'some secret key', :encode => true
 	end
+
+The default encoding is `m*` (base64). You can change this by setting `:encode => 'some encoding'`. See  [Array#pack](http://www.ruby-doc.org/core/classes/Array.html#M002245) for more encoding options.
 
 
 ### Marshaling ###

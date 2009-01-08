@@ -26,12 +26,15 @@ module Huberry
       #                      method before being passed to the encryptor. Proc objects are evaluated as well. Any other key types 
       #                      will be passed directly to the encryptor.
       #
-      #   :encode         => If set to true, attributes will be base64 encoded as well as encrypted. This is useful if you're
-      #                      planning on storing the encrypted attributes in a database. Defaults to false unless you're using
-      #                      it with ActiveRecord.
+      #   :encode         => If set to true, attributes will be encoded as well as encrypted. This is useful if you're
+      #                      planning on storing the encrypted attributes in a database. The default encoding is 'm*' (base64), 
+      #                      however this can be overwritten by setting the :encode option to some other encoding string instead of
+      #                      just 'true'. See http://www.ruby-doc.org/core/classes/Array.html#M002245 for more encoding directives. 
+      #                      Defaults to false unless you're using it with ActiveRecord or DataMapper.
       #
       #   :marshal        => If set to true, attributes will be marshaled as well as encrypted. This is useful if you're planning
-      #                      on encrypting something other than a string. Defaults to false unless you're using it with ActiveRecord.
+      #                      on encrypting something other than a string. Defaults to false unless you're using it with ActiveRecord 
+      #                      or DataMapper.
       #
       #   :encryptor      => The object to use for encrypting. Defaults to Huberry::Encryptor.
       #
@@ -75,6 +78,7 @@ module Huberry
           :encode => false, 
           :marshal => false 
         }.merge(attr_encrypted_options).merge(attrs.last.is_a?(Hash) ? attrs.pop : {})
+        options[:encode] = 'm*' if options[:encode] == true
         
         attrs.each do |attribute|
           encrypted_attribute_name = options[:attribute].nil? ? options[:prefix].to_s + attribute.to_s + options[:suffix].to_s : options[:attribute].to_s
@@ -89,7 +93,7 @@ module Huberry
             else
               value = Marshal.dump(value) if options[:marshal]
               encrypted_value = options[:encryptor].send options[:encrypt_method], options.merge(:value => value)
-              encrypted_value = [encrypted_value].pack('m*') if options[:encode]
+              encrypted_value = [encrypted_value].pack(options[:encode]) if options[:encode]
             end
             encrypted_value
           end
@@ -98,7 +102,7 @@ module Huberry
             if encrypted_value.nil?
               decrypted_value = nil
             else
-              encrypted_value = encrypted_value.unpack('m*').to_s if options[:encode]
+              encrypted_value = encrypted_value.unpack(options[:encode]).to_s if options[:encode]
               decrypted_value = options[:encryptor].send(options[:decrypt_method], options.merge(:value => encrypted_value))
               decrypted_value = Marshal.load(decrypted_value) if options[:marshal]
             end

@@ -18,6 +18,7 @@ class User
   attr_encrypted :ssn, :key => :salt, :attribute => 'ssn_encrypted'
   attr_encrypted :credit_card, :encryptor => SillyEncryptor, :encrypt_method => :silly_encrypt, :decrypt_method => :silly_decrypt, :some_arg => 'test'
   attr_encrypted :with_encoding, :key => 'secret key', :encode => true
+  attr_encrypted :with_custom_encoding, :key => 'secret key', :encode => 'm'
   attr_encrypted :with_marshaling, :key => 'secret key', :marshal => true
   attr_accessor :salt
   
@@ -105,6 +106,16 @@ class AttrEncryptedTest < Test::Unit::TestCase
     encrypted = User.encrypt_with_encoding('test')
     assert_equal 'test', User.decrypt_with_encoding(encrypted)
     assert_equal User.decrypt_with_encoding(encrypted), User.decrypt_without_encoding(encrypted.unpack('m*').to_s)
+  end
+  
+  def test_should_encrypt_with_custom_encoding
+    assert_equal User.encrypt_with_encoding('test'), [User.encrypt_without_encoding('test')].pack('m')
+  end
+  
+  def test_should_decrypt_with_custom_encoding
+    encrypted = User.encrypt_with_encoding('test')
+    assert_equal 'test', User.decrypt_with_encoding(encrypted)
+    assert_equal User.decrypt_with_encoding(encrypted), User.decrypt_without_encoding(encrypted.unpack('m').to_s)
   end
   
   def test_should_encrypt_with_marshaling
