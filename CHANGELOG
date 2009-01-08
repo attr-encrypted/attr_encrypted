@@ -2,3 +2,4 @@
   * Initial commit
   * Add comments/documentation to the active record related logic
   * Add more attr_encrypted tests
+  * Update tests and comments

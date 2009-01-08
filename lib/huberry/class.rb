@@ -17,7 +17,7 @@ module Huberry
           
           encrypted_attributes[attribute.to_s] = encrypted_attribute_name
         
-          attr_accessor encrypted_attribute_name.to_sym unless instance_methods.include?(encrypted_attribute_name)
+          attr_accessor encrypted_attribute_name.to_sym unless self.new.respond_to?(encrypted_attribute_name)
         
           define_class_method "encrypt_#{attribute}" do |value|
             if value.nil?
@@ -42,7 +42,7 @@ module Huberry
           end
         
           define_method "#{attribute}" do
-            value = read_attribute(attribute)
+            value = instance_variable_get("@#{attribute}")
             encrypted_value = read_attribute(encrypted_attribute_name)
             original_key = options[:key]
             options[:key] = self.class.send :evaluate_attr_encrypted_key, options[:key], self
@@ -56,7 +56,7 @@ module Huberry
             options[:key] = self.class.send :evaluate_attr_encrypted_key, options[:key], self
             write_attribute(encrypted_attribute_name, self.class.send("encrypt_#{attribute}".to_sym, value))
             options[:key] = original_key
-            write_attribute(attribute, nil)
+            instance_variable_set("@#{attribute}", value)
           end
         end
       end

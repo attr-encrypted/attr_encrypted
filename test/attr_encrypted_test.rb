@@ -30,6 +30,9 @@ class Admin < User
   attr_encrypted :testing
 end
 
+class SomeOtherClass
+end
+
 class AttrEncryptedTest < Test::Unit::TestCase
   
   def test_should_store_email_in_encrypted_attributes
@@ -154,6 +157,11 @@ class AttrEncryptedTest < Test::Unit::TestCase
   def test_should_inherit_attr_encrypted_options
     assert !User.attr_encrypted_options.empty?
     assert_equal User.attr_encrypted_options, Admin.attr_encrypted_options
+  end
+  
+  def test_should_not_inherit_unrelated_attributes
+    assert SomeOtherClass.attr_encrypted_options.empty?
+    assert SomeOtherClass.encrypted_attributes.empty?
   end
   
 end
