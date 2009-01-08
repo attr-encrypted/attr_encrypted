@@ -232,6 +232,18 @@ when encrypting/decrypting.
 	end
 
 
+### Encrypt/decrypt attribute methods ###
+
+If you use the same key to encrypt every record (per attribute) like this:
+
+	class User
+	  attr_encrypted :email, :key => 'a secret key'
+	end
+
+Then you'll have these two class methods available for each attribute: `User.encrypt_email(email_to_encrypt)` and `User.decrypt_email(email_to_decrypt)`. This can
+be useful when you're using ActiveRecord (see below).
+
+
 ### ActiveRecord ###
 
 If you're using this gem with ActiveRecord, you get a few extra features:
