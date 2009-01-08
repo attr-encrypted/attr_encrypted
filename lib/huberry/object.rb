@@ -3,10 +3,9 @@ module Huberry
     def self.included(base)
       base.class_eval do
         extend ClassMethods
-        # eattr_accessor :attr_encrypted_options, :encrypted_attributes
-        eigenclass_eval { attr_accessor :attr_encrypted_options, :encrypted_attributes }
-        self.attr_encrypted_options = {}
-        self.encrypted_attributes = {}
+        eattr_accessor :attr_encrypted_options, :encrypted_attributes
+        attr_encrypted_options = {}
+        encrypted_attributes = {}
       end
     end
     

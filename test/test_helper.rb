@@ -2,7 +2,7 @@ require 'test/unit'
 require 'digest/sha2'
 
 require 'rubygems'
-gem 'shuber-eigenclass'
+gem 'shuber-eigenclass', '>= 1.0.1'
 gem 'shuber-encryptor'
 gem 'activerecord'
 
