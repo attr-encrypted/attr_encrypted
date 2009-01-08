@@ -26,6 +26,10 @@ class User
   end
 end
 
+class Admin < User
+  attr_encrypted :testing
+end
+
 class AttrEncryptedTest < Test::Unit::TestCase
   
   def test_should_store_email_in_encrypted_attributes
@@ -141,6 +145,15 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user.password = 'testing'
     assert_not_nil @user.crypted_password_test
     assert_equal Huberry::Encryptor.encrypt(:value => 'testing', :key => 'User'), @user.crypted_password_test
+  end
+  
+  def test_should_inherit_encrypted_attributes
+    assert_equal User.encrypted_attributes.merge('testing' => 'encrypted_testing'), Admin.encrypted_attributes
+  end
+  
+  def test_should_inherit_attr_encrypted_options
+    assert !User.attr_encrypted_options.empty?
+    assert_equal User.attr_encrypted_options, Admin.attr_encrypted_options
   end
   
 end
