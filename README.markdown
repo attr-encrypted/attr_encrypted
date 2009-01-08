@@ -129,6 +129,66 @@ Any options that you pass to `attr_encrypted` will be passed to the encryptor al
 Notice it uses `:secret_key` instead of `:key`.
 
 
+### Custom algorithms ###
+
+The default [Huberry::Encryptor](http://github.com/shuber/encryptor) uses the standard ruby OpenSSL library. It's default algorithm is `aes-256-cbc`. You can
+modify this by passing the `:algorithm` option to the `attr_encrypted` call like so:
+
+	class User
+	  attr_encrypted :email, :key => 'a secret key', :algorithm => 'bf'
+	end
+
+Run `openssl list-cipher-commands` to view a list of algorithms supported on your platform. See [http://github.com/shuber/encryptor](http://github.com/shuber/encryptor) for more information.
+
+	aes-128-cbc
+	aes-128-ecb
+	aes-192-cbc
+	aes-192-ecb
+	aes-256-cbc
+	aes-256-ecb
+	base64
+	bf
+	bf-cbc
+	bf-cfb
+	bf-ecb
+	bf-ofb
+	cast
+	cast-cbc
+	cast5-cbc
+	cast5-cfb
+	cast5-ecb
+	cast5-ofb
+	des
+	des-cbc
+	des-cfb
+	des-ecb
+	des-ede
+	des-ede-cbc
+	des-ede-cfb
+	des-ede-ofb
+	des-ede3
+	des-ede3-cbc
+	des-ede3-cfb
+	des-ede3-ofb
+	des-ofb
+	des3
+	desx
+	idea
+	idea-cbc
+	idea-cfb
+	idea-ecb
+	idea-ofb
+	rc2
+	rc2-40-cbc
+	rc2-64-cbc
+	rc2-cbc
+	rc2-cfb
+	rc2-ecb
+	rc2-ofb
+	rc4
+	rc4-40
+
+
 ### Default options ###
 
 Let's imagine that you have a few attributes that you want to encrypt with different keys, but you don't like the `encrypted_#{attribute}` naming convention.
