@@ -38,7 +38,7 @@ Encrypting attributes has never been easier:
 	@user = User.load
 	@user.ssn # decrypts :encrypted_ssn and returns '123-45-6789'
 
-
+  
 ### Specifying the encrypted attribute name ###
 
 By default, the encrypted attribute name is `encrypted_#{attribute}` (e.g. `attr_encrypted :email` would create an attribute named `encrypted_email`).
@@ -54,7 +54,7 @@ You can simply pass the name of the encrypted attribute as the `:attribute` opti
 
 This would generate an attribute named `email_encrypted`
 
-
+  
 #### The `:prefix` and `:suffix` options ####
 
 If you're planning on encrypting a few different attributes and you don't like the `encrypted_#{attribute}` naming convention then you can specify your own:
