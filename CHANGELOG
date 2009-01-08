@@ -1,2 +1,3 @@
 2009-01-07 - Sean Huber (shuber@huberry.com)
   * Initial commit
+  * Add comments/documentation to the active record related logic
