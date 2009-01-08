@@ -38,7 +38,7 @@ Encrypting attributes has never been easier:
 	@user = User.load
 	@user.ssn # decrypts :encrypted_ssn and returns '123-45-6789'
 
-  
+
 ### Specifying the encrypted attribute name ###
 
 By default, the encrypted attribute name is `encrypted_#{attribute}` (e.g. `attr_encrypted :email` would create an attribute named `encrypted_email`).
@@ -54,7 +54,7 @@ You can simply pass the name of the encrypted attribute as the `:attribute` opti
 
 This would generate an attribute named `email_encrypted`
 
-  
+
 #### The `:prefix` and `:suffix` options ####
 
 If you're planning on encrypting a few different attributes and you don't like the `encrypted_#{attribute}` naming convention then you can specify your own:
@@ -64,6 +64,42 @@ If you're planning on encrypting a few different attributes and you don't like t
 	end
 
 This would generate the following attributes: `secret_email_crypted`, `secret_credit_card_crypted`, and `secret_ssn_crypted`.
+
+
+### Encryption keys ###
+
+Although a `:key` option may not be required (see custom encryptor below), it has a few special features
+
+#### Unique keys for each attribute ####
+
+You can specify unique keys for each attribute if you'd like:
+
+	class User
+	  attr_encrypted :email, :key => 'a secret key'
+	  attr_encrypted :ssn, :key => 'a different secret key'
+	end
+
+
+#### Symbols representing instance methods as keys ####
+
+If your class has an instance method that determines the encryption key to use, simply pass a symbol representing it like so:
+
+	class User
+	  attr_encrypted :email, :key => :encryption_key
+	
+	  def encryption_key
+	    # does some fancy logic and returns an encryption key
+	  end
+	end
+
+
+#### Procs as keys ####
+
+You can pass a proc object as the `:key` option as well:
+
+	class User
+	  attr_encrypted :email, :key => proc { |user| ... }
+	end
 
 
 Contact
