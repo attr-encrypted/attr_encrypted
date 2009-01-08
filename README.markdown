@@ -104,7 +104,8 @@ You can pass a proc object as the `:key` option as well:
 
 ### Custom encryptor ###
 
-You may use your own custom encryptor by specifying the `:encryptor`, `:encrypt_method`, and `:decrypt_method` options
+The [Huberry::Encryptor](http://github.com/shuber/encryptor) class is used by default. You may use your own custom encryptor by specifying
+the `:encryptor`, `:encrypt_method`, and `:decrypt_method` options
 
 Lets suppose you'd like to use this custom encryptor class:
 
@@ -154,7 +155,7 @@ This should help keep your classes clean and DRY.
 ### Encoding ###
 
 You're probably going to be storing your encrypted attributes somehow (e.g. filesystem, database, etc) and may run into some issues trying to store a weird
-encrypted string. I've had this problem myself using MySQL. You can simply pass the `:encode` option to automatically encode/decode when encrypting/decrypting.
+encrypted string. I've had this problem myself using MySQL. You can simply pass the `:encode` option to automatically base64 encode/decode when encrypting/decrypting.
 
 	class User
 	  attr_encrypted :email, :key => 'some secret key', :encode => true
@@ -163,11 +164,40 @@ encrypted string. I've had this problem myself using MySQL. You can simply pass 
 
 ### Marshaling ###
 
-You may want to encrypt objects other than strings. If this is the case, simply pass the `:marshal` option to automatically marshal when encrypting/decrypting.
+You may want to encrypt objects other than strings (e.g. hashes, arrays, etc). If this is the case, simply pass the `:marshal` option to automatically marshal
+when encrypting/decrypting.
 
 	class User
 	  attr_encrypted :credentials, :key => 'some secret key', :marshal => true
 	end
+
+
+### ActiveRecord ###
+
+If you're using this gem with ActiveRecord, you get a few extra features:
+
+#### Default options ####
+
+For your convenience, the `:encode` and `:marshal` options are set to true by default since you'll be storing everything in a database.
+
+
+#### Dynamic find\_by\_ and scoped\_by\_ methods ####
+
+Let's say you'd like to encrypt your user's email addresses, but you also need a way for them to login. Simply set up your class like so:
+
+	class User < ActiveRecord::Base
+	  attr_encrypted :email, :key => 'a secret key'
+	  attr_encrypted :password, :key => 'some other secret key'
+	end
+
+You can now lookup and login users like so:
+
+	User.find_by_email_and_password('test@example.com', 'testing')
+
+The call to `find_by_email_and_password` is intercepted and modified to `find_by_encrypted_email_and_encrypted_password('ENCRYPTED EMAIL', 'ENCRYPTED PASSWORD')`.
+The dynamic scope methods like `scoped_by_email_and_password` work the same way.
+
+NOTE: This only works if all records are encrypted with the same encryption key (per attribute).
 
 
 Contact
