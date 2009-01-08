@@ -23,8 +23,8 @@ module Huberry
       #
       #   :key            => The encryption key. This option may not be required if you're using a custom encryptor. If you pass 
       #                      a symbol representing an instance method then the :key option will be replaced with the result of the 
-      #                      method before being passed to the encryptor. Proc objects are evaluated as well. Any other key types 
-      #                      will be passed directly to the encryptor.
+      #                      method before being passed to the encryptor. Objects that respond to :call are evaluated as well (including procs). 
+      #                      Any other key types will be passed directly to the encryptor.
       #
       #   :encode         => If set to true, attributes will be encoded as well as encrypted. This is useful if you're
       #                      planning on storing the encrypted attributes in a database. The default encoding is 'm*' (base64), 
@@ -42,6 +42,13 @@ module Huberry
       #
       #   :decrypt_method => The decrypt method name to call on the <tt>:encryptor</tt> object. Defaults to :decrypt.
       #
+      #   :if             => Attributes are only encrypted if this option evaluates to true. If you pass a symbol representing an instance 
+      #                      method then the result of the method will be evaluated. Any objects that respond to :call are evaluated as well. 
+      #                      Defaults to true.
+      #
+      #   :unless         => Attributes are only encrypted if this option evaluates to false. If you pass a symbol representing an instance 
+      #                      method then the result of the method will be evaluated. Any objects that respond to :call are evaluated as well. 
+      #                      Defaults to false.
       #
       # You can specify your own default options
       #
@@ -76,7 +83,9 @@ module Huberry
           :encrypt_method => :encrypt,
           :decrypt_method => :decrypt,
           :encode => false, 
-          :marshal => false 
+          :marshal => false, 
+          :if => true, 
+          :unless => false 
         }.merge(attr_encrypted_options).merge(attrs.last.is_a?(Hash) ? attrs.pop : {})
         options[:encode] = 'm*' if options[:encode] == true
         
@@ -88,42 +97,56 @@ module Huberry
           attr_accessor encrypted_attribute_name.to_sym unless instance_methods.include?(encrypted_attribute_name)
           
           define_class_method "encrypt_#{attribute}" do |value|
-            if value.nil?
-              encrypted_value = nil
+            if options[:if] && !options[:unless]
+              if value.nil?
+                encrypted_value = nil
+              else
+                value = Marshal.dump(value) if options[:marshal]
+                encrypted_value = options[:encryptor].send options[:encrypt_method], options.merge(:value => value)
+                encrypted_value = [encrypted_value].pack(options[:encode]) if options[:encode]
+              end
+              encrypted_value
             else
-              value = Marshal.dump(value) if options[:marshal]
-              encrypted_value = options[:encryptor].send options[:encrypt_method], options.merge(:value => value)
-              encrypted_value = [encrypted_value].pack(options[:encode]) if options[:encode]
+              value
             end
-            encrypted_value
           end
           
           define_class_method "decrypt_#{attribute}" do |encrypted_value|
-            if encrypted_value.nil?
-              decrypted_value = nil
+            if options[:if] && !options[:unless]
+              if encrypted_value.nil?
+                decrypted_value = nil
+              else
+                encrypted_value = encrypted_value.unpack(options[:encode]).to_s if options[:encode]
+                decrypted_value = options[:encryptor].send(options[:decrypt_method], options.merge(:value => encrypted_value))
+                decrypted_value = Marshal.load(decrypted_value) if options[:marshal]
+              end
+              decrypted_value
             else
-              encrypted_value = encrypted_value.unpack(options[:encode]).to_s if options[:encode]
-              decrypted_value = options[:encryptor].send(options[:decrypt_method], options.merge(:value => encrypted_value))
-              decrypted_value = Marshal.load(decrypted_value) if options[:marshal]
+              encrypted_value
             end
-            decrypted_value
           end
           
           define_method "#{attribute}" do
             value = instance_variable_get("@#{attribute}")
             encrypted_value = read_attribute(encrypted_attribute_name)
-            original_key = options[:key]
-            options[:key] = self.class.send :evaluate_attr_encrypted_option, options[:key], self
+            original_options = [:key, :if, :unless].inject({}) do |hash, option|
+              hash[option] = options[option]
+              options[option] = self.class.send :evaluate_attr_encrypted_option, options[option], self
+              hash
+            end
             value = instance_variable_set("@#{attribute}", self.class.send("decrypt_#{attribute}".to_sym, encrypted_value)) if value.nil? && !encrypted_value.nil?
-            options[:key] = original_key
+            options.merge!(original_options)
             value
           end
           
           define_method "#{attribute}=" do |value|
-            original_key = options[:key]
-            options[:key] = self.class.send :evaluate_attr_encrypted_option, options[:key], self
+            original_options = [:key, :if, :unless].inject({}) do |hash, option|
+              hash[option] = options[option]
+              options[option] = self.class.send :evaluate_attr_encrypted_option, options[option], self
+              hash
+            end
             write_attribute(encrypted_attribute_name, self.class.send("encrypt_#{attribute}".to_sym, value))
-            options[:key] = original_key
+            options.merge!(original_options)
             instance_variable_set("@#{attribute}", value)
           end
         end

@@ -6,6 +6,7 @@
   * Attribute methods are now defined before calling attr_encrypted when using active record
   * Add ability to specify your own encoding directives
   * Update logic that evaluates symbol and proc options
+  * Add support for :if and :unless options
 
 2009-01-07 - Sean Huber (shuber@huberry.com)
   * Initial commit

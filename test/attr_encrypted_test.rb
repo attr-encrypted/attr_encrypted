@@ -20,6 +20,10 @@ class User
   attr_encrypted :with_encoding, :key => 'secret key', :encode => true
   attr_encrypted :with_custom_encoding, :key => 'secret key', :encode => 'm'
   attr_encrypted :with_marshaling, :key => 'secret key', :marshal => true
+  attr_encrypted :with_true_if, :key => 'secret key', :if => true
+  attr_encrypted :with_false_if, :key => 'secret key', :if => false
+  attr_encrypted :with_true_unless, :key => 'secret key', :unless => true
+  attr_encrypted :with_false_unless, :key => 'secret key', :unless => false
   attr_accessor :salt
   
   def initialize
@@ -196,6 +200,38 @@ class AttrEncryptedTest < Test::Unit::TestCase
   
   def test_should_return_a_string_option
     assert_equal 'Object', Object.send(:evaluate_attr_encrypted_option, 'Object', Object.new)
+  end
+  
+  def test_should_encrypt_with_true_if
+    @user = User.new
+    assert_nil @user.encrypted_with_true_if
+    @user.with_true_if = 'testing'
+    assert_not_nil @user.encrypted_with_true_if
+    assert_equal Huberry::Encryptor.encrypt(:value => 'testing', :key => 'secret key'), @user.encrypted_with_true_if
+  end
+  
+  def test_should_not_encrypt_with_false_if
+    @user = User.new
+    assert_nil @user.encrypted_with_false_if
+    @user.with_false_if = 'testing'
+    assert_not_nil @user.encrypted_with_false_if
+    assert_equal 'testing', @user.encrypted_with_false_if
+  end
+  
+  def test_should_encrypt_with_false_unless
+    @user = User.new
+    assert_nil @user.encrypted_with_false_unless
+    @user.with_false_unless = 'testing'
+    assert_not_nil @user.encrypted_with_false_unless
+    assert_equal Huberry::Encryptor.encrypt(:value => 'testing', :key => 'secret key'), @user.encrypted_with_false_unless
+  end
+  
+  def test_should_not_encrypt_with_true_unless
+    @user = User.new
+    assert_nil @user.encrypted_with_true_unless
+    @user.with_true_unless = 'testing'
+    assert_not_nil @user.encrypted_with_true_unless
+    assert_equal 'testing', @user.encrypted_with_true_unless
   end
   
 end
