@@ -3,6 +3,8 @@ attr\_encrypted
 
 Generates attr\_accessors that encrypt and decrypt attributes transparently
 
+Works with any class including ActiveRecord and DataMapper
+
 
 Installation
 ------------

@@ -1,6 +1,6 @@
 Gem::Specification.new do |s| 
   s.name    = 'attr_encrypted'
-  s.version = '1.0.0'
+  s.version = '1.0.1'
   s.date    = '2009-01-08'
   
   s.summary     = 'Generates attr_accessors that encrypt and decrypt attributes transparently'
@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
     lib/attr_encrypted.rb
     lib/huberry/active_record.rb
     lib/huberry/class.rb
+    lib/huberry/data_mapper.rb
     lib/huberry/object.rb
     MIT-LICENSE
     Rakefile
@@ -30,6 +31,7 @@ Gem::Specification.new do |s|
   s.test_files = %w(
     test/active_record_test.rb
     test/attr_encrypted_test.rb
+    test/data_mapper_test.rb
   )
   
   s.add_dependency('shuber-eigenclass', ['>= 1.0.1'])

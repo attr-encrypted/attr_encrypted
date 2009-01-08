@@ -10,15 +10,11 @@ module Huberry
     end
     
     # Wraps instance_variable_get
-    #
-    # ActiveRecord overwrites this (if you're using it)
     def read_attribute(attribute)
       instance_variable_get("@#{attribute}")
     end
     
     # Wraps instance_variable_set
-    #
-    # ActiveRecord overwrites this (if you're using it)
     def write_attribute(attribute, value)
       instance_variable_set("@#{attribute}", value)
     end

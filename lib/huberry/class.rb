@@ -110,7 +110,7 @@ module Huberry
             encrypted_value = read_attribute(encrypted_attribute_name)
             original_key = options[:key]
             options[:key] = self.class.send :evaluate_attr_encrypted_key, options[:key], self
-            value = write_attribute(attribute, self.class.send("decrypt_#{attribute}".to_sym, encrypted_value)) if value.nil? && !encrypted_value.nil?
+            value = instance_variable_set("@#{attribute}", self.class.send("decrypt_#{attribute}".to_sym, encrypted_value)) if value.nil? && !encrypted_value.nil?
             options[:key] = original_key
             value
           end
