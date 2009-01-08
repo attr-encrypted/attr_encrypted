@@ -1,7 +1,7 @@
 module Huberry
-  module Class    
+  module Class
     protected
-      # Generates attr_accessors that encrypt and decrypt attributes as you use them
+      # Generates attr_accessors that encrypt and decrypt attributes transparently
       #
       # Options (any other options you specify are passed to the encryptor's encrypt and decrypt methods)
       #
