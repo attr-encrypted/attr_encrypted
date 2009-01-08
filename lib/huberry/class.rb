@@ -81,7 +81,7 @@ module Huberry
           
           encrypted_attributes[attribute.to_s] = encrypted_attribute_name
           
-          attr_accessor encrypted_attribute_name.to_sym unless self.new.respond_to?(encrypted_attribute_name)
+          attr_accessor encrypted_attribute_name.to_sym unless instance_methods.include?(encrypted_attribute_name)
           
           define_class_method "encrypt_#{attribute}" do |value|
             if value.nil?

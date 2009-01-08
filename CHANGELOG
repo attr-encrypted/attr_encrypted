@@ -3,6 +3,7 @@
   * Update README
   * Add gemspec
   * Add support for data mapper
+  * Attribute methods are now defined before calling attr_encrypted when using active record
 
 2009-01-07 - Sean Huber (shuber@huberry.com)
   * Initial commit
