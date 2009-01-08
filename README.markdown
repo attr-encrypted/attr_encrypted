@@ -142,13 +142,32 @@ Instead of having to define your class like this:
 You can simply define some default options like so:
 
 	class User
-	  attr_encrypted_options.merge(:prefix => '', :suffix => '_crypted')
+	  attr_encrypted_options.merge!(:prefix => '', :suffix => '_crypted')
 	  attr_encrypted :email, :key => 'a secret key'
 	  attr_encrypted :ssn, :key => 'a different secret key'
 	  attr_encrypted :credit_card, :key => 'another secret key'
 	end
 
 This should help keep your classes clean and DRY.
+
+
+### Encoding ###
+
+You're probably going to be storing your encrypted attributes somehow (e.g. filesystem, database, etc) and may run into some issues trying to store a weird
+encrypted string. I've had this problem myself using MySQL. You can simply pass the `:encode` option to automatically encode/decode when encrypting/decrypting.
+
+	class User
+	  attr_encrypted :email, :key => 'some secret key', :encode => true
+	end
+
+
+### Marshaling ###
+
+You may want to encrypt objects other than strings. If this is the case, simply pass the `:marshal` option to automatically marshal when encrypting/decrypting.
+
+	class User
+	  attr_encrypted :credentials, :key => 'some secret key', :marshal => true
+	end
 
 
 Contact
