@@ -113,7 +113,7 @@ module Huberry
             value = instance_variable_get("@#{attribute}")
             encrypted_value = read_attribute(encrypted_attribute_name)
             original_key = options[:key]
-            options[:key] = self.class.send :evaluate_attr_encrypted_key, options[:key], self
+            options[:key] = self.class.send :evaluate_attr_encrypted_option, options[:key], self
             value = instance_variable_set("@#{attribute}", self.class.send("decrypt_#{attribute}".to_sym, encrypted_value)) if value.nil? && !encrypted_value.nil?
             options[:key] = original_key
             value
@@ -121,7 +121,7 @@ module Huberry
           
           define_method "#{attribute}=" do |value|
             original_key = options[:key]
-            options[:key] = self.class.send :evaluate_attr_encrypted_key, options[:key], self
+            options[:key] = self.class.send :evaluate_attr_encrypted_option, options[:key], self
             write_attribute(encrypted_attribute_name, self.class.send("encrypt_#{attribute}".to_sym, value))
             options[:key] = original_key
             instance_variable_set("@#{attribute}", value)
@@ -129,16 +129,15 @@ module Huberry
         end
       end
       
-      # Evaluates encryption keys specified as symbols (representing instance methods) or procs
-      # If the key is not a symbol or proc then the original key is returned
-      def evaluate_attr_encrypted_key(key, object)
-        case key
-        when Symbol
-          object.send(key)
-        when Proc
-          key.call(object)
+      # Evaluates an option specified as a symbol representing an instance method or a proc
+      # If the option is not a symbol or proc then the original option is returned
+      def evaluate_attr_encrypted_option(option, object)
+        if option.is_a?(Symbol) && object.respond_to?(option)
+          object.send(option)
+        elsif option.respond_to?(:call)
+          option.call(object)
         else
-          key
+          option
         end
       end
   end

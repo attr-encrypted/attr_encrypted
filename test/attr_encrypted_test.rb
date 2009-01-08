@@ -32,6 +32,9 @@ class Admin < User
 end
 
 class SomeOtherClass
+  def self.call(object)
+    object.class
+  end
 end
 
 class AttrEncryptedTest < Test::Unit::TestCase
@@ -173,6 +176,26 @@ class AttrEncryptedTest < Test::Unit::TestCase
   def test_should_not_inherit_unrelated_attributes
     assert SomeOtherClass.attr_encrypted_options.empty?
     assert SomeOtherClass.encrypted_attributes.empty?
+  end
+  
+  def test_should_evaluate_a_symbol_option
+    assert_equal Object, Object.send(:evaluate_attr_encrypted_option, :class, Object.new)
+  end
+  
+  def test_should_evaluate_a_proc_option
+    assert_equal Object, Object.send(:evaluate_attr_encrypted_option, proc { |object| object.class }, Object.new)
+  end
+  
+  def test_should_evaluate_a_lambda_option
+    assert_equal Object, Object.send(:evaluate_attr_encrypted_option, lambda { |object| object.class }, Object.new)
+  end
+  
+  def test_should_evaluate_a_method_option
+    assert_equal Object, Object.send(:evaluate_attr_encrypted_option, SomeOtherClass.method(:call), Object.new)
+  end
+  
+  def test_should_return_a_string_option
+    assert_equal 'Object', Object.send(:evaluate_attr_encrypted_option, 'Object', Object.new)
   end
   
 end
