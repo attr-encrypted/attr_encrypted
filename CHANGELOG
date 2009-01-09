@@ -7,6 +7,7 @@
   * Add ability to specify your own encoding directives
   * Update logic that evaluates symbol and proc options
   * Add support for :if and :unless options
+  * Add AttrEncrypted namespace
 
 2009-01-07 - Sean Huber (shuber@huberry.com)
   * Initial commit
