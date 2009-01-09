@@ -261,13 +261,18 @@ Then you'll have these two class methods available for each attribute: `User.enc
 be useful when you're using ActiveRecord (see below).
 
 
+### DataMapper ###
+
+For your convenience, the `:encode` and `:marshal` options are set to true by default since you'll be storing everything in a database.
+
+
 ### ActiveRecord ###
 
 If you're using this gem with ActiveRecord, you get a few extra features:
 
 #### Default options ####
 
-For your convenience, the `:encode` and `:marshal` options are set to true by default since you'll be storing everything in a database.
+Just like the default options for DataMapper, the `:encode` and `:marshal` options are set to true by default since you'll be storing everything in a database.
 
 
 #### Dynamic find\_by\_ and scoped\_by\_ methods ####
