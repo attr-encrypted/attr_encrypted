@@ -109,12 +109,12 @@ You can pass a proc object as the `:key` option as well:
 There may be times that you want to only encrypt when certain conditions are met. For example maybe you're using rails and you don't want to encrypt 
 attributes when you're in development mode. You can specify conditions like this:
 
-	class User
+	class User < ActiveRecord::Base
 	  attr_encrypted :email, :key => 'a secret key', :unless => Rails.env.development?
 	end
 
 You can specify both `:if` and `:unless` options. If you pass a symbol representing an instance method then the result of the method will be evaluated. 
-Any objects that respond to :call are evaluated as well.
+Any objects that respond to `:call` are evaluated as well.
 
 
 ### Custom encryptor ###
