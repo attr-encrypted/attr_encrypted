@@ -29,19 +29,19 @@ class DataMapperTest < Test::Unit::TestCase
   end
   
   def test_should_encrypt_email
-    @person = Client.new :email => 'test@example.com'
-    assert @person.save
-    assert_not_nil @person.encrypted_email
-    assert_not_equal @person.email, @person.encrypted_email
-    assert_equal @person.email, Client.first.email
+    @client = Client.new :email => 'test@example.com'
+    assert @client.save
+    assert_not_nil @client.encrypted_email
+    assert_not_equal @client.email, @client.encrypted_email
+    assert_equal @client.email, Client.first.email
   end
   
   def test_should_marshal_and_encrypt_credentials
-    @person = Client.new
-    assert @person.save
-    assert_not_nil @person.encrypted_credentials
-    assert_not_equal @person.credentials, @person.encrypted_credentials
-    assert_equal @person.credentials, Client.first.credentials
+    @client = Client.new
+    assert @client.save
+    assert_not_nil @client.encrypted_credentials
+    assert_not_equal @client.credentials, @client.encrypted_credentials
+    assert_equal @client.credentials, Client.first.credentials
     assert Client.first.credentials.is_a?(Hash)
   end
   
