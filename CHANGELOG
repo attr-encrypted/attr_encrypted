@@ -1,5 +1,6 @@
 2009-01-12 - Sean Huber (shuber@huberry.com)
   * Remove read_attribute and write_attribute methods - unnecessary
+  * ActiveRecord and DataMapper extensions are now "adapters"
 
 2009-01-11 - Sean Huber (shuber@huberry.com)
   * Update README

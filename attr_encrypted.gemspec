@@ -1,7 +1,7 @@
 Gem::Specification.new do |s| 
   s.name    = 'attr_encrypted'
-  s.version = '1.0.3'
-  s.date    = '2009-01-08'
+  s.version = '1.0.4'
+  s.date    = '2009-01-12'
   
   s.summary     = 'Generates attr_accessors that encrypt and decrypt attributes transparently'
   s.description = 'Generates attr_accessors that encrypt and decrypt attributes transparently'
@@ -18,9 +18,9 @@ Gem::Specification.new do |s|
   s.files = %w(
     CHANGELOG
     lib/attr_encrypted.rb
-    lib/huberry/attr_encrypted/active_record.rb
+    lib/huberry/attr_encrypted/adapters/active_record.rb
+    lib/huberry/attr_encrypted/adapters/data_mapper.rb
     lib/huberry/attr_encrypted/class.rb
-    lib/huberry/attr_encrypted/data_mapper.rb
     lib/huberry/attr_encrypted/object.rb
     MIT-LICENSE
     Rakefile
