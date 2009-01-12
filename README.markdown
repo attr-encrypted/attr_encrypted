@@ -3,7 +3,7 @@ attr\_encrypted
 
 Generates attr\_accessors that encrypt and decrypt attributes transparently
 
-Works with any class including ActiveRecord and DataMapper
+Works with ANY class including ActiveRecord and DataMapper
 
 
 Installation
@@ -97,7 +97,7 @@ If your class has an instance method that determines the encryption key to use, 
 
 #### Procs as keys ####
 
-You can pass a proc object as the `:key` option as well:
+You can pass a proc/lambda object as the `:key` option as well:
 
 	class User
 	  attr_encrypted :email, :key => proc { |user| ... }
