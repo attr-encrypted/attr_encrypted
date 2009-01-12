@@ -89,14 +89,15 @@ module Huberry
             :unless => false 
           }.merge(attr_encrypted_options).merge(attrs.last.is_a?(Hash) ? attrs.pop : {})
           options[:encode] = 'm*' if options[:encode] == true
-        
+          
           attrs.each do |attribute|
             encrypted_attribute_name = options[:attribute].nil? ? options[:prefix].to_s + attribute.to_s + options[:suffix].to_s : options[:attribute].to_s
-          
+            
             encrypted_attributes[attribute.to_s] = encrypted_attribute_name
-          
-            attr_accessor encrypted_attribute_name.to_sym unless instance_methods.include?(encrypted_attribute_name)
-          
+            
+            attr_reader encrypted_attribute_name.to_sym unless instance_methods.include?(encrypted_attribute_name)
+            attr_writer encrypted_attribute_name.to_sym unless instance_methods.include?("#{encrypted_attribute_name}=")
+            
             define_class_method "encrypt_#{attribute}" do |value|
               if options[:if] && !options[:unless]
                 if value.nil?
@@ -111,7 +112,7 @@ module Huberry
                 value
               end
             end
-          
+            
             define_class_method "decrypt_#{attribute}" do |encrypted_value|
               if options[:if] && !options[:unless]
                 if encrypted_value.nil?
@@ -126,7 +127,7 @@ module Huberry
                 encrypted_value
               end
             end
-          
+            
             define_method "#{attribute}" do
               value = instance_variable_get("@#{attribute}")
               encrypted_value = send(encrypted_attribute_name.to_s)
@@ -139,7 +140,7 @@ module Huberry
               options.merge!(original_options)
               value
             end
-          
+            
             define_method "#{attribute}=" do |value|
               original_options = [:key, :if, :unless].inject({}) do |hash, option|
                 hash[option] = options[option]
@@ -152,7 +153,7 @@ module Huberry
             end
           end
         end
-      
+        
         # Evaluates an option specified as a symbol representing an instance method or a proc
         # If the option is not a symbol or proc then the original option is returned
         def evaluate_attr_encrypted_option(option, object)
