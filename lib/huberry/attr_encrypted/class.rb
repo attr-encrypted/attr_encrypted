@@ -130,7 +130,7 @@ module Huberry
             
             define_method "#{attribute}" do
               value = instance_variable_get("@#{attribute}")
-              encrypted_value = send(encrypted_attribute_name.to_s)
+              encrypted_value = send(encrypted_attribute_name.to_sym)
               original_options = [:key, :if, :unless].inject({}) do |hash, option|
                 hash[option] = options[option]
                 options[option] = self.class.send :evaluate_attr_encrypted_option, options[option], self

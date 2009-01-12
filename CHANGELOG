@@ -2,6 +2,7 @@
   * Remove read_attribute and write_attribute methods - unnecessary
   * ActiveRecord and DataMapper extensions are now "adapters"
   * Check for existing reader and writer methods separately before creating default ones for encrypted attributes
+  * Typo: should send(encrypted_attribute_name.to_sym) instead of send(encrypted_attribute_name.to_s)
 
 2009-01-11 - Sean Huber (shuber@huberry.com)
   * Update README
