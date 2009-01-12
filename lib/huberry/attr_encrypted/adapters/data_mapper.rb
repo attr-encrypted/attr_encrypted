@@ -3,23 +3,21 @@ if defined?(DataMapper)
     module AttrEncrypted
       module Adapters
         module DataMapper
-          def self.included(base)
-            base.extend ClassMethods
+          def self.extended(base)
+            base.eigenclass_eval do 
+              alias_method :included_without_attr_encrypted, :included
+              alias_method :included, :included_with_attr_encrypted
+            end
           end
-        
-          module ClassMethods
-            protected
-              # Calls attr_encrypted with the options <tt>:encode</tt> and <tt>:marshal</tt> set to true
-              # unless they've already been specified
-              def attr_encrypted(*attrs)
-                options = { :encode => true, :marshal => true }.merge(attrs.last.is_a?(Hash) ? attrs.pop : {})
-                super *(attrs << options)
-              end
+          
+          def included_with_attr_encrypted(base)
+            included_without_attr_encrypted(base)
+            base.attr_encrypted_options.merge!(:encode => true, :marshal => true)
           end
         end
       end
     end
   end
   
-  DataMapper::Resource.send :include, Huberry::AttrEncrypted::Adapters::DataMapper
+  DataMapper::Resource.extend Huberry::AttrEncrypted::Adapters::DataMapper
 end

@@ -71,4 +71,9 @@ class ActiveRecordTest < Test::Unit::TestCase
     assert_equal @person, Person.scoped_by_email_and_password('test@example.com', 'test').find(:first) rescue NoMethodError
   end
   
+  def test_should_use_encode_and_marshal_options
+    assert Person.attr_encrypted_options[:encode]
+    assert Person.attr_encrypted_options[:marshal]
+  end
+  
 end

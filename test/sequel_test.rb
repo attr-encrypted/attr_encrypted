@@ -43,4 +43,9 @@ class SequelTest < Test::Unit::TestCase
     assert Human.first.credentials.is_a?(Hash)
   end
   
+  def test_should_use_encode_and_marshal_options
+    assert Human.attr_encrypted_options[:encode]
+    assert Human.attr_encrypted_options[:marshal]
+  end
+  
 end

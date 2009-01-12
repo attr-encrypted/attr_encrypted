@@ -4,21 +4,19 @@ if defined?(ActiveRecord)
       module Adapters
         module ActiveRecord
           def self.extended(base)
+            base.attr_encrypted_options.merge!(:encode => true, :marshal => true)
             base.eigenclass_eval { alias_method_chain :method_missing, :attr_encrypted }
           end
-        
+          
           protected
-        
-            # Calls attr_encrypted with the options <tt>:encode</tt> and <tt>:marshal</tt> set to true
-            # unless they've already been specified
-            #
-            # Also defines the attribute methods for db fields if they don't exist yet
+          
+            # Ensures the attribute methods for db fields have been defined before calling the original 
+            # <tt>attr_encrypted</tt> method
             def attr_encrypted(*attrs)
               define_attribute_methods
-              options = { :encode => true, :marshal => true }.merge(attrs.last.is_a?(Hash) ? attrs.pop : {})
-              super *(attrs << options)
+              super
             end
-          
+            
             # Allows you to use dynamic methods like <tt>find_by_email</tt> or <tt>scoped_by_email</tt> for 
             # encrypted attributes
             #

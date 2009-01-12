@@ -45,4 +45,9 @@ class DataMapperTest < Test::Unit::TestCase
     assert Client.first.credentials.is_a?(Hash)
   end
   
+  def test_should_use_encode_and_marshal_options
+    assert Client.attr_encrypted_options[:encode]
+    assert Client.attr_encrypted_options[:marshal]
+  end
+  
 end

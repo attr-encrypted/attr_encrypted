@@ -6,6 +6,7 @@
   * Add Sequel adapter
   * Update DataMapper tests
   * Update README
+  * Set attr_encrypted_options instead of overwriting the attr_encrypted method in adapters
 
 2009-01-11 - Sean Huber (shuber@huberry.com)
   * Update README
