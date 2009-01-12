@@ -5,6 +5,7 @@
   * Typo: should send(encrypted_attribute_name.to_sym) instead of send(encrypted_attribute_name.to_s)
   * Add Sequel adapter
   * Update DataMapper tests
+  * Update README
 
 2009-01-11 - Sean Huber (shuber@huberry.com)
   * Update README

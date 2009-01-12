@@ -3,7 +3,7 @@ attr\_encrypted
 
 Generates attr\_accessors that encrypt and decrypt attributes transparently
 
-Works with ANY class including ActiveRecord and DataMapper
+Works with ANY class including ActiveRecord, DataMapper, and Sequel
 
 
 Installation
@@ -261,18 +261,13 @@ Then you'll have these two class methods available for each attribute: `User.enc
 be useful when you're using ActiveRecord (see below).
 
 
-### DataMapper ###
-
-For your convenience, the `:encode` and `:marshal` options are set to true by default since you'll be storing everything in a database.
-
-
 ### ActiveRecord ###
 
 If you're using this gem with ActiveRecord, you get a few extra features:
 
 #### Default options ####
 
-Just like the default options for DataMapper, the `:encode` and `:marshal` options are set to true by default since you'll be storing everything in a database.
+For your convenience, the `:encode` and `:marshal` options are set to true by default since you'll be storing everything in a database.
 
 
 #### Dynamic find\_by\_ and scoped\_by\_ methods ####
@@ -292,6 +287,11 @@ The call to `find_by_email_and_password` is intercepted and modified to `find_by
 The dynamic scope methods like `scoped_by_email_and_password` work the same way.
 
 NOTE: This only works if all records are encrypted with the same encryption key (per attribute).
+
+
+### DataMapper and Sequel ###
+
+Just like the default options for ActiveRecord, the `:encode` and `:marshal` options are set to true by default since you'll be storing everything in a database.
 
 
 Contact
