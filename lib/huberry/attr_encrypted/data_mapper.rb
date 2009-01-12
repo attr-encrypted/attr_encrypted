@@ -2,15 +2,11 @@ module Huberry
   module AttrEncrypted
     module DataMapper
       def self.included(base)
-        base.class_eval do
-          extend ClassMethods
-          alias_method :read_attribute, :attribute_get
-          alias_method :write_attribute, :attribute_set
-        end
+        base.extend ClassMethods
       end
-    
+      
       module ClassMethods
-        protected    
+        protected
           # Calls attr_encrypted with the options <tt>:encode</tt> and <tt>:marshal</tt> set to true
           # unless they've already been specified
           def attr_encrypted(*attrs)

@@ -1,3 +1,6 @@
+2009-01-12 - Sean Huber (shuber@huberry.com)
+  * Remove read_attribute and write_attribute methods - unnecessary
+
 2009-01-11 - Sean Huber (shuber@huberry.com)
   * Update README
 

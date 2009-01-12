@@ -2,7 +2,7 @@ require 'huberry/attr_encrypted/class'
 Class.send :include, Huberry::AttrEncrypted::Class
 
 require 'huberry/attr_encrypted/object'
-Object.send :include, Huberry::AttrEncrypted::Object
+Object.extend Huberry::AttrEncrypted::Object
 
 if defined?(ActiveRecord)
   require 'huberry/attr_encrypted/active_record'

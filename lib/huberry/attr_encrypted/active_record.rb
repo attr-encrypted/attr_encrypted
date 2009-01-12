@@ -9,6 +9,8 @@ module Huberry
     
         # Calls attr_encrypted with the options <tt>:encode</tt> and <tt>:marshal</tt> set to true
         # unless they've already been specified
+        #
+        # Also defines the attribute methods for db fields if they don't exist yet
         def attr_encrypted(*attrs)
           define_attribute_methods
           options = { :encode => true, :marshal => true }.merge(attrs.last.is_a?(Hash) ? attrs.pop : {})
