@@ -3,7 +3,7 @@ attr\_encrypted
 
 Generates attr\_accessors that encrypt and decrypt attributes transparently
 
-Works with ANY class including ActiveRecord, DataMapper, and Sequel
+It works with ANY class, however, you get a few extra features when you're using it with ActiveRecord, DataMapper, or Sequel
 
 
 Installation
