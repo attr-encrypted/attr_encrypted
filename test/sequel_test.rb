@@ -12,7 +12,7 @@ end
 
 class Human < Sequel::Model(:humans)  
   attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |human| Huberry::Encryptor.encrypt(:value => human.salt, :key => 'some private key') }
+  attr_encrypted :credentials, :key => Proc.new { |human| Huberry::Encryptor.encrypt(:value => human.salt, :key => 'some private key') }, :marshal => true
   
   def after_initialize(attrs = {})
     self.salt ||= Digest::SHA1.hexdigest((Time.now.to_i * rand(5)).to_s)
@@ -43,9 +43,8 @@ class SequelTest < Test::Unit::TestCase
     assert Human.first.credentials.is_a?(Hash)
   end
   
-  def test_should_use_encode_and_marshal_options
+  def test_should_encode_by_default
     assert Human.attr_encrypted_options[:encode]
-    assert Human.attr_encrypted_options[:marshal]
   end
   
 end

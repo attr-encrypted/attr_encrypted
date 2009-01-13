@@ -20,7 +20,7 @@ create_people_table
 
 class Person < ActiveRecord::Base
   attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |user| Huberry::Encryptor.encrypt(:value => user.salt, :key => 'some private key') }
+  attr_encrypted :credentials, :key => Proc.new { |user| Huberry::Encryptor.encrypt(:value => user.salt, :key => 'some private key') }, :marshal => true
   
   def after_initialize
     self.salt ||= Digest::SHA256.hexdigest((Time.now.to_i * rand(5)).to_s)
@@ -71,9 +71,8 @@ class ActiveRecordTest < Test::Unit::TestCase
     assert_equal @person, Person.scoped_by_email_and_password('test@example.com', 'test').find(:first) rescue NoMethodError
   end
   
-  def test_should_use_encode_and_marshal_options
+  def test_should_encode_by_default
     assert Person.attr_encrypted_options[:encode]
-    assert Person.attr_encrypted_options[:marshal]
   end
   
 end

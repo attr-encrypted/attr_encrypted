@@ -4,7 +4,7 @@ if defined?(ActiveRecord)
       module Adapters
         module ActiveRecord
           def self.extended(base)
-            base.attr_encrypted_options.merge!(:encode => true, :marshal => true)
+            base.attr_encrypted_options[:encode] = true
             base.eigenclass_eval { alias_method_chain :method_missing, :attr_encrypted }
           end
           

@@ -11,7 +11,7 @@ class Client
   property :salt, String
   
   attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |client| Huberry::Encryptor.encrypt(:value => client.salt, :key => 'some private key') }
+  attr_encrypted :credentials, :key => Proc.new { |client| Huberry::Encryptor.encrypt(:value => client.salt, :key => 'some private key') }, :marshal => true
   
   def initialize(attrs = {})
     super attrs
@@ -45,9 +45,8 @@ class DataMapperTest < Test::Unit::TestCase
     assert Client.first.credentials.is_a?(Hash)
   end
   
-  def test_should_use_encode_and_marshal_options
+  def test_should_encode_by_default
     assert Client.attr_encrypted_options[:encode]
-    assert Client.attr_encrypted_options[:marshal]
   end
   
 end

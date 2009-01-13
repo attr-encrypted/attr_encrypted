@@ -4,7 +4,7 @@ if defined?(Sequel)
       module Adapters
         module Sequel
           def self.extended(base)
-            base.attr_encrypted_options.merge!(:encode => true, :marshal => true)
+            base.attr_encrypted_options[:encode] = true
           end
         end
       end

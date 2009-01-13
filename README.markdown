@@ -267,7 +267,7 @@ If you're using this gem with ActiveRecord, you get a few extra features:
 
 #### Default options ####
 
-For your convenience, the `:encode` and `:marshal` options are set to true by default since you'll be storing everything in a database.
+For your convenience, the `:encode` option is set to true by default since you'll be storing everything in a database.
 
 
 #### Dynamic find\_by\_ and scoped\_by\_ methods ####
@@ -291,7 +291,7 @@ NOTE: This only works if all records are encrypted with the same encryption key 
 
 ### DataMapper and Sequel ###
 
-Just like the default options for ActiveRecord, the `:encode` and `:marshal` options are set to true by default since you'll be storing everything in a database.
+Just like the default options for ActiveRecord, the `:encode` option is set to true by default since you'll be storing everything in a database.
 
 
 Contact
