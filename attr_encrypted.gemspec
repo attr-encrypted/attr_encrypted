@@ -1,6 +1,6 @@
 Gem::Specification.new do |s| 
   s.name    = 'attr_encrypted'
-  s.version = '1.0.6'
+  s.version = '1.0.7'
   s.date    = '2009-01-13'
   
   s.summary     = 'Generates attr_accessors that encrypt and decrypt attributes transparently'
@@ -21,8 +21,6 @@ Gem::Specification.new do |s|
     lib/huberry/attr_encrypted/adapters/active_record.rb
     lib/huberry/attr_encrypted/adapters/data_mapper.rb
     lib/huberry/attr_encrypted/adapters/sequel.rb
-    lib/huberry/attr_encrypted/class.rb
-    lib/huberry/attr_encrypted/object.rb
     MIT-LICENSE
     Rakefile
     README.markdown
