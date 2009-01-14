@@ -1,3 +1,9 @@
+gem 'shuber-eigenclass', '>= 1.0.1'
+require 'eigenclass'
+
+gem 'shuber-encryptor'
+require 'encryptor'
+
 require 'huberry/attr_encrypted/class'
 Class.send :include, Huberry::AttrEncrypted::Class
 

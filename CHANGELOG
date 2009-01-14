@@ -1,5 +1,6 @@
 2009-01-13 - Sean Huber (shuber@huberry.com)
   * :marshal no longer defaults to true in ORM adapters
+  * Load gem dependencies
 
 2009-01-12 - Sean Huber (shuber@huberry.com)
   * Remove read_attribute and write_attribute methods - unnecessary
