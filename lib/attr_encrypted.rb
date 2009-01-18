@@ -152,8 +152,8 @@ module Huberry
           
           define_class_method "encrypt_#{attribute}" do |value|
             if options[:if] && !options[:unless]
-              if value.nil?
-                encrypted_value = nil
+              if value.nil? || (value.is_a?(String) && value.empty?)
+                encrypted_value = value
               else
                 value = Marshal.dump(value) if options[:marshal]
                 encrypted_value = options[:encryptor].send options[:encrypt_method], options.merge(:value => value)
@@ -167,8 +167,8 @@ module Huberry
           
           define_class_method "decrypt_#{attribute}" do |encrypted_value|
             if options[:if] && !options[:unless]
-              if encrypted_value.nil?
-                decrypted_value = nil
+              if encrypted_value.nil? || (encrypted_value.is_a?(String) && encrypted_value.empty?)
+                decrypted_value = encrypted_value
               else
                 encrypted_value = encrypted_value.unpack(options[:encode]).to_s if options[:encode]
                 decrypted_value = options[:encryptor].send(options[:decrypt_method], options.merge(:value => encrypted_value))

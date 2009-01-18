@@ -1,3 +1,6 @@
+2009-01-18 - Sean Huber (shuber@huberry.com)
+  * Don't attempt to encrypt/decrypt empty strings
+
 2009-01-14 - Sean Huber (shuber@huberry.com)
   * Move Class logic into Object
 

@@ -75,6 +75,10 @@ class AttrEncryptedTest < Test::Unit::TestCase
     assert_nil User.encrypt_email(nil)
   end
   
+  def test_should_not_encrypt_empty_string
+    assert_equal '', User.encrypt_email('')
+  end
+  
   def test_should_encrypt_email
     assert_not_nil User.encrypt_email('test@example.com')
     assert_not_equal 'test@example.com', User.encrypt_email('test@example.com')
@@ -90,6 +94,10 @@ class AttrEncryptedTest < Test::Unit::TestCase
   
   def test_should_not_decrypt_nil_value
     assert_nil User.decrypt_email(nil)
+  end
+  
+  def test_should_not_decrypt_empty_string
+    assert_equal '', User.decrypt_email('')
   end
   
   def test_should_decrypt_email
