@@ -28,6 +28,11 @@ class Person < ActiveRecord::Base
   end
 end
 
+class PersonWithValidation < Person
+  validates_presence_of :email
+  validates_uniqueness_of :encrypted_email
+end
+
 class ActiveRecordTest < Test::Unit::TestCase
   
   def setup
@@ -73,6 +78,20 @@ class ActiveRecordTest < Test::Unit::TestCase
   
   def test_should_encode_by_default
     assert Person.attr_encrypted_options[:encode]
+  end
+  
+  def test_should_validate_presence_of_email
+    @person = PersonWithValidation.new
+    assert !@person.valid?
+    assert @person.errors.on(:email)
+  end
+  
+  def test_should_validate_uniqueness_of_email
+    @person = PersonWithValidation.new :email => 'test@example.com'
+    assert @person.save
+    @person2 = PersonWithValidation.new :email => @person.email
+    assert !@person2.valid?
+    assert @person2.errors.on(:encrypted_email)
   end
   
 end
