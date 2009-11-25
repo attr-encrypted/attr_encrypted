@@ -13,7 +13,7 @@ if defined?(ActiveRecord)
             # Ensures the attribute methods for db fields have been defined before calling the original 
             # <tt>attr_encrypted</tt> method
             def attr_encrypted(*attrs)
-              define_attribute_methods
+              define_attribute_methods rescue nil
               super
             end
             
