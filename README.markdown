@@ -9,7 +9,7 @@ It works with ANY class, however, you get a few extra features when you're using
 Installation
 ------------
 
-	gem install shuber-attr_encrypted --source http://gems.github.com
+	gem install attr_encrypted --source http://gemcutter.org
 
 
 Usage
@@ -43,8 +43,7 @@ Encrypting attributes has never been easier:
 
 ### Specifying the encrypted attribute name ###
 
-By default, the encrypted attribute name is `encrypted_#{attribute}` (e.g. `attr_encrypted :email` would create an attribute named `encrypted_email`).
-You have a couple of options if you want to name your attribute something else.
+By default, the encrypted attribute name is `encrypted_#{attribute}` (e.g. `attr_encrypted :email` would create an attribute named `encrypted_email`). So, if you're storing the encrypted attribute in the database, you need to make sure the `encrypted_#{attribute}` field exists in your table. You have a couple of options if you want to name your attribute something else.
 
 #### The `:attribute` option ####
 
