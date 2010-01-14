@@ -15,6 +15,7 @@ if defined?(ActiveRecord)
             def attr_encrypted(*attrs)
               define_attribute_methods rescue nil
               super
+              attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr| alias_method "#{attr}_before_type_cast", attr }
             end
             
             # Allows you to use dynamic methods like <tt>find_by_email</tt> or <tt>scoped_by_email</tt> for 
