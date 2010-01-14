@@ -34,6 +34,6 @@ Gem::Specification.new do |s|
     test/sequel_test.rb
   )
   
-  s.add_dependency('shuber-eigenclass', ['>= 1.0.1'])
-  s.add_dependency('shuber-encryptor', ['>= 1.0.0'])
+  s.add_dependency('eigenclass', ['>= 1.0.1'])
+  s.add_dependency('encryptor', ['>= 1.0.0'])
 end

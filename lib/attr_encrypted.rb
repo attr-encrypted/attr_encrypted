@@ -1,7 +1,7 @@
-gem 'shuber-eigenclass', '>= 1.0.1'
+gem 'eigenclass', '>= 1.0.1'
 require 'eigenclass'
 
-gem 'shuber-encryptor'
+gem 'encryptor', '>= 1.0.0'
 require 'encryptor'
 
 module Huberry
