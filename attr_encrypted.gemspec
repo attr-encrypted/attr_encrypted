@@ -38,6 +38,6 @@ Gem::Specification.new do |s|
     test/test_helper.rb
   )
   
-  s.add_dependency('eigenclass', ['>= 1.0.1'])
+  s.add_dependency('eigenclass', ['>= 1.1.1'])
   s.add_dependency('encryptor', ['>= 1.1.0'])
 end
