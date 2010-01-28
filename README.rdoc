@@ -1,0 +1,308 @@
+= attr_encrypted
+
+Generates attr_accessors that encrypt and decrypt attributes transparently
+
+It works with ANY class, however, you get a few extra features when you're using it with <tt>ActiveRecord</tt>, <tt>DataMapper</tt>, or <tt>Sequel</tt>
+
+
+== Installation
+
+  gem install attr_encrypted
+
+
+== Usage
+
+
+=== Basic
+
+Encrypting attributes has never been easier:
+
+  class User
+    attr_accessor :name
+    attr_encrypted :ssn, :key => 'a secret key'
+  
+    def load
+      # loads the stored data
+    end
+  
+    def save
+      # saves the :name and :encrypted_ssn attributes somewhere (e.g. filesystem, database, etc)
+    end
+  end
+  
+  @user = User.new
+  @user.ssn = '123-45-6789'
+  @user.encrypted_ssn # returns the encrypted version of :ssn
+  @user.save
+  
+  @user = User.load
+  @user.ssn # decrypts :encrypted_ssn and returns '123-45-6789'
+
+The <tt>attr_encrypted</tt> method is also aliased as <tt>attr_encryptor</tt> to conform to Ruby's <tt>attr_</tt> naming conventions. I know that I should have called this project <tt>attr_encryptor</tt> but it was too late when I realized it ='(.
+
+
+=== Specifying the encrypted attribute name
+
+By default, the encrypted attribute name is <tt>encrypted_#{attribute}</tt> (e.g. <tt>attr_encrypted :email</tt> would create an attribute named <tt>encrypted_email</tt>). So, if you're storing the encrypted attribute in the database, you need to make sure the <tt>encrypted_#{attribute}</tt> field exists in your table. You have a couple of options if you want to name your attribute something else.
+
+
+==== The <tt>:attribute</tt> option
+
+You can simply pass the name of the encrypted attribute as the <tt>:attribute</tt> option:
+
+  class User
+    attr_encrypted :email, :key => 'a secret key', :attribute => 'email_encrypted'
+  end
+
+This would generate an attribute named <tt>email_encrypted</tt>
+
+
+==== The <tt>:prefix</tt> and <tt>:suffix</tt> options
+
+If you're planning on encrypting a few different attributes and you don't like the <tt>encrypted_#{attribute}</tt> naming convention then you can specify your own:
+
+  class User
+    attr_encrypted :email, :credit_card, :ssn, :key => 'a secret key', :prefix => 'secret_', :suffix => '_crypted'
+  end
+
+This would generate the following attributes: <tt>secret_email_crypted</tt>, <tt>secret_credit_card_crypted</tt>, and <tt>secret_ssn_crypted</tt>.
+
+
+=== Encryption keys
+
+Although a <tt>:key</tt> option may not be required (see custom encryptor below), it has a few special features
+
+
+==== Unique keys for each attribute
+
+You can specify unique keys for each attribute if you'd like:
+
+  class User
+    attr_encrypted :email, :key => 'a secret key'
+    attr_encrypted :ssn, :key => 'a different secret key'
+  end
+
+
+==== Symbols representing instance methods as keys
+
+If your class has an instance method that determines the encryption key to use, simply pass a symbol representing it like so:
+
+  class User
+    attr_encrypted :email, :key => :encryption_key
+  
+    def encryption_key
+      # does some fancy logic and returns an encryption key
+    end
+  end
+
+
+==== Procs as keys
+
+You can pass a proc/lambda object as the <tt>:key</tt> option as well:
+
+  class User
+    attr_encrypted :email, :key => proc { |user| user.key }
+  end
+
+This can be used to create asymmetrical encryption by requiring users to provide their own encryption keys.
+
+
+=== Conditional encrypting
+
+There may be times that you want to only encrypt when certain conditions are met. For example maybe you're using rails and you don't want to encrypt 
+attributes when you're in development mode. You can specify conditions like this:
+
+  class User < ActiveRecord::Base
+    attr_encrypted :email, :key => 'a secret key', :unless => Rails.env.development?
+  end
+
+You can specify both <tt>:if</tt> and <tt>:unless</tt> options. If you pass a symbol representing an instance method then the result of the method will be evaluated. Any objects that respond to <tt>:call</tt> are evaluated as well.
+
+
+=== Custom encryptor
+
+The <tt>Encryptor</tt> (see http://github.com/shuber/encryptor) class is used by default. You may use your own custom encryptor by specifying
+the <tt>:encryptor</tt>, <tt>:encrypt_method</tt>, and <tt>:decrypt_method</tt> options
+
+Lets suppose you'd like to use this custom encryptor class:
+
+  class SillyEncryptor
+    def self.silly_encrypt(options)
+      (options[:value] + options[:secret_key]).reverse
+    end
+  
+    def self.silly_decrypt(options)
+      options[:value].reverse.gsub(/#{options[:secret_key]}$/, '')
+    end
+  end
+
+Simply set up your class like so:
+
+  class User
+    attr_encrypted :email, :secret_key => 'a secret key', :encryptor => SillyEncryptor, :encrypt_method => :silly_encrypt, :decrypt_method => :silly_decrypt
+  end
+
+Any options that you pass to <tt>attr_encrypted</tt> will be passed to the encryptor along with the <tt>:value</tt> option which contains the string to encrypt/decrypt. Notice it uses <tt>:secret_key</tt> instead of <tt>:key</tt>.
+
+
+=== Custom algorithms
+
+The default <tt>Encryptor</tt> uses the standard ruby OpenSSL library. It's default algorithm is <tt>aes-256-cbc</tt>. You can modify this by passing the <tt>:algorithm</tt> option to the <tt>attr_encrypted</tt> call like so:
+
+  class User
+    attr_encrypted :email, :key => 'a secret key', :algorithm => 'bf'
+  end
+
+Run <tt>openssl list-cipher-commands</tt> to view a list of algorithms supported on your platform. See http://github.com/shuber/encryptor for more information.
+
+  aes-128-cbc
+  aes-128-ecb
+  aes-192-cbc
+  aes-192-ecb
+  aes-256-cbc
+  aes-256-ecb
+  base64
+  bf
+  bf-cbc
+  bf-cfb
+  bf-ecb
+  bf-ofb
+  cast
+  cast-cbc
+  cast5-cbc
+  cast5-cfb
+  cast5-ecb
+  cast5-ofb
+  des
+  des-cbc
+  des-cfb
+  des-ecb
+  des-ede
+  des-ede-cbc
+  des-ede-cfb
+  des-ede-ofb
+  des-ede3
+  des-ede3-cbc
+  des-ede3-cfb
+  des-ede3-ofb
+  des-ofb
+  des3
+  desx
+  idea
+  idea-cbc
+  idea-cfb
+  idea-ecb
+  idea-ofb
+  rc2
+  rc2-40-cbc
+  rc2-64-cbc
+  rc2-cbc
+  rc2-cfb
+  rc2-ecb
+  rc2-ofb
+  rc4
+  rc4-40
+
+
+=== Default options
+
+Let's imagine that you have a few attributes that you want to encrypt with different keys, but you don't like the <tt>encrypted_#{attribute}</tt> naming convention. Instead of having to define your class like this:
+
+  class User
+    attr_encrypted :email, :key => 'a secret key', :prefix => '', :suffix => '_crypted'
+    attr_encrypted :ssn, :key => 'a different secret key', :prefix => '', :suffix => '_crypted'
+    attr_encrypted :credit_card, :key => 'another secret key', :prefix => '', :suffix => '_crypted'
+  end
+
+You can simply define some default options like so:
+
+  class User
+    attr_encrypted_options.merge!(:prefix => '', :suffix => '_crypted')
+    attr_encrypted :email, :key => 'a secret key'
+    attr_encrypted :ssn, :key => 'a different secret key'
+    attr_encrypted :credit_card, :key => 'another secret key'
+  end
+
+This should help keep your classes clean and DRY.
+
+
+=== Encoding
+
+You're probably going to be storing your encrypted attributes somehow (e.g. filesystem, database, etc) and may run into some issues trying to store a weird
+encrypted string. I've had this problem myself using MySQL. You can simply pass the <tt>:encode</tt> option to automatically encode/decode when encrypting/decrypting.
+
+  class User
+    attr_encrypted :email, :key => 'some secret key', :encode => true
+  end
+
+The default encoding is <tt>m*</tt> (base64). You can change this by setting <tt>:encode => 'some encoding'</tt>. See the <tt>Array#pack</tt> method at http://www.ruby-doc.org/core/classes/Array.html#M002245 for more encoding options.
+
+
+=== Marshaling
+
+You may want to encrypt objects other than strings (e.g. hashes, arrays, etc). If this is the case, simply pass the <tt>:marshal</tt> option to automatically marshal when encrypting/decrypting.
+
+  class User
+    attr_encrypted :credentials, :key => 'some secret key', :marshal => true
+  end
+
+
+=== Encrypt/decrypt attribute methods
+
+If you use the same key to encrypt every record (per attribute) like this:
+
+  class User
+    attr_encrypted :email, :key => 'a secret key'
+  end
+
+Then you'll have these two class methods available for each attribute: <tt>User.encrypt_email(email_to_encrypt)</tt> and <tt>User.decrypt_email(email_to_decrypt)</tt>. This can be useful when you're using <tt>ActiveRecord</tt> (see below).
+
+
+=== ActiveRecord
+
+If you're using this gem with <tt>ActiveRecord</tt>, you get a few extra features:
+
+
+==== Default options
+
+For your convenience, the <tt>:encode</tt> option is set to true by default since you'll be storing everything in a database.
+
+
+==== Dynamic find_by_ and scoped_by_ methods
+
+Let's say you'd like to encrypt your user's email addresses, but you also need a way for them to login. Simply set up your class like so:
+
+  class User < ActiveRecord::Base
+    attr_encrypted :email, :key => 'a secret key'
+    attr_encrypted :password, :key => 'some other secret key'
+  end
+
+You can now lookup and login users like so:
+
+  User.find_by_email_and_password('test@example.com', 'testing')
+
+The call to <tt>find_by_email_and_password</tt> is intercepted and modified to <tt>find_by_encrypted_email_and_encrypted_password('ENCRYPTED EMAIL', 'ENCRYPTED PASSWORD')</tt>. The dynamic scope methods like <tt>scoped_by_email_and_password</tt> work the same way.
+
+NOTE: This only works if all records are encrypted with the same encryption key (per attribute).
+
+
+=== DataMapper and Sequel
+
+Just like the default options for <tt>ActiveRecord</tt>, the <tt>:encode</tt> option is set to true by default since you'll be storing everything in a database.
+
+
+== Note on Patches/Pull Requests
+
+* Fork the project.
+* Make your feature addition or bug fix.
+* Add tests for it. This is important so I don't break it in a
+  future version unintentionally.
+* Commit, do not mess with rakefile, version, or history.
+  (if you want to have your own version, that is fine but
+   bump version in a commit by itself I can ignore when I pull)
+* Send me a pull request. Bonus points for topic branches.
+
+
+== Contact
+
+Problems, comments, and suggestions all welcome: shuber@huberry.com
