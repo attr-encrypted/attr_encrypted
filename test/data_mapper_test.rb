@@ -11,7 +11,7 @@ class Client
   property :salt, String
   
   attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |client| Huberry::Encryptor.encrypt(:value => client.salt, :key => 'some private key') }, :marshal => true
+  attr_encrypted :credentials, :key => Proc.new { |client| Encryptor.encrypt(:value => client.salt, :key => 'some private key') }, :marshal => true
   
   def initialize(attrs = {})
     super attrs

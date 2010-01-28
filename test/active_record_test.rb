@@ -20,7 +20,7 @@ create_people_table
 
 class Person < ActiveRecord::Base
   attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |user| Huberry::Encryptor.encrypt(:value => user.salt, :key => 'some private key') }, :marshal => true
+  attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => 'some private key') }, :marshal => true
   
   def after_initialize
     self.salt ||= Digest::SHA256.hexdigest((Time.now.to_i * rand(5)).to_s)

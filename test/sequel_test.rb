@@ -12,7 +12,7 @@ end
 
 class Human < Sequel::Model(:humans)  
   attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |human| Huberry::Encryptor.encrypt(:value => human.salt, :key => 'some private key') }, :marshal => true
+  attr_encrypted :credentials, :key => Proc.new { |human| Encryptor.encrypt(:value => human.salt, :key => 'some private key') }, :marshal => true
   
   def after_initialize(attrs = {})
     self.salt ||= Digest::SHA1.hexdigest((Time.now.to_i * rand(5)).to_s)
