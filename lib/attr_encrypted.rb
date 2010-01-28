@@ -201,6 +201,7 @@ module AttrEncrypted
         end
       end
     end
+    alias_method :attr_encryptor, :attr_encrypted
     
     # Evaluates an option specified as a symbol representing an instance method or a proc
     #

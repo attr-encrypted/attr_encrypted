@@ -24,6 +24,9 @@ class User
   attr_encrypted :with_false_if, :key => 'secret key', :if => false
   attr_encrypted :with_true_unless, :key => 'secret key', :unless => true
   attr_encrypted :with_false_unless, :key => 'secret key', :unless => false
+  
+  attr_encryptor :aliased, :key => 'secret_key'
+  
   attr_accessor :salt
   
   def initialize
@@ -240,6 +243,10 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user.with_true_unless = 'testing'
     assert_not_nil @user.encrypted_with_true_unless
     assert_equal 'testing', @user.encrypted_with_true_unless
+  end
+  
+  def test_should_work_with_aliased_attr_encryptor
+    assert User.encrypted_attributes.include?('aliased')
   end
   
 end
