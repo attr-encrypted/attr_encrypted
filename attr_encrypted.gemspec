@@ -1,6 +1,6 @@
 Gem::Specification.new do |s| 
   s.name    = 'attr_encrypted'
-  s.version = '1.1.1'
+  s.version = '1.1.2'
   s.date    = '2010-04-26'
   
   s.summary     = 'Generates attr_accessors that encrypt and decrypt attributes transparently'
