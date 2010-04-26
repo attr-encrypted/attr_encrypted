@@ -1,6 +1,5 @@
 require 'eigenclass'
 require 'encryptor'
-require 'ruby-debug'
 
 module AttrEncrypted
   def self.extended(base)
