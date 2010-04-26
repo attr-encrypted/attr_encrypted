@@ -1,5 +1,6 @@
 require 'eigenclass'
 require 'encryptor'
+require 'ruby-debug'
 
 module AttrEncrypted
   def self.extended(base)
@@ -177,26 +178,32 @@ module AttrEncrypted
         end
         
         define_method "#{attribute}" do
-          value = instance_variable_get("@#{attribute}")
-          encrypted_value = send(encrypted_attribute_name.to_sym)
-          original_options = [:key, :if, :unless].inject({}) do |hash, option|
-            hash[option] = options[option]
-            options[option] = self.class.send :evaluate_attr_encrypted_option, options[option], self
-            hash
+          begin
+            value = instance_variable_get("@#{attribute}")
+            encrypted_value = send(encrypted_attribute_name.to_sym)
+            original_options = [:key, :if, :unless].inject({}) do |hash, option|
+              hash[option] = options[option]
+              options[option] = self.class.send :evaluate_attr_encrypted_option, options[option], self
+              hash
+            end
+            value = instance_variable_set("@#{attribute}", self.class.send("decrypt_#{attribute}".to_sym, encrypted_value)) if value.nil? && !encrypted_value.nil?
+          ensure
+            options.merge!(original_options)
           end
-          value = instance_variable_set("@#{attribute}", self.class.send("decrypt_#{attribute}".to_sym, encrypted_value)) if value.nil? && !encrypted_value.nil?
-          options.merge!(original_options)
           value
         end
         
         define_method "#{attribute}=" do |value|
-          original_options = [:key, :if, :unless].inject({}) do |hash, option|
-            hash[option] = options[option]
-            options[option] = self.class.send :evaluate_attr_encrypted_option, options[option], self
-            hash
+          begin
+            original_options = [:key, :if, :unless].inject({}) do |hash, option|
+              hash[option] = options[option]
+              options[option] = self.class.send :evaluate_attr_encrypted_option, options[option], self
+              hash
+            end
+            send("#{encrypted_attribute_name}=".to_sym, self.class.send("encrypt_#{attribute}".to_sym, value))
+          ensure
+            options.merge!(original_options)
           end
-          send("#{encrypted_attribute_name}=".to_sym, self.class.send("encrypt_#{attribute}".to_sym, value))
-          options.merge!(original_options)
           instance_variable_set("@#{attribute}", value)
         end
       end

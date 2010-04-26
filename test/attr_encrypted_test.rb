@@ -1,4 +1,5 @@
 require File.dirname(__FILE__) + '/test_helper'
+require 'mocha'
 
 class SillyEncryptor
   def self.silly_encrypt(options)
@@ -24,13 +25,16 @@ class User
   attr_encrypted :with_false_if, :key => 'secret key', :if => false
   attr_encrypted :with_true_unless, :key => 'secret key', :unless => true
   attr_encrypted :with_false_unless, :key => 'secret key', :unless => false
+  attr_encrypted :with_if_changed, :key => 'secret key', :if => :should_encrypt
   
   attr_encryptor :aliased, :key => 'secret_key'
   
   attr_accessor :salt
+  attr_accessor :should_encrypt
   
   def initialize
     self.salt = Time.now.to_i.to_s
+    self.should_encrypt = true
   end
 end
 
@@ -247,6 +251,22 @@ class AttrEncryptedTest < Test::Unit::TestCase
   
   def test_should_work_with_aliased_attr_encryptor
     assert User.encrypted_attributes.include?('aliased')
+  end
+  
+  def test_should_always_reset_options
+    @user = User.new
+    @user.with_if_changed = "encrypt_stuff"
+    @user.stubs(:instance_variable_get).returns(nil)
+    @user.stubs(:instance_variable_set).raises("BadStuff")
+    assert_raise RuntimeError do 
+      @user.with_if_changed
+    end
+    
+    @user = User.new
+    @user.should_encrypt = false
+    @user.with_if_changed = "not_encrypted_stuff"
+    assert_equal "not_encrypted_stuff", @user.with_if_changed
+    assert_equal "not_encrypted_stuff", @user.encrypted_with_if_changed
   end
   
 end
