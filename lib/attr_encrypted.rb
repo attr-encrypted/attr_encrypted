@@ -143,8 +143,8 @@ module AttrEncrypted
         
         encrypted_attributes[attribute.to_s] = encrypted_attribute_name
         
-        attr_reader encrypted_attribute_name.to_sym unless instance_methods.include?(encrypted_attribute_name)
-        attr_writer encrypted_attribute_name.to_sym unless instance_methods.include?("#{encrypted_attribute_name}=")
+        attr_reader encrypted_attribute_name.to_sym unless instance_methods.include?(encrypted_attribute_name.to_sym)
+        attr_writer encrypted_attribute_name.to_sym unless instance_methods.include?("#{encrypted_attribute_name}=".to_sym)
         
         define_class_method "encrypt_#{attribute}" do |value|
           if options[:if] && !options[:unless]
@@ -166,7 +166,7 @@ module AttrEncrypted
             if encrypted_value.nil? || (encrypted_value.is_a?(String) && encrypted_value.empty?)
               decrypted_value = encrypted_value
             else
-              encrypted_value = encrypted_value.unpack(options[:encode]).to_s if options[:encode]
+              encrypted_value = encrypted_value.unpack("m")[0] if options[:encode]
               decrypted_value = options[:encryptor].send(options[:decrypt_method], options.merge(:value => encrypted_value))
               decrypted_value = Marshal.load(decrypted_value) if options[:marshal]
             end
