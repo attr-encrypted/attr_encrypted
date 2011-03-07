@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/test_helper'
+require 'test_helper'
 require 'mocha'
 
 class SillyEncryptor
@@ -51,11 +51,11 @@ end
 class AttrEncryptedTest < Test::Unit::TestCase
   
   def test_should_store_email_in_encrypted_attributes
-    assert User.encrypted_attributes.include?('email')
+    assert User.encrypted_attributes.include?(:email)
   end
   
   def test_should_not_store_salt_in_encrypted_attributes
-    assert !User.encrypted_attributes.include?('salt')
+    assert !User.encrypted_attributes.include?(:salt)
   end
   
   def test_attr_encrypted_should_return_true_for_email
@@ -184,7 +184,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
   end
   
   def test_should_inherit_encrypted_attributes
-    assert_equal User.encrypted_attributes.merge('testing' => 'encrypted_testing'), Admin.encrypted_attributes
+    assert_equal [User.encrypted_attributes.keys, :testing].flatten.collect { |key| key.to_s }.sort, Admin.encrypted_attributes.keys.collect { |key| key.to_s }.sort
   end
   
   def test_should_inherit_attr_encrypted_options
@@ -198,23 +198,23 @@ class AttrEncryptedTest < Test::Unit::TestCase
   end
   
   def test_should_evaluate_a_symbol_option
-    assert_equal Object, Object.send(:evaluate_attr_encrypted_option, :class, Object.new)
+    assert_equal Object, Object.new.send(:evaluate_attr_encrypted_option, :class)
   end
   
   def test_should_evaluate_a_proc_option
-    assert_equal Object, Object.send(:evaluate_attr_encrypted_option, proc { |object| object.class }, Object.new)
+    assert_equal Object, Object.new.send(:evaluate_attr_encrypted_option, proc { |object| object.class })
   end
   
   def test_should_evaluate_a_lambda_option
-    assert_equal Object, Object.send(:evaluate_attr_encrypted_option, lambda { |object| object.class }, Object.new)
+    assert_equal Object, Object.new.send(:evaluate_attr_encrypted_option, lambda { |object| object.class })
   end
   
   def test_should_evaluate_a_method_option
-    assert_equal Object, Object.send(:evaluate_attr_encrypted_option, SomeOtherClass.method(:call), Object.new)
+    assert_equal Object, Object.new.send(:evaluate_attr_encrypted_option, SomeOtherClass.method(:call))
   end
   
   def test_should_return_a_string_option
-    assert_equal 'Object', Object.send(:evaluate_attr_encrypted_option, 'Object', Object.new)
+    assert_equal 'Object', Object.new.send(:evaluate_attr_encrypted_option, 'Object')
   end
   
   def test_should_encrypt_with_true_if
@@ -250,7 +250,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
   end
   
   def test_should_work_with_aliased_attr_encryptor
-    assert User.encrypted_attributes.include?('aliased')
+    assert User.encrypted_attributes.include?(:aliased)
   end
   
   def test_should_always_reset_options
