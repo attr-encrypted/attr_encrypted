@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.version = AttrEncrypted::Version.string
   s.date    = Date.today
 
-  s.summary     = 'Generates attr_accessors that encrypt and decrypt attributes transparently'
+  s.summary     = 'Encrypt and decrypt attributes'
   s.description = 'Generates attr_accessors that encrypt and decrypt attributes transparently'
 
   s.author   = 'Sean Huber'
@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
 
   s.require_paths = ['lib']
 
-  s.files      = Dir['{bin,lib}/**/*'] + %w(MIT-LICENSE README.rdoc)
+  s.files      = Dir['{bin,lib}/**/*'] + %w(MIT-LICENSE Rakefile README.rdoc)
   s.test_files = Dir['test/**/*']
 
   s.add_dependency('encryptor', ['>= 1.1.1'])
