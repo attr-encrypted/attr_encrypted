@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/test_helper'
+require File.expand_path('../test_helper', __FILE__)
 
 ActiveRecord::Base.establish_connection :adapter => 'sqlite3', :database => ':memory:'
 
@@ -25,12 +25,18 @@ class Person < ActiveRecord::Base
   attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => 'some private key') }, :marshal => true
 
   ActiveSupport::Deprecation.silenced = true
-  def after_initialize
-    self.salt ||= Digest::SHA256.hexdigest((Time.now.to_i * rand(5)).to_s)
-    self.credentials ||= { :username => 'example', :password => 'test' }
-  rescue ActiveRecord::MissingAttributeError
-  end
+  def after_initialize; end
   ActiveSupport::Deprecation.silenced = false
+
+  after_initialize :initialize_salt_and_credentials
+
+  protected
+
+    def initialize_salt_and_credentials
+      self.salt ||= Digest::SHA256.hexdigest((Time.now.to_i * rand(5)).to_s)
+      self.credentials ||= { :username => 'example', :password => 'test' }
+    rescue ActiveRecord::MissingAttributeError
+    end
 end
 
 class PersonWithValidation < Person
