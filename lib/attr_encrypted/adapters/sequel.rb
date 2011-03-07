@@ -2,7 +2,7 @@ if defined?(Sequel)
   module AttrEncrypted
     module Adapters
       module Sequel
-        def self.extended(base)
+        def self.extended(base) # :nodoc:
           base.attr_encrypted_options[:encode] = true
         end
       end

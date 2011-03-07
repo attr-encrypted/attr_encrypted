@@ -2,7 +2,7 @@ if defined?(DataMapper)
   module AttrEncrypted
     module Adapters
       module DataMapper
-        def self.extended(base)
+        def self.extended(base) # :nodoc:
           class << base
             alias_method :included_without_attr_encrypted, :included
             alias_method :included, :included_with_attr_encrypted

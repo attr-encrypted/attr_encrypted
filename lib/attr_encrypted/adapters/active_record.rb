@@ -2,7 +2,7 @@ if defined?(ActiveRecord)
   module AttrEncrypted
     module Adapters
       module ActiveRecord
-        def self.extended(base)
+        def self.extended(base) # :nodoc:
           base.class_eval do
             attr_encrypted_options[:encode] = true
             class << self; alias_method_chain :method_missing, :attr_encrypted; end
