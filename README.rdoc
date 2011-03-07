@@ -12,7 +12,6 @@ It works with ANY class, however, you get a few extra features when you're using
 
 == Usage
 
-
 === Basic
 
 Encrypting attributes has never been easier:
@@ -38,7 +37,7 @@ Encrypting attributes has never been easier:
   @user = User.load
   @user.ssn # decrypts :encrypted_ssn and returns '123-45-6789'
 
-The <tt>attr_encrypted</tt> method is also aliased as <tt>attr_encryptor</tt> to conform to Ruby's <tt>attr_</tt> naming conventions. I know that I should have called this project <tt>attr_encryptor</tt> but it was too late when I realized it ='(.
+The <tt>attr_encrypted</tt> method is also aliased as <tt>attr_encryptor</tt> to conform to Ruby's <tt>attr_</tt> naming conventions. I should have called this project <tt>attr_encryptor</tt> but it was too late when I realized it ='(.
 
 
 === Specifying the encrypted attribute name
@@ -246,6 +245,8 @@ You may want to encrypt objects other than strings (e.g. hashes, arrays, etc). I
     attr_encrypted :credentials, :key => 'some secret key', :marshal => true
   end
 
+You may also optionally specify <tt>:marshaler</tt>, <tt>:dump_method</tt>, and <tt>:load_method</tt> if you want to use something other than the default <tt>Marshal</tt> object.
+
 
 === Encrypt/decrypt attribute methods
 
@@ -297,12 +298,5 @@ Just like the default options for <tt>ActiveRecord</tt>, the <tt>:encode</tt> op
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a
   future version unintentionally.
-* Commit, do not mess with rakefile, version, or history.
-  (if you want to have your own version, that is fine but
-   bump version in a commit by itself I can ignore when I pull)
+* Commit, do not mess with rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.
-
-
-== Contact
-
-Problems, comments, and suggestions all welcome: shuber@huberry.com
