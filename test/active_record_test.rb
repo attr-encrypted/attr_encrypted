@@ -18,6 +18,8 @@ end
 # The table needs to exist before defining the class
 create_people_table
 
+ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
+
 class Person < ActiveRecord::Base
   attr_encrypted :email, :key => 'a secret key'
   attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => 'some private key') }, :marshal => true

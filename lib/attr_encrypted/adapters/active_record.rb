@@ -42,7 +42,7 @@ if defined?(ActiveRecord)
               attribute_names.each_with_index do |attribute, index|
                 if attr_encrypted?(attribute)
                   args[index] = send("encrypt_#{attribute}", args[index])
-                  attribute_names[index] = encrypted_attributes[attribute]
+                  attribute_names[index] = encrypted_attributes[attribute.to_sym][:attribute]
                 end
               end
               method = "#{match.captures[0]}_#{match.captures[1]}_#{attribute_names.join('_and_')}".to_sym
