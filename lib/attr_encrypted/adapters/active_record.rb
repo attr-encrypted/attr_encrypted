@@ -3,12 +3,14 @@ if defined?(ActiveRecord)
     module Adapters
       module ActiveRecord
         def self.extended(base)
-          base.attr_encrypted_options[:encode] = true
-          base.eigenclass_eval { alias_method_chain :method_missing, :attr_encrypted }
+          base.class_eval do
+            attr_encrypted_options[:encode] = true
+            class << self; alias_method_chain :method_missing, :attr_encrypted; end
+          end
         end
-        
+
         protected
-        
+
           # Ensures the attribute methods for db fields have been defined before calling the original 
           # <tt>attr_encrypted</tt> method
           def attr_encrypted(*attrs)
@@ -16,7 +18,7 @@ if defined?(ActiveRecord)
             super
             attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr| alias_method "#{attr}_before_type_cast", attr }
           end
-          
+
           # Allows you to use dynamic methods like <tt>find_by_email</tt> or <tt>scoped_by_email</tt> for 
           # encrypted attributes
           #
@@ -50,6 +52,6 @@ if defined?(ActiveRecord)
       end
     end
   end
-  
+
   ActiveRecord::Base.extend AttrEncrypted::Adapters::ActiveRecord
 end
