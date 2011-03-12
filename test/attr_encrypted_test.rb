@@ -268,4 +268,10 @@ class AttrEncryptedTest < Test::Unit::TestCase
     assert_equal "not_encrypted_stuff", @user.encrypted_with_if_changed
   end
 
+  def test_should_cast_values_as_strings_before_encrypting
+    string_encrypted_email = User.encrypt_email('3')
+    assert_equal string_encrypted_email, User.encrypt_email(3)
+    assert_equal '3', User.decrypt_email(string_encrypted_email)
+  end
+
 end

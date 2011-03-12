@@ -189,7 +189,7 @@ module AttrEncrypted
   def encrypt(attribute, value, options = {})
     options = encrypted_attributes[attribute.to_sym].merge(options)
     if options[:if] && !options[:unless] && !value.nil? && !(value.is_a?(String) && value.empty?)
-      value = options[:marshaler].send(options[:dump_method], value) if options[:marshal]
+      value = options[:marshal] ? options[:marshaler].send(options[:dump_method], value) : value.to_s
       encrypted_value = options[:encryptor].send(options[:encrypt_method], options.merge!(:value => value))
       encrypted_value = [encrypted_value].pack(options[:encode]) if options[:encode]
       encrypted_value
