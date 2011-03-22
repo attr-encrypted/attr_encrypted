@@ -1,4 +1,4 @@
-if defined?(ActiveRecord)
+if defined?(ActiveRecord::Base)
   module AttrEncrypted
     module Adapters
       module ActiveRecord
