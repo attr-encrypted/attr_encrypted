@@ -274,4 +274,13 @@ class AttrEncryptedTest < Test::Unit::TestCase
     assert_equal '3', User.decrypt_email(string_encrypted_email)
   end
 
+  def test_should_create_query_accessor
+    @user = User.new
+    assert !@user.email?
+    @user.email = ''
+    assert !@user.email?
+    @user.email = 'test@example.com'
+    assert @user.email?
+  end
+
 end

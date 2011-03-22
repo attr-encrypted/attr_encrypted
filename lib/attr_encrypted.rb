@@ -86,8 +86,10 @@ module AttrEncrypted
   #   end
   #
   #   @user = User.new
-  #   @user.encrypted_email # returns nil
+  #   @user.encrypted_email # nil
+  #   @user.email? # false
   #   @user.email = 'test@example.com'
+  #   @user.email? # true
   #   @user.encrypted_email # returns the encrypted version of 'test@example.com'
   #
   #   @user.configuration = { :time_zone => 'UTC' }
@@ -127,6 +129,11 @@ module AttrEncrypted
       define_method("#{attribute}=") do |value|
         send("#{encrypted_attribute_name}=", encrypt(attribute, value))
         instance_variable_set("@#{attribute}", value)
+      end
+
+      define_method("#{attribute}?") do
+        value = send(attribute)
+        value.respond_to?(:empty?) ? !value.empty? : !!value
       end
 
       encrypted_attributes[attribute.to_sym] = options.merge!(:attribute => encrypted_attribute_name)
