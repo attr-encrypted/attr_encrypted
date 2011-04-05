@@ -61,6 +61,10 @@ class AttrEncryptedTest < Test::Unit::TestCase
     assert User.attr_encrypted?('email')
   end
 
+  def test_attr_encrypted_should_not_use_the_same_attribute_name_for_two_attributes_in_the_same_line
+    assert_not_equal User.encrypted_attributes[:email][:attribute], User.encrypted_attributes[:without_encoding][:attribute]
+  end
+
   def test_attr_encrypted_should_return_false_for_salt
     assert !User.attr_encrypted?('salt')
   end
