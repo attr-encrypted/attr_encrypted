@@ -136,7 +136,7 @@ module AttrEncrypted
         value.respond_to?(:empty?) ? !value.empty? : !!value
       end
 
-      encrypted_attributes[attribute.to_sym] = options.merge!(:attribute => encrypted_attribute_name)
+      encrypted_attributes[attribute.to_sym] = options.merge(:attribute => encrypted_attribute_name)
     end
   end
   alias_method :attr_encryptor, :attr_encrypted
