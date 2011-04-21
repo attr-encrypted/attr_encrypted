@@ -10,6 +10,7 @@ def create_people_table
         t.string   :password
         t.string   :encrypted_credentials
         t.string   :salt
+        t.string   :encrypted_colors
       end
     end
   end
@@ -21,8 +22,11 @@ create_people_table
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
 
 class Person < ActiveRecord::Base
+  serialize :colors
+
   attr_encrypted :email, :key => 'a secret key'
   attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => 'some private key') }, :marshal => true
+  attr_encrypted :colors, :key => 'another key'
 
   ActiveSupport::Deprecation.silenced = true
   def after_initialize; end
@@ -89,6 +93,13 @@ class ActiveRecordTest < Test::Unit::TestCase
 
   def test_should_encode_by_default
     assert Person.attr_encrypted_options[:encode]
+  end
+
+  def test_should_serialize_and_encrypt_colors
+    @person = Person.create(:colors => ['blue', 'green'])
+    assert_not_nil @person.encrypted_colors
+    assert_not_equal @person.colors, @person.encrypted_colors
+    assert_equal @person.colors, Person.find(:first).colors
   end
 
   def test_should_validate_presence_of_email
