@@ -184,15 +184,15 @@ module AttrEncrypted
     else
       value = encrypted_value
     end
-
-    if options[:type] == Float 
-      value = value.to_f
+    
+    if options[:type] == Float
+      value = Float(value)
     elsif options[:type] == Integer
-      value = value.to_i
+      value = Integer(value)
     elsif options[:type] == Complex
-      value = value.to_c
+      value = Complex(value)
     elsif options[:type] == Rational
-      value = value.to_r
+      value = Rational(value)
     end
     value
   end
@@ -267,7 +267,11 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
     def decrypt(attribute, encrypted_value)
-      self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      begin 
+        self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      rescue Exception => exc
+        self.errors.add(attribute, exc.message)
+      end
     end
 
     # Encrypts a value for the attribute specified using options evaluated in the current object's scope
