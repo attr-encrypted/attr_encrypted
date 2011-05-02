@@ -130,7 +130,16 @@ module AttrEncrypted
       end
 
       define_method("#{attribute}=") do |value|
-        send("#{encrypted_attribute_name}=", encrypt(attribute, value))
+        encrypted_value = encrypt(attribute, value)
+        send("#{encrypted_attribute_name}=", encrypted_value)
+ 
+        if options[:type] != String
+          begin 
+            value = decrypt(attribute, encrypted_value)
+          rescue Exception => exc
+            self.errors.add(attribute, exc.message)
+          end
+        end
         instance_variable_set("@#{attribute}", value)
       end
 
