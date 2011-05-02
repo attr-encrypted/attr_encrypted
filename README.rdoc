@@ -123,11 +123,19 @@ Attribute types different than String can be specified as:
 
   class User < ActiveRecord::Base
     attr_encrypted :age, :key => 'a secret key', :type => Integer
+
   end
+
 
 The supported types are: Integer, Float, Rational, Complex.
 
 Note that the encrypted attribute type is always String, i.e. in this example <tt>encrypted_age</tt> is of type String.
+
+ActiveRecord validation is supported, e.g.:
+
+  validates_numericality_of :age, :only_integer => true, :greater_than_or_equal_to => 0
+
+If encrypting an association attribute (id attribute), the ActiveRecord association specifier will not work, in particular: <tt>belongs_to, has_many, has_one, ...</tt>.
 
 === Custom encryptor
 
