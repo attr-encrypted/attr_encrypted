@@ -117,6 +117,25 @@ attributes when you're in development mode. You can specify conditions like this
 
 You can specify both <tt>:if</tt> and <tt>:unless</tt> options. If you pass a symbol representing an instance method then the result of the method will be evaluated. Any objects that respond to <tt>:call</tt> are evaluated as well.
 
+=== Attribute type
+
+Attribute types different than String can be specified as:
+
+  class User < ActiveRecord::Base
+    attr_encrypted :age, :key => 'a secret key', :type => Integer
+
+  end
+
+
+The supported types are: Integer, Float, Rational, Complex.
+
+Note that the encrypted attribute type is always String, i.e. in this example <tt>encrypted_age</tt> must be of type String.
+
+ActiveRecord validation is supported, e.g.:
+
+  validates_numericality_of :age, :only_integer => true, :greater_than_or_equal_to => 0
+
+If an association attribute (id attribute) is encrypted, the ActiveRecord association specifier will not work, in particular: <tt>belongs_to, has_many, has_one, ...</tt>.
 
 === Custom encryptor
 

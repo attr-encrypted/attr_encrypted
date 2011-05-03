@@ -61,6 +61,8 @@ module AttrEncrypted
   #
   #   :decrypt_method   => The decrypt method name to call on the <tt>:encryptor</tt> object. Defaults to 'decrypt'.
   #
+  #   :type             => The type to which the decrypted attribute will be casted. Defaults to 'String'.
+  #
   #   :if               => Attributes are only encrypted if this option evaluates to true. If you pass a symbol representing an instance
   #                        method then the result of the method will be evaluated. Any objects that respond to <tt>:call</tt> are evaluated as well.
   #                        Defaults to true.
@@ -110,7 +112,8 @@ module AttrEncrypted
       :load_method      => 'load',
       :encryptor        => Encryptor,
       :encrypt_method   => 'encrypt',
-      :decrypt_method   => 'decrypt'
+      :decrypt_method   => 'decrypt',
+      :type             => String
     }.merge!(attr_encrypted_options).merge!(attributes.last.is_a?(Hash) ? attributes.pop : {})
 
     options[:encode] = options[:default_encoding] if options[:encode] == true
@@ -127,7 +130,16 @@ module AttrEncrypted
       end
 
       define_method("#{attribute}=") do |value|
-        send("#{encrypted_attribute_name}=", encrypt(attribute, value))
+        encrypted_value = encrypt(attribute, value)
+        send("#{encrypted_attribute_name}=", encrypted_value)
+ 
+        if options[:type] != String
+          begin 
+            value = decrypt(attribute, encrypted_value)
+          rescue Exception => exc
+            self.errors.add(attribute, exc.message)
+          end
+        end
         instance_variable_set("@#{attribute}", value)
       end
 
@@ -178,10 +190,20 @@ module AttrEncrypted
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
       value = options[:encryptor].send(options[:decrypt_method], options.merge!(:value => encrypted_value))
       value = options[:marshaler].send(options[:load_method], value) if options[:marshal]
-      value
     else
-      encrypted_value
+      value = encrypted_value
     end
+    
+    if options[:type] == Float
+      value = Float(value)
+    elsif options[:type] == Integer
+      value = Integer(value)
+    elsif options[:type] == Complex
+      value = Complex(value)
+    elsif options[:type] == Rational
+      value = Rational(value)
+    end
+    value
   end
 
   # Encrypts a value for the attribute specified
@@ -254,7 +276,11 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
     def decrypt(attribute, encrypted_value)
-      self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      begin 
+        self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      rescue Exception => exc
+        self.errors.add(attribute, exc.message)
+      end
     end
 
     # Encrypts a value for the attribute specified using options evaluated in the current object's scope
