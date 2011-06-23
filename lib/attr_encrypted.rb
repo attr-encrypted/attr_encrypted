@@ -118,9 +118,8 @@ module AttrEncrypted
     attributes.each do |attribute|
       encrypted_attribute_name = (options[:attribute] ? options[:attribute] : [options[:prefix], attribute, options[:suffix]].join).to_sym
 
-      instance_methods_as_symbols = instance_methods.collect { |method| method.to_sym }
-      attr_reader encrypted_attribute_name unless instance_methods_as_symbols.include?(encrypted_attribute_name)
-      attr_writer encrypted_attribute_name unless instance_methods_as_symbols.include?(:"#{encrypted_attribute_name}=")
+      attr_reader encrypted_attribute_name unless new.respond_to?(encrypted_attribute_name)
+      attr_writer encrypted_attribute_name unless new.respond_to?(:"#{encrypted_attribute_name}=")
 
       define_method(attribute) do
         instance_variable_get("@#{attribute}") || instance_variable_set("@#{attribute}", decrypt(attribute, send(encrypted_attribute_name)))
