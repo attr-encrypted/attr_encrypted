@@ -132,25 +132,18 @@ module AttrEncryptor
 
 
       define_method(attribute) do
+        
+        load_iv_for_attribute(attribute,encrypted_attribute_name, options[:algorithm])
+        load_salt_for_attribute(attribute,encrypted_attribute_name) 
+
         instance_variable_get("@#{attribute}") || instance_variable_set("@#{attribute}", decrypt(attribute, send(encrypted_attribute_name)))
       end
 
       define_method("#{attribute}=") do |value|
-        iv = send("#{encrypted_attribute_name.to_s + "_iv"}")
-        if(iv == nil)
-          begin 
-            algorithm = options[:algorithm] || "aes-256-cbc"
-            algo = OpenSSL::Cipher::Cipher.new(algorithm)
-            iv = [algo.random_iv].pack("m")
-            send("#{encrypted_attribute_name.to_s + "_iv"}=", iv)
-          rescue RuntimeError
-          end
-        end
-
-        salt = send("#{encrypted_attribute_name.to_s + "_salt"}") || send("#{encrypted_attribute_name.to_s + "_salt"}=", Time.now.to_i.to_s) 
+        load_iv_for_attribute(attribute, encrypted_attribute_name, options[:algorithm])
+        load_salt_for_attribute(attribute, encrypted_attribute_name) 
+        
         #this add's the iv and salt on the options for this instance
-        self.class.encrypted_attributes[attribute.to_sym] = self.class.encrypted_attributes[attribute.to_sym].merge(:iv => iv.unpack("m").first) if (iv && !iv.empty?)
-        self.class.encrypted_attributes[attribute.to_sym] = self.class.encrypted_attributes[attribute.to_sym].merge(:salt => salt)
         send("#{encrypted_attribute_name}=", encrypt(attribute, value))
         instance_variable_set("@#{attribute}", value)
       end
@@ -163,6 +156,7 @@ module AttrEncryptor
     end
   end
   alias_method :attr_encryptor, :attr_encrypted
+
 
   # Default options to use with calls to <tt>attr_encrypted</tt>
   #
@@ -298,7 +292,10 @@ module AttrEncryptor
     def encrypt(attribute, value)
       self.class.encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
     end
+    
+    def foo
 
+    end
     protected
 
       # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
@@ -318,6 +315,27 @@ module AttrEncryptor
           option
         end
       end
+
+      def load_iv_for_attribute (attribute, encrypted_attribute_name, algorithm)
+        iv = send("#{encrypted_attribute_name.to_s + "_iv"}")
+          if(iv == nil)
+            begin 
+              algorithm = algorithm || "aes-256-cbc"
+              algo = OpenSSL::Cipher::Cipher.new(algorithm)
+              iv = [algo.random_iv].pack("m")
+              send("#{encrypted_attribute_name.to_s + "_iv"}=", iv)
+            rescue RuntimeError
+            end
+          end
+        self.class.encrypted_attributes[attribute.to_sym] = self.class.encrypted_attributes[attribute.to_sym].merge(:iv => iv.unpack("m").first) if (iv && !iv.empty?)
+      end
+
+      def load_salt_for_attribute(attribute, encrypted_attribute_name)
+        salt = send("#{encrypted_attribute_name.to_s + "_salt"}") || send("#{encrypted_attribute_name.to_s + "_salt"}=", Time.now.to_i.to_s) 
+        self.class.encrypted_attributes[attribute.to_sym] = self.class.encrypted_attributes[attribute.to_sym].merge(:salt => salt)
+      end
+  
+
   end
 end
 
