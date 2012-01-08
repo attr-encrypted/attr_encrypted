@@ -7,15 +7,18 @@ class Client
 
   property :id, Serial
   property :encrypted_email, String
-  property :encrypted_credentials, Text
-  property :salt, String
+  property :encrypted_email_iv, String
+  property :encrypted_email_salt, String
 
+  property :encrypted_credentials, Text
+  property :encrypted_credentials_iv, Text
+  property :encrypted_credentials_salt, Text
+  
   attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |client| Encryptor.encrypt(:value => client.salt, :key => 'some private key') }, :marshal => true
+  attr_encrypted :credentials, :key => 'some private key', :marshal => true
 
   def initialize(attrs = {})
     super attrs
-    self.salt ||= Digest::SHA1.hexdigest((Time.now.to_i * rand(5)).to_s)
     self.credentials ||= { :username => 'example', :password => 'test' }
   end
 end

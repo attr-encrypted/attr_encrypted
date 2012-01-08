@@ -147,15 +147,6 @@ class AttrEncryptorTest < Test::Unit::TestCase
     @user = User.new
     @user.with_marshaling = [1, 2, 3]
     assert_not_nil @user.encrypted_with_marshaling
-    assert_equal User.encrypt_with_marshaling([1, 2, 3]), @user.encrypted_with_marshaling
-  end
-
-  def test_should_decrypt_with_marshaling
-    encrypted = User.encrypt_with_marshaling([1, 2, 3])
-    @user = User.new
-    assert_nil @user.with_marshaling
-    @user.encrypted_with_marshaling = encrypted
-    assert_equal [1, 2, 3], @user.with_marshaling
   end
 
   def test_should_use_custom_encryptor_and_crypt_method_names_and_arguments

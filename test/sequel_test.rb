@@ -5,17 +5,19 @@ DB = Sequel.sqlite
 DB.create_table :humans do
   primary_key :id
   column :encrypted_email, :string
+  column :encrypted_email_salt, String
+  column :encrypted_email_iv, :string
   column :password, :string
   column :encrypted_credentials, :string
-  column :salt, :string
+  column :encrypted_credentials_iv, :string
+  column :encrypted_credentials_salt, String
 end
 
 class Human < Sequel::Model(:humans)  
   attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |human| Encryptor.encrypt(:value => human.salt, :key => 'some private key') }, :marshal => true
+  attr_encrypted :credentials, :key => 'some private key', :marshal => true
 
   def after_initialize(attrs = {})
-    self.salt ||= Digest::SHA1.hexdigest((Time.now.to_i * rand(5)).to_s)
     self.credentials ||= { :username => 'example', :password => 'test' }
   end
 end
@@ -27,6 +29,7 @@ class SequelTest < Test::Unit::TestCase
   end
 
   def test_should_encrypt_email
+    require 'ruby-debug' 
     @human = Human.new :email => 'test@example.com'
     assert @human.save
     assert_not_nil @human.encrypted_email
@@ -35,6 +38,7 @@ class SequelTest < Test::Unit::TestCase
   end
 
   def test_should_marshal_and_encrypt_credentials
+
     @human = Human.new
     assert @human.save
     assert_not_nil @human.encrypted_credentials
