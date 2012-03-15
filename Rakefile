@@ -8,7 +8,8 @@ task :default => :test
 desc 'Test the attr_encrypted gem.'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
-  t.pattern = 'test/**/*_test.rb'
+  # t.pattern = 'test/**/*_test.rb'
+  t.pattern = ENV['TEST'] ? ENV['TEST'] : 'test/**/*_test.rb'
   t.verbose = true
 end
 
