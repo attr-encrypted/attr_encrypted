@@ -105,6 +105,20 @@ You can pass a proc/lambda object as the <tt>:key</tt> option as well:
 
 This can be used to create asymmetrical encryption by requiring users to provide their own encryption keys.
 
+==== Initial Values
+
+You can pass Initial Values to the underlying encryption algorithm as the <tt>:iv</tt> option.
+
+The value can be a string or a Proc.
+
+The :iv value is saved in the encrypted value and extracted during decryption so that :iv's may vary between encryptions of the same field.
+
+For example:
+
+  class SomeClass
+    attr_encrypted :field, :key => App31::Application.config.secret_token, :marshal => true,
+      :iv => lambda { |arg| (0..16).map { |x| rand(256).chr }.join() }
+  end
 
 === Conditional encrypting
 
