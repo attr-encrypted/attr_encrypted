@@ -189,7 +189,7 @@ module AttrEncrypted
     end
     
     
-    if RUBY_VERSION >= "1.9" and not options[:charset].nil?
+    if RUBY_VERSION >= "1.9" and not return_value.nil? and not options[:charset].nil? 
       return_value.force_encoding(options[:charset])
     else
       return_value
