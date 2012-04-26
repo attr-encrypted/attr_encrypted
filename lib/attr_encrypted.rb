@@ -61,6 +61,8 @@ module AttrEncrypted
   #
   #   :decrypt_method   => The decrypt method name to call on the <tt>:encryptor</tt> object. Defaults to 'decrypt'.
   #
+  #   :charset          => Force encoding to the charset specified in this attribute after decryption process. Requires ruby >= 1.9.
+  #
   #   :if               => Attributes are only encrypted if this option evaluates to true. If you pass a symbol representing an instance
   #                        method then the result of the method will be evaluated. Any objects that respond to <tt>:call</tt> are evaluated as well.
   #                        Defaults to true.
@@ -110,7 +112,8 @@ module AttrEncrypted
       :load_method      => 'load',
       :encryptor        => Encryptor,
       :encrypt_method   => 'encrypt',
-      :decrypt_method   => 'decrypt'
+      :decrypt_method   => 'decrypt',
+      :charset          => nil
     }.merge!(attr_encrypted_options).merge!(attributes.last.is_a?(Hash) ? attributes.pop : {})
 
     options[:encode] = options[:default_encoding] if options[:encode] == true
@@ -254,7 +257,12 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
     def decrypt(attribute, encrypted_value)
-      self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      decrypted_value = self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      if RUBY_VERSION >= "1.9" and not options[:charset].nil?
+        decrypted_value.force_encoding(options[:charset])
+      else
+        decrypted_value
+      end
     end
 
     # Encrypts a value for the attribute specified using options evaluated in the current object's scope
