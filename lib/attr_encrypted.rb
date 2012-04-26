@@ -181,9 +181,16 @@ module AttrEncrypted
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
       value = options[:encryptor].send(options[:decrypt_method], options.merge!(:value => encrypted_value))
       value = options[:marshaler].send(options[:load_method], value) if options[:marshal]
-      value
+      return_value = value
     else
-      encrypted_value
+      return_value = encrypted_value
+    end
+    
+    
+    if RUBY_VERSION >= "1.9" and not options[:charset].nil?
+      return_value.force_encoding(options[:charset])
+    else
+      return_value
     end
   end
 
@@ -257,12 +264,7 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
     def decrypt(attribute, encrypted_value)
-      decrypted_value = self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
-      if RUBY_VERSION >= "1.9" and not options[:charset].nil?
-        decrypted_value.force_encoding(options[:charset])
-      else
-        decrypted_value
-      end
+      self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
     end
 
     # Encrypts a value for the attribute specified using options evaluated in the current object's scope
