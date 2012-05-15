@@ -293,9 +293,6 @@ module AttrEncryptor
       self.class.encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
     end
     
-    def foo
-
-    end
     protected
 
       # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
