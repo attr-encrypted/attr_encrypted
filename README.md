@@ -15,7 +15,7 @@ It works with ANY class, however, you get a few extra features when you're using
 
 Encrypting attributes has never been easier:
 
-### You database
+### Your database
 
 add a `encrypted_ssn`, `encrypted_ssn_salt`, `encrypted_ssn_iv`. All of
 them will be populated automatically
@@ -243,6 +243,14 @@ encrypted string. I've had this problem myself using MySQL. You can simply pass 
 
 The default encoding is `m*` (base64). You can change this by setting `:encode => 'some encoding'`. See the `Array#pack` method at http://www.ruby-doc.org/core/classes/Array.html#M002245 for more encoding options.
 
+### String Encoding/Charset
+
+If you are trying to store UTF-8 (or other non-english charsets) strings in your encrypted parameters, you may get the decrypted string back as a US-ASCII or ASCII-8BIT string.
+
+To fix this, add the `:charset => 'UTF-8'` option to your encrypted attribute definitions. 
+This option defaults to whatever your `Encoding.default_internal` is set to. `:charset => :default` will force it to use the default value.
+
+This option only applies to encrypted strings and will be ignored when encrypting marshalled objects.
 
 ### Marshaling
 

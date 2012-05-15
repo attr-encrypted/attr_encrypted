@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require File.expand_path('../test_helper', __FILE__)
 
 class SillyEncryptor
@@ -25,6 +26,10 @@ class User
   attr_encrypted :with_true_unless, :key => 'secret key', :unless => true
   attr_encrypted :with_false_unless, :key => 'secret key', :unless => false
   attr_encrypted :with_if_changed, :key => 'secret key', :if => :should_encrypt
+
+  attr_encrypted :utf8, :key => 'secret key', :charset => 'UTF-8'
+  attr_encrypted :default_enc, :key => 'secret key'
+  attr_encrypted :us_ascii, :key => 'secret key', :charset => 'US-ASCII'
 
   attr_encryptor :aliased, :key => 'secret_key'
 
@@ -267,6 +272,29 @@ class AttrEncryptorTest < Test::Unit::TestCase
     string_encrypted_email = User.encrypt_email('3')
     assert_equal string_encrypted_email, User.encrypt_email(3)
     assert_equal '3', User.decrypt_email(string_encrypted_email)
+  end
+
+  def test_should_force_utf8_charset_on_decrypted_string
+    utf8_str = 'thïs should bé UTF-8'.force_encoding('UTF-8')
+    encrypted_utf8 = User.encrypt_utf8(utf8_str)
+    decrypted_utf8 = User.decrypt_utf8(encrypted_utf8)
+    assert_equal decrypted_utf8.encoding, Encoding::UTF_8
+  end
+
+  def test_should_force_default_encoding_on_decrypted_string
+    Encoding.default_internal = 'ASCII-8BIT' #Provide a default.
+    default_str = 'this is a default encoding'
+    encrypted_def = User.encrypt_default_enc(default_str)
+    decrypted_def = User.decrypt_default_enc(encrypted_def)
+    assert_equal decrypted_def.encoding, Encoding.default_internal
+    Encoding.default_internal = nil
+  end
+
+  def test_should_force_ascii_charset_on_decrypted_string
+    ascii_str = 'this should be US-ASCII'.force_encoding('US-ASCII')
+    encrypted_ascii = User.encrypt_us_ascii(ascii_str)
+    decrypted_ascii = User.decrypt_us_ascii(encrypted_ascii)
+    assert_equal decrypted_ascii.encoding, Encoding::US_ASCII
   end
 
   def test_should_create_query_accessor
