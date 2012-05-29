@@ -37,6 +37,13 @@ module AttrEncrypted
   #                        method before being passed to the encryptor. Objects that respond to :call are evaluated as well (including procs).
   #                        Any other key types will be passed directly to the encryptor.
   #
+  #   :iv               => Initial value passed directly to the encryptor. Can be a value or a proc.
+  #                        :iv values are intercepted in encryption and saved in the encrypted string.
+  #                        This is done so that each encrypted value may have a different, randomly
+  #                        generated :iv which will be used to decrypt the data without separate tracking.
+  #                        Inasmuch as the security requirements for :iv's is different from keys, this
+  #                        is supposed to be ok.
+  #
   #   :encode           => If set to true, attributes will be encoded as well as encrypted. This is useful if you're
   #                        planning on storing the encrypted attributes in a database. The default encoding is 'm' (base64),
   #                        however this can be overwritten by setting the :encode option to some other encoding string instead of
@@ -82,7 +89,8 @@ module AttrEncrypted
   #
   #   class User
   #     attr_encrypted :email, :credit_card, :key => 'some secret key'
-  #     attr_encrypted :configuration, :key => 'some other secret key', :marshal => true
+  #     attr_encrypted :configuration, :key => 'some other secret key', :marshal => true,
+  #         :iv => lambda { |arg| (0..16).map { |x| rand(256).chr }.join() } # create random :iv's for ase-256-cbc
   #   end
   #
   #   @user = User.new
@@ -254,7 +262,14 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
     def decrypt(attribute, encrypted_value)
-      self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      options = evaluated_attr_encrypted_options_for(attribute)
+      if options[:iv]
+        # pos is the offset into encrypted_value of the last character of the iv
+        pos = encrypted_value[0..3].to_i + 3
+        options[:iv] = encrypted_value[4..(pos)]
+        encrypted_value = encrypted_value[(pos+1)..-1]
+      end
+      self.class.decrypt(attribute, encrypted_value, options)
     end
 
     # Encrypts a value for the attribute specified using options evaluated in the current object's scope
@@ -273,7 +288,12 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.encrypt(:email, 'test@example.com')
     def encrypt(attribute, value)
-      self.class.encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
+      options = evaluated_attr_encrypted_options_for(attribute)
+      if options[:iv]
+        ("%04d" % options[:iv].length) + options[:iv] + self.class.encrypt(attribute, value, options)
+      else
+        self.class.encrypt(attribute, value, options)
+      end
     end
 
     protected

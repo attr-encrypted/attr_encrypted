@@ -25,6 +25,8 @@ class User
   attr_encrypted :with_true_unless, :key => 'secret key', :unless => true
   attr_encrypted :with_false_unless, :key => 'secret key', :unless => false
   attr_encrypted :with_if_changed, :key => 'secret key', :if => :should_encrypt
+  attr_encrypted :with_dynamic_iv, :key => 'a very long, very long, even longer secret key' ,
+      :iv => lambda { |arg| (0..16).map { |x| rand(256).chr }.join() }
 
   attr_encryptor :aliased, :key => 'secret_key'
 
@@ -287,4 +289,13 @@ class AttrEncryptedTest < Test::Unit::TestCase
     assert @user.email?
   end
 
+  def test_dynamic_iv_should_work
+    @user = User.new
+    @user.with_dynamic_iv = "this is a string"
+    assert_not_nil @user.encrypted_with_dynamic_iv, "encrypted_with_dynamic_iv should not be nil"
+    assert_equal "this is a string", @user.with_dynamic_iv, "@user.with_dynamic_iv should recover original data"
+    saved_encrypted_value = @user.encrypted_with_dynamic_iv
+    @user.with_dynamic_iv = "this is a string"
+    assert_not_equal saved_encrypted_value, @user.encrypted_with_dynamic_iv, "newly encrypted value should not be the same as the saved one"
+  end
 end

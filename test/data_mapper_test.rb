@@ -1,3 +1,5 @@
+require 'datamapper'
+
 require File.expand_path('../test_helper', __FILE__)
 
 DataMapper.setup(:default, 'sqlite3::memory:')
