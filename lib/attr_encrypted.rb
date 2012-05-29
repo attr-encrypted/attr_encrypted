@@ -172,12 +172,17 @@ module AttrEncrypted
   #   end
   #
   #   email = User.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
-  def decrypt(attribute, encrypted_value, options = {})
+  def decrypt(obj, attribute, encrypted_value, options = {})
     options = encrypted_attributes[attribute.to_sym].merge(options)
     if options[:if] && !options[:unless] && !encrypted_value.nil? && !(encrypted_value.is_a?(String) && encrypted_value.empty?)
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
       value = options[:encryptor].send(options[:decrypt_method], options.merge!(:value => encrypted_value))
       value = options[:marshaler].send(options[:load_method], value) if options[:marshal]
+      if obj && serialized_attributes.include?(attribute.to_s)
+        obj.send(:write_attribute, attribute.to_s, value)
+        value = obj.unserialize_attribute(attribute.to_s)
+      end
+
       value
     else
       encrypted_value
@@ -196,7 +201,8 @@ module AttrEncrypted
   def encrypt(attribute, value, options = {})
     options = encrypted_attributes[attribute.to_sym].merge(options)
     if options[:if] && !options[:unless] && !value.nil? && !(value.is_a?(String) && value.empty?)
-      value = options[:marshal] ? options[:marshaler].send(options[:dump_method], value) : value.to_s
+      value = value.to_yaml if serialized_attributes.include?(attribute.to_s)
+      value = options[:marshaler].send(options[:dump_method], value) if options[:marshal]
       encrypted_value = options[:encryptor].send(options[:encrypt_method], options.merge!(:value => value))
       encrypted_value = [encrypted_value].pack(options[:encode]) if options[:encode]
       encrypted_value
@@ -254,7 +260,7 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
     def decrypt(attribute, encrypted_value)
-      self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      self.class.decrypt(self, attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
     end
 
     # Encrypts a value for the attribute specified using options evaluated in the current object's scope
