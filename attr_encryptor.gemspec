@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
 
   s.author   = 'Daniel Palacio'
   s.email    = 'danpal@gmail.com'
-  s.homepage = 'http://github.com/danpal/attr_encrypted'
+  s.homepage = 'http://github.com/danpal/attr_encryptor'
 
   s.has_rdoc = false
   s.rdoc_options = ['--line-numbers', '--inline-source', '--main', 'README.rdoc']
