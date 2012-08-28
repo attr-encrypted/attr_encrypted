@@ -23,6 +23,7 @@ them will be populated automatically
     create_table :google_apps_admins do |t|
       t.string :username
       t.string :encrypted_password
+      t.string :encrypted_password_salt
       t.string :encrypted_password_iv
       t.string :domain
       t.timestamps
