@@ -12,26 +12,26 @@ class SillyEncryptor
 end
 
 class User
-  self.attr_encrypted_options[:key] = Proc.new { |user| user.class.to_s } # default key
+  self.attr_encrypted_options[:key] = Proc.new { |user| SECRET_KEY } # default key
 
-  attr_encrypted :email, :without_encoding, :key => 'secret key'
+  attr_encrypted :email, :without_encoding, :key => SECRET_KEY
   attr_encrypted :password, :prefix => 'crypted_', :suffix => '_test'
-  attr_encrypted :ssn, :key => :salt, :attribute => 'ssn_encrypted'
+  attr_encrypted :ssn, :key => :secret_key, :attribute => 'ssn_encrypted'
   attr_encrypted :credit_card, :encryptor => SillyEncryptor, :encrypt_method => :silly_encrypt, :decrypt_method => :silly_decrypt, :some_arg => 'test'
-  attr_encrypted :with_encoding, :key => 'secret key', :encode => true
-  attr_encrypted :with_custom_encoding, :key => 'secret key', :encode => 'm'
-  attr_encrypted :with_marshaling, :key => 'secret key', :marshal => true
-  attr_encrypted :with_true_if, :key => 'secret key', :if => true
-  attr_encrypted :with_false_if, :key => 'secret key', :if => false
-  attr_encrypted :with_true_unless, :key => 'secret key', :unless => true
-  attr_encrypted :with_false_unless, :key => 'secret key', :unless => false
-  attr_encrypted :with_if_changed, :key => 'secret key', :if => :should_encrypt
+  attr_encrypted :with_encoding, :key => SECRET_KEY, :encode => true
+  attr_encrypted :with_custom_encoding, :key => SECRET_KEY, :encode => 'm'
+  attr_encrypted :with_marshaling, :key => SECRET_KEY, :marshal => true
+  attr_encrypted :with_true_if, :key => SECRET_KEY, :if => true
+  attr_encrypted :with_false_if, :key => SECRET_KEY, :if => false
+  attr_encrypted :with_true_unless, :key => SECRET_KEY, :unless => true
+  attr_encrypted :with_false_unless, :key => SECRET_KEY, :unless => false
+  attr_encrypted :with_if_changed, :key => SECRET_KEY, :if => :should_encrypt
 
-  attr_encrypted :utf8, :key => 'secret key', :charset => 'UTF-8'
-  attr_encrypted :default_enc, :key => 'secret key'
-  attr_encrypted :us_ascii, :key => 'secret key', :charset => 'US-ASCII'
+  attr_encrypted :utf8, :key => SECRET_KEY, :charset => 'UTF-8'
+  attr_encrypted :default_enc, :key => SECRET_KEY
+  attr_encrypted :us_ascii, :key => SECRET_KEY, :charset => 'US-ASCII'
 
-  attr_encryptor :aliased, :key => 'secret_key'
+  attr_encryptor :aliased, :key => SECRET_KEY
 
   attr_accessor :salt
   attr_accessor :should_encrypt
@@ -39,6 +39,10 @@ class User
   def initialize
     self.salt = Time.now.to_i.to_s
     self.should_encrypt = true
+  end
+
+  def secret_key
+    SECRET_KEY
   end
 end
 
@@ -163,7 +167,7 @@ class AttrEncryptorTest < Test::Unit::TestCase
     assert_nil @user.ssn_encrypted
     @user.ssn = 'testing'
     assert_not_nil @user.ssn_encrypted
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => @user.salt, :iv => @user.ssn_encrypted_iv.unpack("m").first, :salt => Time.now.to_i.to_s), @user.ssn_encrypted
+    assert_equal Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.ssn_encrypted_iv.unpack("m").first, :salt => Time.now.to_i.to_s), @user.ssn_encrypted
   end
 
   def test_should_evaluate_a_key_passed_as_a_proc
@@ -171,7 +175,7 @@ class AttrEncryptorTest < Test::Unit::TestCase
     assert_nil @user.crypted_password_test
     @user.password = 'testing'
     assert_not_nil @user.crypted_password_test
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => 'User', :iv => @user.crypted_password_test_iv.unpack("m").first, :salt => Time.now.to_i.to_s), @user.crypted_password_test
+    assert_equal Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.crypted_password_test_iv.unpack("m").first, :salt => Time.now.to_i.to_s), @user.crypted_password_test
   end
 
   def test_should_use_options_found_in_the_attr_encrypted_options_attribute
@@ -179,8 +183,8 @@ class AttrEncryptorTest < Test::Unit::TestCase
     assert_nil @user.crypted_password_test
     @user.password = 'testing'
     assert_not_nil @user.crypted_password_test
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => 'User', :iv => @user.crypted_password_test_iv.unpack("m").first, :salt => Time.now.to_i.to_s), @user.crypted_password_test
-  end 
+    assert_equal Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.crypted_password_test_iv.unpack("m").first, :salt => Time.now.to_i.to_s), @user.crypted_password_test
+  end
 
   def test_should_inherit_encrypted_attributes
     assert_equal [User.encrypted_attributes.keys, :testing].flatten.collect { |key| key.to_s }.sort, Admin.encrypted_attributes.keys.collect { |key| key.to_s }.sort
@@ -221,7 +225,7 @@ class AttrEncryptorTest < Test::Unit::TestCase
     assert_nil @user.encrypted_with_true_if
     @user.with_true_if = 'testing'
     assert_not_nil @user.encrypted_with_true_if
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => 'secret key', :iv => @user.encrypted_with_true_if_iv.unpack("m").first, :salt => Time.now.to_i.to_s), @user.encrypted_with_true_if
+    assert_equal Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.encrypted_with_true_if_iv.unpack("m").first, :salt => Time.now.to_i.to_s), @user.encrypted_with_true_if
   end
 
   def test_should_not_encrypt_with_false_if
@@ -237,7 +241,7 @@ class AttrEncryptorTest < Test::Unit::TestCase
     assert_nil @user.encrypted_with_false_unless
     @user.with_false_unless = 'testing'
     assert_not_nil @user.encrypted_with_false_unless
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => 'secret key', :iv => @user.encrypted_with_false_unless_iv.unpack("m").first, :salt => Time.now.to_i.to_s,), @user.encrypted_with_false_unless
+    assert_equal Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.encrypted_with_false_unless_iv.unpack("m").first, :salt => Time.now.to_i.to_s,), @user.encrypted_with_false_unless
   end
 
   def test_should_not_encrypt_with_true_unless
@@ -257,7 +261,7 @@ class AttrEncryptorTest < Test::Unit::TestCase
     @user.with_if_changed = "encrypt_stuff"
     @user.stubs(:instance_variable_get).returns(nil)
     @user.stubs(:instance_variable_set).raises("BadStuff")
-    assert_raise RuntimeError do 
+    assert_raise RuntimeError do
       @user.with_if_changed
     end
 

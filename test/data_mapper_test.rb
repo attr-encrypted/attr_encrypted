@@ -13,9 +13,9 @@ class Client
   property :encrypted_credentials, Text
   property :encrypted_credentials_iv, Text
   property :encrypted_credentials_salt, Text
-  
-  attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => 'some private key', :marshal => true
+
+  attr_encrypted :email, :key => SECRET_KEY
+  attr_encrypted :credentials, :key => SECRET_KEY, :marshal => true
 
   def initialize(attrs = {})
     super attrs
