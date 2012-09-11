@@ -177,7 +177,12 @@ module AttrEncrypted
     if options[:if] && !options[:unless] && !encrypted_value.nil? && !(encrypted_value.is_a?(String) && encrypted_value.empty?)
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
       value = options[:encryptor].send(options[:decrypt_method], options.merge!(:value => encrypted_value))
-      value = options[:marshaler].send(options[:load_method], value) if options[:marshal]
+      if options[:marshal]
+        value = options[:marshaler].send(options[:load_method], value)
+      elsif defined?(Encoding)
+        encoding = Encoding.default_internal || Encoding.default_external
+        value = value.force_encoding(encoding.name)
+      end
       value
     else
       encrypted_value
