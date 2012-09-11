@@ -3,7 +3,7 @@ require 'digest/sha2'
 require 'rubygems'
 gem 'activerecord', ENV['ACTIVE_RECORD_VERSION'] if ENV['ACTIVE_RECORD_VERSION']
 require 'active_record'
-require 'datamapper'
+require 'data_mapper'
 require 'sequel'
 require 'mocha'
 
