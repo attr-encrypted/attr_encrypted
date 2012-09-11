@@ -61,6 +61,9 @@ module AttrEncrypted
   #
   #   :decrypt_method   => The decrypt method name to call on the <tt>:encryptor</tt> object. Defaults to 'decrypt'.
   #
+  #   :charset          => Force encoding to the charset specified in this attribute after decryption process. Requires ruby >= 1.9.
+  #                        Set to :default to use ruby's default encoding.
+  #
   #   :if               => Attributes are only encrypted if this option evaluates to true. If you pass a symbol representing an instance
   #                        method then the result of the method will be evaluated. Any objects that respond to <tt>:call</tt> are evaluated as well.
   #                        Defaults to true.
@@ -110,10 +113,12 @@ module AttrEncrypted
       :load_method      => 'load',
       :encryptor        => Encryptor,
       :encrypt_method   => 'encrypt',
-      :decrypt_method   => 'decrypt'
+      :decrypt_method   => 'decrypt',
+      :charset          => nil
     }.merge!(attr_encrypted_options).merge!(attributes.last.is_a?(Hash) ? attributes.pop : {})
 
     options[:encode] = options[:default_encoding] if options[:encode] == true
+    options[:charset] = Encoding.default_internal if options[:charset] == :default
 
     attributes.each do |attribute|
       encrypted_attribute_name = (options[:attribute] ? options[:attribute] : [options[:prefix], attribute, options[:suffix]].join).to_sym
@@ -178,9 +183,16 @@ module AttrEncrypted
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
       value = options[:encryptor].send(options[:decrypt_method], options.merge!(:value => encrypted_value))
       value = options[:marshaler].send(options[:load_method], value) if options[:marshal]
-      value
+      return_value = value
     else
-      encrypted_value
+      return_value = encrypted_value
+    end
+    
+    
+    if RUBY_VERSION >= "1.9" and not return_value.nil? and not options[:charset].nil? 
+      return_value.force_encoding(options[:charset])
+    else
+      return_value
     end
   end
 
