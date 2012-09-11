@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 require File.expand_path('../test_helper', __FILE__)
 
 ActiveRecord::Base.establish_connection :adapter => 'sqlite3', :database => ':memory:'
@@ -49,6 +50,13 @@ class ActiveRecordTest < Test::Unit::TestCase
   def setup
     ActiveRecord::Base.connection.tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }
     create_people_table
+  end
+
+  def test_should_decrypt_with_correct_encoding
+    if defined?(Encoding)
+      @person = Person.create :email => 'test@example.com'
+      assert_equal 'UTF-8', Person.find(:first).email.encoding.name
+    end
   end
 
   def test_should_encrypt_email
