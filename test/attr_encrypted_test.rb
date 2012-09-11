@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 require File.expand_path('../test_helper', __FILE__)
 
 class SillyEncryptor
@@ -133,14 +134,20 @@ class AttrEncryptedTest < Test::Unit::TestCase
     assert_equal User.decrypt_with_encoding(encrypted), User.decrypt_without_encoding(encrypted.unpack('m').first)
   end
 
+  def test_should_decrypt_utf8_with_encoding
+    encrypted = User.encrypt_with_encoding("test\xC2\xA0utf-8\xC2\xA0text")
+    assert_equal "test\xC2\xA0utf-8\xC2\xA0text", User.decrypt_with_encoding(encrypted)
+    assert_equal User.decrypt_with_encoding(encrypted), User.decrypt_without_encoding(encrypted.unpack('m').first)
+  end
+
   def test_should_encrypt_with_custom_encoding
-    assert_equal User.encrypt_with_encoding('test'), [User.encrypt_without_encoding('test')].pack('m')
+    assert_equal User.encrypt_with_custom_encoding('test'), [User.encrypt_without_encoding('test')].pack('m')
   end
 
   def test_should_decrypt_with_custom_encoding
-    encrypted = User.encrypt_with_encoding('test')
-    assert_equal 'test', User.decrypt_with_encoding(encrypted)
-    assert_equal User.decrypt_with_encoding(encrypted), User.decrypt_without_encoding(encrypted.unpack('m').first)
+    encrypted = User.encrypt_with_custom_encoding('test')
+    assert_equal 'test', User.decrypt_with_custom_encoding(encrypted)
+    assert_equal User.decrypt_with_custom_encoding(encrypted), User.decrypt_without_encoding(encrypted.unpack('m').first)
   end
 
   def test_should_encrypt_with_marshaling
