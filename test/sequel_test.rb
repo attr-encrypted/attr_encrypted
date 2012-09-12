@@ -13,9 +13,9 @@ DB.create_table :humans do
   column :encrypted_credentials_salt, String
 end
 
-class Human < Sequel::Model(:humans)  
-  attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => 'some private key', :marshal => true
+class Human < Sequel::Model(:humans)
+  attr_encrypted :email, :key => SECRET_KEY
+  attr_encrypted :credentials, :key => SECRET_KEY, :marshal => true
 
   def after_initialize(attrs = {})
     self.credentials ||= { :username => 'example', :password => 'test' }
@@ -29,7 +29,7 @@ class SequelTest < Test::Unit::TestCase
   end
 
   def test_should_encrypt_email
-    require 'ruby-debug' 
+    require 'ruby-debug'
     @human = Human.new :email => 'test@example.com'
     assert @human.save
     assert_not_nil @human.encrypted_email
