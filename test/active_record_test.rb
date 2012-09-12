@@ -12,6 +12,9 @@ def create_people_table
         t.string   :encrypted_credentials
         t.string   :salt
       end
+      create_table :projects do |t|
+        t.string   :encrypted_name
+      end
     end
   end
 end
@@ -45,6 +48,10 @@ class PersonWithValidation < Person
   validates_uniqueness_of :encrypted_email
 end
 
+class Project < ActiveRecord::Base
+  attr_encryptor :name, :key => 'a secret key'
+end
+
 class ActiveRecordTest < Test::Unit::TestCase
 
   def setup
@@ -64,6 +71,12 @@ class ActiveRecordTest < Test::Unit::TestCase
     assert_not_nil @person.encrypted_email
     assert_not_equal @person.email, @person.encrypted_email
     assert_equal @person.email, Person.find(:first).email
+  end
+
+  def test_should_properly_detects_active_record_object_by_attribute_methods
+    @project = Project.create :name => 'test@example.com'
+    assert_not_nil Project.find(:first).name
+    assert_equal @project.name, Project.find(:first).name
   end
 
   def test_should_marshal_and_encrypt_credentials

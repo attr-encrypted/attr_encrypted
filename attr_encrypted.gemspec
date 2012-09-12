@@ -18,7 +18,6 @@ Gem::Specification.new do |s|
   s.email    = 'shuber@huberry.com'
   s.homepage = 'http://github.com/shuber/attr_encrypted'
 
-  s.has_rdoc = false
   s.rdoc_options = ['--line-numbers', '--inline-source', '--main', 'README.rdoc']
 
   s.require_paths = ['lib']
@@ -28,7 +27,9 @@ Gem::Specification.new do |s|
 
   s.add_dependency('encryptor', ['>= 1.1.1'])
   s.add_development_dependency('activerecord', ['>= 2.0.0'])
+  s.add_development_dependency('sqlite3-ruby', ['~> 1.3.3'])
   s.add_development_dependency('datamapper')
+  s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('mocha')
   s.add_development_dependency('sequel')
 end
