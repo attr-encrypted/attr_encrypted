@@ -113,4 +113,31 @@ class ActiveRecordTest < Test::Unit::TestCase
     assert !@person2.errors[:encrypted_email].empty? || @person2.errors.on(:encrypted_email)
   end
 
+  def test_should_create_dirty_attribute_methods
+    @person = Person.new
+    first_email = 'old@example.com'
+    second_email = "new@example.com"
+    assert @person.email_was == nil
+
+    @person.email = first_email
+    encrypted_first_email = @person.email
+    assert @person.email_was == nil
+    assert @person.email_change == [nil, encrypted_first_email]
+    assert @person.email_changed?
+
+    @person.save!
+    assert !@person.email_changed?
+
+    @person.email = first_email
+    assert @person.email_was == encrypted_first_email
+    assert @person.email_change == nil
+    assert !@person.email_changed?
+
+    @person.email = second_email
+    encrypted_second_email = @person.email
+    assert @person.email_was == encrypted_first_email
+    assert @person.email_change == [encrypted_first_email, encrypted_second_email]
+    assert @person.email_changed?
+  end
+
 end

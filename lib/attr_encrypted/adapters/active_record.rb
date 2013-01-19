@@ -16,7 +16,19 @@ if defined?(ActiveRecord::Base)
           def attr_encrypted(*attrs)
             define_attribute_methods rescue nil
             super
-            attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr| alias_method "#{attr}_before_type_cast", attr }
+            attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr|
+              alias_method "#{attr}_before_type_cast", attr 
+              encrypted_attr = encrypted_attributes[attr.to_sym][:attribute]
+              class_eval <<-EOS
+              def #{attr}_was
+                @#{attr}_was ||= #{encrypted_attr}_was ? decrypt(:#{attr}, #{encrypted_attr}_was) : nil
+              end
+              def #{attr}_change
+                [#{attr}_was, #{attr}] if #{attr}_changed?
+              end
+              EOS
+              alias_method "#{attr}_changed?", "#{encrypted_attr}_changed?"
+            }
           end
 
           # Allows you to use dynamic methods like <tt>find_by_email</tt> or <tt>scoped_by_email</tt> for 
