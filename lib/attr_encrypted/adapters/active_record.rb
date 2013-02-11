@@ -26,8 +26,10 @@ if defined?(ActiveRecord::Base)
               def #{attr}_change
                 [#{attr}_was, #{attr}] if #{attr}_changed?
               end
+              def #{attr}_changed?
+                #{encrypted_attr}_changed?
+              end
               EOS
-              alias_method "#{attr}_changed?", "#{encrypted_attr}_changed?"
             }
           end
 
