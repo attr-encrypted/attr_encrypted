@@ -303,6 +303,10 @@ module AttrEncrypted
   end
 end
 
-Object.extend AttrEncrypted
+# I say this super rarely, but the following line is really, really dumb. Also ugly.
+# Please figure out another way to make this work. Polluting every Ruby object everywhere with these methods
+# is super bad and leads to really weird shit happening, not to mention that every single missing method error
+# now says it's coming from "method_missing in lib/attr_encrypted.rb".
+# Object.extend AttrEncrypted
 
 Dir[File.join(File.dirname(__FILE__), 'attr_encrypted', 'adapters', '*.rb')].each { |adapter| require adapter }
