@@ -2,6 +2,12 @@ require File.expand_path('../test_helper', __FILE__)
 
 DB = Sequel.sqlite
 
+# The :after_initialize hook was removed in Sequel 4.0
+# and had been deprecated for a while before that:
+# http://sequel.rubyforge.org/rdoc-plugins/classes/Sequel/Plugins/AfterInitialize.html
+# This plugin re-enables it.
+Sequel::Model.plugin :after_initialize
+
 DB.create_table :humans do
   primary_key :id
   column :encrypted_email, :string
