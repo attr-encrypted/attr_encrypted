@@ -30,5 +30,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency('activerecord', ['>= 2.0.0'])
   s.add_development_dependency('datamapper')
   s.add_development_dependency('mocha')
-  s.add_development_dependency('sequel')
+  s.add_development_dependency('sequel', ['>= 4.0.0'])
+  s.add_development_dependency('dm-sqlite-adapter')
+  s.add_development_dependency('sqlite3')
 end
+
