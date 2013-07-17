@@ -29,7 +29,6 @@ class SequelTest < Test::Unit::TestCase
   end
 
   def test_should_encrypt_email
-    require 'ruby-debug'
     @human = Human.new :email => 'test@example.com'
     assert @human.save
     assert_not_nil @human.encrypted_email
@@ -39,7 +38,7 @@ class SequelTest < Test::Unit::TestCase
 
   def test_should_marshal_and_encrypt_credentials
 
-    @human = Human.new
+    @human = Human.new :credentials => { :username => 'example', :password => 'test' }
     assert @human.save
     assert_not_nil @human.encrypted_credentials
     assert_not_equal @human.credentials, @human.encrypted_credentials

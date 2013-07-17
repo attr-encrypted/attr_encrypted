@@ -167,7 +167,8 @@ class AttrEncryptorTest < Test::Unit::TestCase
     assert_nil @user.ssn_encrypted
     @user.ssn = 'testing'
     assert_not_nil @user.ssn_encrypted
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.ssn_encrypted_iv.unpack("m").first, :salt => Time.now.to_i.to_s), @user.ssn_encrypted
+    encrypted =  Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.ssn_encrypted_iv.unpack("m").first, :salt => @user.ssn_encrypted_salt )
+    assert_equal encrypted, @user.ssn_encrypted
   end
 
   def test_should_evaluate_a_key_passed_as_a_proc
@@ -175,7 +176,8 @@ class AttrEncryptorTest < Test::Unit::TestCase
     assert_nil @user.crypted_password_test
     @user.password = 'testing'
     assert_not_nil @user.crypted_password_test
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.crypted_password_test_iv.unpack("m").first, :salt => Time.now.to_i.to_s), @user.crypted_password_test
+    encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.crypted_password_test_iv.unpack("m").first, :salt =>  @user.crypted_password_test_salt)
+    assert_equal encrypted, @user.crypted_password_test
   end
 
   def test_should_use_options_found_in_the_attr_encrypted_options_attribute
@@ -183,7 +185,8 @@ class AttrEncryptorTest < Test::Unit::TestCase
     assert_nil @user.crypted_password_test
     @user.password = 'testing'
     assert_not_nil @user.crypted_password_test
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.crypted_password_test_iv.unpack("m").first, :salt => Time.now.to_i.to_s), @user.crypted_password_test
+    encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.crypted_password_test_iv.unpack("m").first, :salt => @user.crypted_password_test_salt)
+    assert_equal encrypted, @user.crypted_password_test
   end
 
   def test_should_inherit_encrypted_attributes
@@ -225,7 +228,8 @@ class AttrEncryptorTest < Test::Unit::TestCase
     assert_nil @user.encrypted_with_true_if
     @user.with_true_if = 'testing'
     assert_not_nil @user.encrypted_with_true_if
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.encrypted_with_true_if_iv.unpack("m").first, :salt => Time.now.to_i.to_s), @user.encrypted_with_true_if
+    encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.encrypted_with_true_if_iv.unpack("m").first, :salt => @user.encrypted_with_true_if_salt)
+    assert_equal encrypted, @user.encrypted_with_true_if
   end
 
   def test_should_not_encrypt_with_false_if
@@ -241,7 +245,8 @@ class AttrEncryptorTest < Test::Unit::TestCase
     assert_nil @user.encrypted_with_false_unless
     @user.with_false_unless = 'testing'
     assert_not_nil @user.encrypted_with_false_unless
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.encrypted_with_false_unless_iv.unpack("m").first, :salt => Time.now.to_i.to_s,), @user.encrypted_with_false_unless
+    encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.encrypted_with_false_unless_iv.unpack("m").first, :salt => @user.encrypted_with_false_unless_salt)
+    assert_equal encrypted,  @user.encrypted_with_false_unless
   end
 
   def test_should_not_encrypt_with_true_unless
