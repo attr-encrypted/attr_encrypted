@@ -30,8 +30,8 @@ create_tables
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
 
 class Person < ActiveRecord::Base
-  attr_encrypted :email, :key => "secret"
-  attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => 'secret_key') }, :marshal => true
+  attr_encrypted :email, :key => SECRET_KEY
+  attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => SECRET_KEY) }, :marshal => true
 
 
   after_initialize :initialize_salt_and_credentials
@@ -39,7 +39,7 @@ class Person < ActiveRecord::Base
   protected
 
   def initialize_salt_and_credentials
-    self.salt ||= Digest::SHA256.hexdigest((Time.now.to_i * rand(5)).to_s)
+    self.salt ||= Digest::SHA256.hexdigest((Time.now.to_i * rand(1000)).to_s)[0..15]
     self.credentials ||= { :username => 'example', :password => 'test' }
   end
 end
@@ -58,43 +58,42 @@ class ActiveRecordTest < Test::Unit::TestCase
   def setup
     ActiveRecord::Base.connection.tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }
     create_tables
-    Account.create!(:key => "secret", :password => "password")
+    Account.create!(:key => SECRET_KEY, :password => "password")
   end
 
-  def _test_should_encrypt_email
+  def test_should_encrypt_email
     @person = Person.create :email => 'test@example.com'
     assert_not_nil @person.encrypted_email
     assert_not_equal @person.email, @person.encrypted_email
     assert_equal @person.email, Person.find(:first).email
   end
 
-  def _test_should_marshal_and_encrypt_credentials
+  def test_should_marshal_and_encrypt_credentials
     @person = Person.create
     assert_not_nil @person.encrypted_credentials
     assert_not_equal @person.credentials, @person.encrypted_credentials
     assert_equal @person.credentials, Person.find(:first).credentials
   end
 
-  def _test_should_encode_by_default
+  def test_should_encode_by_default
     assert Person.attr_encrypted_options[:encode]
   end
 
-  def _test_should_validate_presence_of_email
+  def test_should_validate_presence_of_email
     @person = PersonWithValidation.new
     assert !@person.valid?
     assert !@person.errors[:email].empty? || @person.errors.on(:email)
   end
 
-  def _test_should_encrypt_decrypt_with_iv
+  def test_should_encrypt_decrypt_with_iv
     @person = Person.create :email => 'test@example.com'
     @person2 = Person.find(@person.id)
     assert_not_nil @person2.encrypted_email_iv
     assert_equal 'test@example.com', @person2.email
   end
-  
-  def _test_should_create_an_account_regardless_of_arguments_order
-    Account.create!(:key => "secret", :password => "password")
-    Account.create!(:password => "password" , :key => "secret")
-  end
 
+  def _test_should_create_an_account_regardless_of_arguments_order
+    Account.create!(:key => SECRET_KEY, :password => "password")
+    Account.create!(:password => "password" , :key => SECRET_KEY)
+  end
 end
