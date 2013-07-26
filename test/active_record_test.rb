@@ -1,62 +1,64 @@
-# -*- encoding: utf-8 -*-
 require File.expand_path('../test_helper', __FILE__)
 
 ActiveRecord::Base.establish_connection :adapter => 'sqlite3', :database => ':memory:'
 
-def create_people_table
+def create_tables
   silence_stream(STDOUT) do
     ActiveRecord::Schema.define(:version => 1) do
       create_table :people do |t|
         t.string   :encrypted_email
         t.string   :password
         t.string   :encrypted_credentials
-        t.string   :salt
+        t.binary   :salt
+         t.string   :encrypted_email_salt
+        t.string   :encrypted_credentials_salt
+        t.string   :encrypted_email_iv
+        t.string   :encrypted_credentials_iv
+      end
+      create_table :accounts do |t|
+        t.string :encrypted_password
+        t.string :encrypted_password_iv
+        t.string :encrypted_password_salt
       end
     end
   end
 end
 
 # The table needs to exist before defining the class
-create_people_table
+create_tables
 
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
 
 class Person < ActiveRecord::Base
-  attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => 'some private key') }, :marshal => true
+  attr_encrypted :email, :key => SECRET_KEY
+  attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => SECRET_KEY) }, :marshal => true
 
-  ActiveSupport::Deprecation.silenced = true
-  def after_initialize; end
-  ActiveSupport::Deprecation.silenced = false
 
   after_initialize :initialize_salt_and_credentials
 
   protected
 
-    def initialize_salt_and_credentials
-      self.salt ||= Digest::SHA256.hexdigest((Time.now.to_i * rand(5)).to_s)
-      self.credentials ||= { :username => 'example', :password => 'test' }
-    rescue ActiveRecord::MissingAttributeError
-    end
+  def initialize_salt_and_credentials
+    self.salt ||= Digest::SHA256.hexdigest((Time.now.to_i * rand(1000)).to_s)[0..15]
+    self.credentials ||= { :username => 'example', :password => 'test' }
+  end
 end
 
 class PersonWithValidation < Person
   validates_presence_of :email
-  validates_uniqueness_of :encrypted_email
+end
+
+class Account < ActiveRecord::Base
+  attr_accessor :key
+  attr_encrypted :password, :key => Proc.new {|account| account.key}
 end
 
 class ActiveRecordTest < Test::Unit::TestCase
 
   def setup
     ActiveRecord::Base.connection.tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }
-    create_people_table
-  end
-
-  def test_should_decrypt_with_correct_encoding
-    if defined?(Encoding)
-      @person = Person.create :email => 'test@example.com'
-      assert_equal 'UTF-8', Person.find(:first).email.encoding.name
-    end
+    create_tables
+    Account.create!(:key => SECRET_KEY, :password => "password")
   end
 
   def test_should_encrypt_email
@@ -73,28 +75,6 @@ class ActiveRecordTest < Test::Unit::TestCase
     assert_equal @person.credentials, Person.find(:first).credentials
   end
 
-  def test_should_find_by_email
-    @person = Person.create(:email => 'test@example.com')
-    assert_equal @person, Person.find_by_email('test@example.com')
-  end
-
-  def test_should_find_by_email_and_password
-    Person.create(:email => 'test@example.com', :password => 'invalid')
-    @person = Person.create(:email => 'test@example.com', :password => 'test')
-    assert_equal @person, Person.find_by_email_and_password('test@example.com', 'test')
-  end
-
-  def test_should_scope_by_email
-    @person = Person.create(:email => 'test@example.com')
-    assert_equal @person, Person.scoped_by_email('test@example.com').find(:first) rescue NoMethodError
-  end
-
-  def test_should_scope_by_email_and_password
-    Person.create(:email => 'test@example.com', :password => 'invalid')
-    @person = Person.create(:email => 'test@example.com', :password => 'test')
-    assert_equal @person, Person.scoped_by_email_and_password('test@example.com', 'test').find(:first) rescue NoMethodError
-  end
-
   def test_should_encode_by_default
     assert Person.attr_encrypted_options[:encode]
   end
@@ -105,12 +85,15 @@ class ActiveRecordTest < Test::Unit::TestCase
     assert !@person.errors[:email].empty? || @person.errors.on(:email)
   end
 
-  def test_should_validate_uniqueness_of_email
-    @person = PersonWithValidation.new :email => 'test@example.com'
-    assert @person.save
-    @person2 = PersonWithValidation.new :email => @person.email
-    assert !@person2.valid?
-    assert !@person2.errors[:encrypted_email].empty? || @person2.errors.on(:encrypted_email)
+  def test_should_encrypt_decrypt_with_iv
+    @person = Person.create :email => 'test@example.com'
+    @person2 = Person.find(@person.id)
+    assert_not_nil @person2.encrypted_email_iv
+    assert_equal 'test@example.com', @person2.email
   end
 
+  def _test_should_create_an_account_regardless_of_arguments_order
+    Account.create!(:key => SECRET_KEY, :password => "password")
+    Account.create!(:password => "password" , :key => SECRET_KEY)
+  end
 end
