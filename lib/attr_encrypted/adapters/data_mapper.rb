@@ -1,5 +1,5 @@
 if defined?(DataMapper)
-  module AttrEncryptor
+  module AttrEncrypted
     module Adapters
       module DataMapper
         def self.extended(base) # :nodoc:
@@ -17,5 +17,5 @@ if defined?(DataMapper)
     end
   end
 
-  DataMapper::Resource.extend AttrEncryptor::Adapters::DataMapper
+  DataMapper::Resource.extend AttrEncrypted::Adapters::DataMapper
 end

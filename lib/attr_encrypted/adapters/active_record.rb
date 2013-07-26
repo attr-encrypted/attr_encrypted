@@ -1,5 +1,5 @@
 if defined?(ActiveRecord::Base)
-  module AttrEncryptor
+  module AttrEncrypted
     module Adapters
       module ActiveRecord
         def self.extended(base) # :nodoc:
@@ -28,5 +28,5 @@ if defined?(ActiveRecord::Base)
     end
   end
 
-  ActiveRecord::Base.extend AttrEncryptor::Adapters::ActiveRecord
+  ActiveRecord::Base.extend AttrEncrypted::Adapters::ActiveRecord
 end

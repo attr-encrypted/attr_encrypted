@@ -1,5 +1,5 @@
 if defined?(Sequel)
-  module AttrEncryptor
+  module AttrEncrypted
     module Adapters
       module Sequel
         def self.extended(base) # :nodoc:
@@ -9,6 +9,6 @@ if defined?(Sequel)
     end
   end
 
-  Sequel::Model.extend AttrEncryptor::Adapters::Sequel
+  Sequel::Model.extend AttrEncrypted::Adapters::Sequel
 
 end

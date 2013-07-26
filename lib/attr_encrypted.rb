@@ -2,7 +2,7 @@ require 'encryptor'
 require 'openssl'
 
 # Adds attr_accessors that encrypt and decrypt an object's attributes
-module AttrEncryptor
+module AttrEncrypted
   autoload :Version, 'attr_encryptor/version'
 
   def self.extended(base) # :nodoc:
@@ -346,6 +346,6 @@ module AttrEncryptor
   end
 end
 
-Object.extend AttrEncryptor
+Object.extend AttrEncrypted
 
-Dir[File.join(File.dirname(__FILE__), 'attr_encryptor', 'adapters', '*.rb')].each { |adapter| require adapter }
+Dir[File.join(File.dirname(__FILE__), 'attr_encrypted', 'adapters', '*.rb')].each { |adapter| require adapter }
