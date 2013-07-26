@@ -9,6 +9,8 @@ DB.create_table :legacy_humans do
 end
 
 class LegacyHuman < Sequel::Model(:legacy_humans)  
+  self.attr_encrypted_options[:mode] = :single_iv_and_salt
+
   attr_encrypted :email, :key => 'a secret key'
   attr_encrypted :credentials, :key => Proc.new { |human| Encryptor.encrypt(:value => human.salt, :key => 'some private key') }, :marshal => true
 

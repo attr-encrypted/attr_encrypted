@@ -21,3 +21,5 @@ DB = Sequel.sqlite
 # This plugin re-enables it.
 Sequel::Model.plugin :after_initialize
 
+SECRET_KEY = 4.times.map { Digest::SHA256.hexdigest((Time.now.to_i * rand(5)).to_s) }.join
+

@@ -22,6 +22,7 @@ create_legacy_people_table
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
 
 class LegacyPerson < ActiveRecord::Base
+  self.attr_encrypted_options[:mode] = :single_iv_and_salt
   attr_encrypted :email, :key => 'a secret key'
   attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => 'some private key') }, :marshal => true
 
