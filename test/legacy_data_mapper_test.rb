@@ -2,7 +2,7 @@ require File.expand_path('../test_helper', __FILE__)
 
 DataMapper.setup(:default, 'sqlite3::memory:')
 
-class Client
+class LegacyClient
   include DataMapper::Resource
 
   property :id, Serial
@@ -22,31 +22,31 @@ end
 
 DataMapper.auto_migrate!
 
-class DataMapperTest < Test::Unit::TestCase
+class LegacyDataMapperTest < Test::Unit::TestCase
 
   def setup
-    Client.all.each(&:destroy)
+    LegacyClient.all.each(&:destroy)
   end
 
   def test_should_encrypt_email
-    @client = Client.new :email => 'test@example.com'
+    @client = LegacyClient.new :email => 'test@example.com'
     assert @client.save
     assert_not_nil @client.encrypted_email
     assert_not_equal @client.email, @client.encrypted_email
-    assert_equal @client.email, Client.first.email
+    assert_equal @client.email, LegacyClient.first.email
   end
 
   def test_should_marshal_and_encrypt_credentials
-    @client = Client.new
+    @client = LegacyClient.new
     assert @client.save
     assert_not_nil @client.encrypted_credentials
     assert_not_equal @client.credentials, @client.encrypted_credentials
-    assert_equal @client.credentials, Client.first.credentials
-    assert Client.first.credentials.is_a?(Hash)
+    assert_equal @client.credentials, LegacyClient.first.credentials
+    assert LegacyClient.first.credentials.is_a?(Hash)
   end
 
   def test_should_encode_by_default
-    assert Client.attr_encrypted_options[:encode]
+    assert LegacyClient.attr_encrypted_options[:encode]
   end
 
 end
