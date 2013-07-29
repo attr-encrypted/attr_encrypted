@@ -14,6 +14,8 @@ class Client
   property :encrypted_credentials_iv, Text
   property :encrypted_credentials_salt, Text
 
+  self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
+
   attr_encrypted :email, :key => SECRET_KEY
   attr_encrypted :credentials, :key => SECRET_KEY, :marshal => true
 

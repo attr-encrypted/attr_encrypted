@@ -12,6 +12,8 @@ DB.create_table :humans do
 end
 
 class Human < Sequel::Model(:humans)
+  self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
+
   attr_encrypted :email, :key => SECRET_KEY
   attr_encrypted :credentials, :key => SECRET_KEY, :marshal => true
 

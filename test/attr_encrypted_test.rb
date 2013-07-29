@@ -13,6 +13,7 @@ end
 
 class User
   self.attr_encrypted_options[:key] = Proc.new { |user| SECRET_KEY } # default key
+  self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
 
   attr_encrypted :email, :without_encoding, :key => SECRET_KEY
   attr_encrypted :password, :prefix => 'crypted_', :suffix => '_test'

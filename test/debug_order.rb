@@ -25,6 +25,8 @@ create_tables
 require 'ruby-debug'
 require 'pry'
 class Account < ActiveRecord::Base
+  self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
+
   attr_accessor :key
   attr_encrypted :password, :key => Proc.new {|account| binding.pry}
 end
