@@ -12,3 +12,12 @@ $:.unshift(File.dirname(__FILE__))
 require 'attr_encrypted'
 
 puts "\nTesting with ActiveRecord #{ActiveRecord::VERSION::STRING rescue ENV['ACTIVE_RECORD_VERSION']}"
+
+DB = Sequel.sqlite
+
+# The :after_initialize hook was removed in Sequel 4.0
+# and had been deprecated for a while before that:
+# http://sequel.rubyforge.org/rdoc-plugins/classes/Sequel/Plugins/AfterInitialize.html
+# This plugin re-enables it.
+Sequel::Model.plugin :after_initialize
+
