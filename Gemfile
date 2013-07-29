@@ -1,4 +1,7 @@
 source "http://rubygems.org"
+
+gem 'encryptor', :git => 'https://github.com/shuber/encryptor'
+
 gemspec
 
 # Lock to "rake" version 0.9.2.2 in order to use deprecated "rake/rdoctask".
