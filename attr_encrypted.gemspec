@@ -27,7 +27,11 @@ Gem::Specification.new do |s|
   s.test_files = Dir['test/**/*']
 
   s.add_dependency('encryptor', ['>= 1.1.1'])
-  s.add_development_dependency('activerecord', ['>= 2.0.0'])
+  if RUBY_VERSION < '1.9.3'
+    s.add_development_dependency('activerecord', ['>= 2.0.0'], ['< 4.0.0'])
+  else
+    s.add_development_dependency('activerecord', ['>= 2.0.0'])
+  end
   s.add_development_dependency('datamapper')
   s.add_development_dependency('mocha')
   s.add_development_dependency('sequel')
