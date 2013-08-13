@@ -45,6 +45,12 @@ class PersonWithValidation < Person
   validates_uniqueness_of :encrypted_email
 end
 
+class PersonWithSerialization < ActiveRecord::Base
+  self.table_name = 'people'
+  attr_encrypted :email, :key => 'a secret key'
+  serialize :password
+end
+
 class ActiveRecordTest < Test::Unit::TestCase
 
   def setup
@@ -111,6 +117,12 @@ class ActiveRecordTest < Test::Unit::TestCase
     @person2 = PersonWithValidation.new :email => @person.email
     assert !@person2.valid?
     assert !@person2.errors[:encrypted_email].empty? || @person2.errors.on(:encrypted_email)
+  end
+
+  def test_should_ensure_attributes_can_be_deserialized
+    @person = PersonWithSerialization.new :email => 'test@example.com', :password => %w(an array of strings)
+    @person.save
+    assert_equal @person.password, %w(an array of strings)
   end
 
 end
