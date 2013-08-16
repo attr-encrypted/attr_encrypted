@@ -38,4 +38,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency('sqlite3')
   s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('rake', '0.9.2.2')
+  if RUBY_VERSION < '1.9.3'
+    s.add_development_dependency('mongoid', ['~> 2.7.0'])
+  else
+    s.add_development_dependency('mongoid', ['~> 3.0'])
+  end
+  s.add_development_dependency('bson_ext')
 end
