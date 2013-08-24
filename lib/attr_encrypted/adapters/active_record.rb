@@ -16,6 +16,7 @@ if defined?(ActiveRecord::Base)
           def attr_encrypted(*attrs)
             define_attribute_methods rescue nil
             super
+            undefine_attribute_methods
             attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr| alias_method "#{attr}_before_type_cast", attr }
           end
 
