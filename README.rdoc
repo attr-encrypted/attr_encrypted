@@ -287,9 +287,11 @@ The call to <tt>find_by_email_and_password</tt> is intercepted and modified to <
 NOTE: This only works if all records are encrypted with the same encryption key (per attribute).
 
 
-=== DataMapper and Sequel
+=== DataMapper, Sequel, and Mongoid
 
 Just like the default options for <tt>ActiveRecord</tt>, the <tt>:encode</tt> option is set to true by default since you'll be storing everything in a database.
+
+NOTE: If you are using Mongoid make sure you have defined your encrypted attributes using 'field' before your call to attr_encrypted.
 
 
 == Note on Patches/Pull Requests
