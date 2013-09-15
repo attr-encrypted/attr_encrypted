@@ -1,21 +1,23 @@
 require File.expand_path('../test_helper', __FILE__)
 
-DB = Sequel.sqlite
-
 DB.create_table :humans do
   primary_key :id
   column :encrypted_email, :string
+  column :encrypted_email_salt, String
+  column :encrypted_email_iv, :string
   column :password, :string
   column :encrypted_credentials, :string
-  column :salt, :string
+  column :encrypted_credentials_iv, :string
+  column :encrypted_credentials_salt, String
 end
 
-class Human < Sequel::Model(:humans)  
-  attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |human| Encryptor.encrypt(:value => human.salt, :key => 'some private key') }, :marshal => true
+class Human < Sequel::Model(:humans)
+  self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
+
+  attr_encrypted :email, :key => SECRET_KEY
+  attr_encrypted :credentials, :key => SECRET_KEY, :marshal => true
 
   def after_initialize(attrs = {})
-    self.salt ||= Digest::SHA1.hexdigest((Time.now.to_i * rand(5)).to_s)
     self.credentials ||= { :username => 'example', :password => 'test' }
   end
 end
@@ -35,7 +37,8 @@ class SequelTest < Test::Unit::TestCase
   end
 
   def test_should_marshal_and_encrypt_credentials
-    @human = Human.new
+
+    @human = Human.new :credentials => { :username => 'example', :password => 'test' }
     assert @human.save
     assert_not_nil @human.encrypted_credentials
     assert_not_equal @human.credentials, @human.encrypted_credentials
