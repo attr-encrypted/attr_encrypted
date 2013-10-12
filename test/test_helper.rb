@@ -6,8 +6,8 @@ SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
   SimpleCov::Formatter::RcovFormatter,
 ]
 
-SimpleCov.start 'rails' do
-  add_filter 'vendor' # Don't include vendored stuff
+SimpleCov.start do
+  add_filter 'test'
 end
 
 require 'test/unit'
