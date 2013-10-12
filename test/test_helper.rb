@@ -1,3 +1,15 @@
+require 'simplecov'
+require 'simplecov-rcov'
+
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+  SimpleCov::Formatter::HTMLFormatter,
+  SimpleCov::Formatter::RcovFormatter,
+]
+
+SimpleCov.start 'rails' do
+  add_filter 'vendor' # Don't include vendored stuff
+end
+
 require 'test/unit'
 require 'digest/sha2'
 require 'rubygems'
