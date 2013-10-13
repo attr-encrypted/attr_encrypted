@@ -2,9 +2,6 @@ require 'rake'
 require 'rake/testtask'
 require 'rake/rdoctask'
 
-desc 'Default: run unit tests.'
-task :default => :test
-
 desc 'Test the attr_encrypted gem.'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
@@ -19,4 +16,18 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.options << '--line-numbers' << '--inline-source'
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
+if RUBY_VERSION < '1.9.3'
+  require 'rcov/rcovtask'
+
+  task :rcov do
+    system "rcov -o coverage/rcov --exclude '^(?!lib)' " + FileList[ 'test/**/*_test.rb' ].join(' ')
+  end
+
+  desc 'Default: run unit tests under rcov.'
+  task :default => :rcov
+else
+  desc 'Default: run unit tests.'
+  task :default => :test
 end
