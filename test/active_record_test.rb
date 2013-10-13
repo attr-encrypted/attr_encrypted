@@ -105,7 +105,7 @@ class ActiveRecordTest < Test::Unit::TestCase
     assert_equal @person.password, %w(an array of strings)
   end
 
-  def _test_should_create_an_account_regardless_of_arguments_order
+  def test_should_create_an_account_regardless_of_arguments_order
     Account.create!(:key => SECRET_KEY, :password => "password")
     Account.create!(:password => "password" , :key => SECRET_KEY)
   end
