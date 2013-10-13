@@ -6,6 +6,14 @@ if defined?(ActiveRecord::Base)
           base.class_eval do
             attr_encrypted_options[:encode] = true
             class << self; alias_method_chain :method_missing, :attr_encrypted; end
+
+            def assign_attributes_with_attr_encrypted(*args)
+              attributes = args.shift
+              encrypted_attributes = self.class.encrypted_attributes.keys
+              assign_attributes_without_attr_encrypted attributes.except(*encrypted_attributes), *args
+              assign_attributes_without_attr_encrypted attributes.slice(*encrypted_attributes), *args
+            end
+            alias_method_chain :assign_attributes, :attr_encrypted
           end
         end
 
