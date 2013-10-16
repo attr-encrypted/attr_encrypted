@@ -14,9 +14,9 @@ Gem::Specification.new do |s|
   s.summary     = 'Encrypt and decrypt attributes'
   s.description = 'Generates attr_accessors that encrypt and decrypt attributes transparently'
 
-  s.author   = 'Sean Huber'
-  s.email    = 'shuber@huberry.com'
-  s.homepage = 'http://github.com/shuber/attr_encrypted'
+  s.authors   = ['Sean Huber', 'S. Brent Faulkner', 'William Monk']
+  s.email    = ['shuber@huberry.com', 'sbfaulkner@gmail.com', 'billy.monk@gmail.com']
+  s.homepage = 'http://github.com/attr_encrypted/attr_encrypted'
 
   s.has_rdoc = false
   s.rdoc_options = ['--line-numbers', '--inline-source', '--main', 'README.rdoc']
