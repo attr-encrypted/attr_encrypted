@@ -109,4 +109,33 @@ class ActiveRecordTest < Test::Unit::TestCase
     Account.create!(:key => SECRET_KEY, :password => "password")
     Account.create!(:password => "password" , :key => SECRET_KEY)
   end
+
+  def test_should_create_dirty_attribute_methods
+    first_email = 'first@example.com'
+    second_email = "second@example.com"
+    third_email = "third@example.com"
+    @person = Person.new
+
+    assert_nil @person.email_was
+    assert !@person.email_changed?
+
+    @person.email = first_email
+    assert_nil @person.email_was
+    assert_equal @person.email_change, [nil, first_email]
+    assert @person.email_changed?
+
+    @person.email = second_email
+    assert_nil @person.email_was
+    assert_equal @person.email_change, [nil, second_email]
+    assert @person.email_changed?
+
+    @person.save!
+
+    assert !@person.email_changed?
+
+    @person.email = third_email
+    assert_equal @person.email_was, second_email
+    assert_equal @person.email_change, [second_email, third_email]
+    assert @person.email_changed?
+  end
 end

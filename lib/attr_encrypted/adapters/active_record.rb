@@ -25,7 +25,22 @@ if defined?(ActiveRecord::Base)
             define_attribute_methods rescue nil
             super
             undefine_attribute_methods
-            attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr| alias_method "#{attr}_before_type_cast", attr }
+            attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr|
+              alias_method "#{attr}_before_type_cast", attr
+              # Simulate ActiveRecord dirty methods
+              encrypted_attr = encrypted_attributes[attr.to_sym][:attribute]
+              class_eval <<-EOS
+              def #{attr}_was
+                #{encrypted_attr}_was.nil? ? nil : decrypt(:#{attr}, #{encrypted_attr}_was)
+              end
+              def #{attr}_change
+                [#{attr}_was, __send__(:#{attr})] if #{encrypted_attr}_changed?
+              end
+              def #{attr}_changed?
+                #{encrypted_attr}_changed?
+              end
+              EOS
+            }
           end
 
           # Allows you to use dynamic methods like <tt>find_by_email</tt> or <tt>scoped_by_email</tt> for 
