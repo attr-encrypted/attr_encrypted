@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
 
   s.authors   = ['Sean Huber', 'S. Brent Faulkner', 'William Monk']
   s.email    = ['shuber@huberry.com', 'sbfaulkner@gmail.com', 'billy.monk@gmail.com']
-  s.homepage = 'http://github.com/attr_encrypted/attr_encrypted'
+  s.homepage = 'http://github.com/attr-encrypted/attr_encrypted'
 
   s.has_rdoc = false
   s.rdoc_options = ['--line-numbers', '--inline-source', '--main', 'README.rdoc']
