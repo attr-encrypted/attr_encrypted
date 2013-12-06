@@ -9,3 +9,4 @@ gemspec
 # and allow our dependencies to "float" to the latest version of "rake".
 gem 'rake', '0.9.2.2'
 
+gem 'activerecord', ENV['ACTIVERECORD']
