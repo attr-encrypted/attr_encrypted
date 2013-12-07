@@ -9,4 +9,5 @@ gemspec
 # and allow our dependencies to "float" to the latest version of "rake".
 gem 'rake', '0.9.2.2'
 
-gem 'activerecord', ENV['ACTIVERECORD'] && "~> #{ENV['ACTIVERECORD']}"
+# support for testing with specific active record version
+gem 'activerecord', "~> #{ENV['ACTIVERECORD']}" if ENV['ACTIVERECORD']
