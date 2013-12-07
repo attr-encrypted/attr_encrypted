@@ -5,15 +5,30 @@ if defined?(ActiveRecord::Base)
         def self.extended(base) # :nodoc:
           base.class_eval do
             attr_encrypted_options[:encode] = true
-            class << self; alias_method_chain :method_missing, :attr_encrypted; end
-
-            def assign_attributes_with_attr_encrypted(*args)
-              attributes = args.shift
-              encrypted_attributes = self.class.encrypted_attributes.keys
-              assign_attributes_without_attr_encrypted attributes.except(*encrypted_attributes), *args
-              assign_attributes_without_attr_encrypted attributes.slice(*encrypted_attributes), *args
+            class << self
+              alias_method_chain :method_missing, :attr_encrypted
+              if ::ActiveRecord::VERSION::STRING < "3"
+                alias_method :undefine_attribute_methods, :reset_column_information
+              end
             end
-            alias_method_chain :assign_attributes, :attr_encrypted
+
+            if defined?(assign_attributes)
+              def assign_attributes_with_attr_encrypted(*args)
+                attributes = args.shift.symbolize_keys
+                encrypted_attributes = self.class.encrypted_attributes.keys
+                assign_attributes_without_attr_encrypted attributes.except(*encrypted_attributes), *args
+                assign_attributes_without_attr_encrypted attributes.slice(*encrypted_attributes), *args
+              end
+              alias_method_chain :assign_attributes, :attr_encrypted
+            else
+              def attributes_with_attr_encrypted=(attributes)
+                attributes = attributes.symbolize_keys
+                encrypted_attributes = self.class.encrypted_attributes.keys
+                self.attributes_without_attr_encrypted = attributes.except(*encrypted_attributes)
+                self.attributes_without_attr_encrypted = attributes.slice(*encrypted_attributes)
+              end
+              alias_method_chain :attributes=, :attr_encrypted
+            end
           end
         end
 

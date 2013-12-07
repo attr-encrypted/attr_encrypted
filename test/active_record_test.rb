@@ -34,8 +34,13 @@ class Person < ActiveRecord::Base
   attr_encrypted :email, :key => SECRET_KEY
   attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => SECRET_KEY) }, :marshal => true
 
-
-  after_initialize :initialize_salt_and_credentials
+  if ActiveRecord::VERSION::STRING < "3"
+    def after_initialize
+      initialize_salt_and_credentials
+    end
+  else
+    after_initialize :initialize_salt_and_credentials
+  end
 
   protected
 
