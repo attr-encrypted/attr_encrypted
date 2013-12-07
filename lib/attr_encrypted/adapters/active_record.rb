@@ -12,7 +12,7 @@ if defined?(ActiveRecord::Base)
               end
             end
 
-            if defined?(assign_attributes)
+            if ::ActiveRecord::VERSION::STRING < "3.0" || ::ActiveRecord::VERSION::STRING > "3.1"
               def assign_attributes_with_attr_encrypted(*args)
                 attributes = args.shift.symbolize_keys
                 encrypted_attributes = self.class.encrypted_attributes.keys
