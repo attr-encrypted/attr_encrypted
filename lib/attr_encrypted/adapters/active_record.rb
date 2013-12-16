@@ -2,6 +2,9 @@ if defined?(ActiveRecord::Base)
   module AttrEncrypted
     module Adapters
       module ActiveRecord
+        # Allows AR to infer the proper type for the column
+        AttrEncryptedReflection = Struct.new(:klass)
+
         def self.extended(base) # :nodoc:
           base.class_eval do
 
@@ -19,13 +22,17 @@ if defined?(ActiveRecord::Base)
 
             class << self
               alias_method_chain :method_missing, :attr_encrypted
+              alias_method_chain :reflect_on_aggregation, :attr_encrypted
+              if public_method_defined?(:type_for_attribute)
+                alias_method_chain :type_for_attribute, :attr_encrypted
+              end
             end
 
             def perform_attribute_assignment(method, new_attributes, *args)
               return if new_attributes.blank?
 
-              send method, new_attributes.reject { |k, _|  self.class.encrypted_attributes.key?(k.to_sym) }, *args
-              send method, new_attributes.reject { |k, _| !self.class.encrypted_attributes.key?(k.to_sym) }, *args
+              public_send method, new_attributes.reject { |k, _|  self.class.encrypted_attributes.key?(k.to_sym) }, *args
+              public_send method, new_attributes.reject { |k, _| !self.class.encrypted_attributes.key?(k.to_sym) }, *args
             end
             private :perform_attribute_assignment
 
@@ -43,32 +50,47 @@ if defined?(ActiveRecord::Base)
           end
         end
 
+        # Saves the attr class wrappers, so AR can infer the correct type later
+        def attr_encrypted_reflections
+          @attr_encrypted_reflections ||= {}
+        end
+
         protected
 
           # <tt>attr_encrypted</tt> method
           def attr_encrypted(*attrs)
             super
             options = attrs.extract_options!
-            attr = attrs.pop
-            options.merge! encrypted_attributes[attr]
 
-            define_method("#{attr}_changed?") do
-              if send("#{options[:attribute]}_changed?")
-                send(attr) != send("#{attr}_was")
+            attrs.each do |attribute|
+              if (klass = options[:class])
+                self.attr_encrypted_reflections[attribute.to_sym] = AttrEncryptedReflection.new(klass)
+              end
+
+              attribute_options = options.merge(encrypted_attributes[attribute])
+
+              define_method("#{attribute}_changed?") do
+                public_send(attribute) != public_send("#{attribute}_was")
+              end
+
+              define_method("#{attribute}_was") do
+                attr_was_options = { operation: :decrypting }
+                attr_was_options[:iv]= public_send("#{attribute_options[:attribute]}_iv_was") if respond_to?("#{attribute_options[:attribute]}_iv_was")
+                attr_was_options[:salt]= public_send("#{attribute_options[:attribute]}_salt_was") if respond_to?("#{attribute_options[:attribute]}_salt_was")
+                encrypted_attributes[attribute].merge!(attr_was_options)
+                evaluated_options = evaluated_attr_encrypted_options_for(attribute)
+                [:iv, :salt, :operation].each { |key| encrypted_attributes[attribute].delete(key) }
+                self.class.decrypt(attribute, public_send("#{attribute_options[:attribute]}_was"), evaluated_options)
               end
             end
+          end
 
-            define_method("#{attr}_was") do
-              attr_was_options = { operation: :decrypting }
-              attr_was_options[:iv]= send("#{options[:attribute]}_iv_was") if respond_to?("#{options[:attribute]}_iv_was")
-              attr_was_options[:salt]= send("#{options[:attribute]}_salt_was") if respond_to?("#{options[:attribute]}_salt_was")
-              encrypted_attributes[attr].merge!(attr_was_options)
-              evaluated_options = evaluated_attr_encrypted_options_for(attr)
-              [:iv, :salt, :operation].each { |key| encrypted_attributes[attr].delete(key) }
-              self.class.decrypt(attr, send("#{options[:attribute]}_was"), evaluated_options)
-            end
+          def reflect_on_aggregation_with_attr_encrypted(attribute)
+            attr_encrypted_reflections[attribute.to_sym] || reflect_on_aggregation_without_attr_encrypted(attribute)
+          end
 
-            alias_method "#{attr}_before_type_cast", attr
+          def type_for_attribute_with_attr_encrypted(attribute)
+            attr_encrypted_reflections[attribute.to_sym] || type_for_attribute_without_attr_encrypted(attribute)
           end
 
           def attribute_instance_methods_as_symbols
@@ -108,7 +130,7 @@ if defined?(ActiveRecord::Base)
               attribute_names = match.captures.last.split('_and_')
               attribute_names.each_with_index do |attribute, index|
                 if attr_encrypted?(attribute) && encrypted_attributes[attribute.to_sym][:mode] == :single_iv_and_salt
-                  args[index] = send("encrypt_#{attribute}", args[index])
+                  args[index] = public_send("encrypt_#{attribute}", args[index])
                   warn "DEPRECATION WARNING: This feature will be removed in the next major release."
                   attribute_names[index] = encrypted_attributes[attribute.to_sym][:attribute]
                 end
