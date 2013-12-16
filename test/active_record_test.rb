@@ -10,10 +10,11 @@ def create_tables
         t.string   :password
         t.string   :encrypted_credentials
         t.binary   :salt
-         t.string   :encrypted_email_salt
+        t.string   :encrypted_email_salt
         t.string   :encrypted_credentials_salt
         t.string   :encrypted_email_iv
         t.string   :encrypted_credentials_iv
+        t.string   :encrypted_birth_date
       end
       create_table :accounts do |t|
         t.string :encrypted_password
@@ -65,6 +66,11 @@ class PersonWithSerialization < ActiveRecord::Base
   serialize :password
 end
 
+class PersonWithDateBirthDate < ActiveRecord::Base
+  self.table_name = 'people'
+  attr_encrypted :birth_date, marshal: true, class: Date, :key => "any key"
+end
+
 class ActiveRecordTest < Test::Unit::TestCase
 
   def setup
@@ -113,5 +119,12 @@ class ActiveRecordTest < Test::Unit::TestCase
   def test_should_create_an_account_regardless_of_arguments_order
     Account.create!(:key => SECRET_KEY, :password => "password")
     Account.create!(:password => "password" , :key => SECRET_KEY)
+  end
+
+  def test_multiparameter_attributes_on_date
+    attributes = { "birth_date(1i)" => "1983", "birth_date(2i)" => "9", "birth_date(3i)" => "17" }
+    person = PersonWithDateBirthDate.create(attributes)
+
+    assert_equal Date.new(1983, 9, 17), person.birth_date
   end
 end
