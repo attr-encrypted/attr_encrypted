@@ -68,7 +68,7 @@ end
 
 class PersonWithDateBirthDate < ActiveRecord::Base
   self.table_name = 'people'
-  attr_encrypted :birth_date, marshal: true, class: Date, :key => "any key"
+  attr_encrypted :birth_date, :marshal => true, :class => Date, :key => "any key"
 end
 
 class ActiveRecordTest < Test::Unit::TestCase
