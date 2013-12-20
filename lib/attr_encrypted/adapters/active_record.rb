@@ -40,7 +40,15 @@ if defined?(ActiveRecord::Base)
             define_attribute_methods rescue nil
             super
             undefine_attribute_methods
-            attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr| alias_method "#{attr}_before_type_cast", attr }
+            options = attrs.last.is_a?(Hash) ? attrs.pop : {}
+
+            if klass = options.delete(:class)
+              attribute_sym = attrs.first.to_sym
+              self.encrypted_attribute_class_wrappers[attribute_sym] = EncryptedAttributeClassWrapper.new(klass)
+            end
+
+            new_attrs = attrs + [options]
+            new_attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr| alias_method "#{attr}_before_type_cast", attr }
           end
 
           # Allows you to use dynamic methods like <tt>find_by_email</tt> or <tt>scoped_by_email</tt> for 
@@ -73,9 +81,35 @@ if defined?(ActiveRecord::Base)
             end
             method_missing_without_attr_encrypted(method, *args, &block)
           end
+
+          # Saves the attr class wrappers, so AR can infer the correct type later
+          def encrypted_attribute_class_wrappers
+            @encrypted_attribute_class_wrappers ||= {}
+          end
+
+          # Allows AR to infer the proper type for the column
+          class EncryptedAttributeClassWrapper
+            attr_reader :klass
+            def initialize(klass); @klass = klass; end
+          end
+
       end
     end
   end
 
+  class ActiveRecord::Base
+    # Patch column_for_attribute so we can infer the correct column type
+    alias_method :column_for_attribute_base, :column_for_attribute
+    def column_for_attribute(attribute)
+      attribute_sym = attribute.to_sym
+      if encrypted = self.class.encrypted_attributes[attribute_sym]
+        column_info = self.class.send(:encrypted_attribute_class_wrappers)[attribute_sym]
+        column_info ||= column_for_attribute_base(encrypted[:attribute])
+        column_info
+      else
+        column_for_attribute_base(attribute)
+      end
+    end
+  end
   ActiveRecord::Base.extend AttrEncrypted::Adapters::ActiveRecord
 end
