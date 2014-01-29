@@ -12,9 +12,19 @@ if defined?(ActiveRecord::Base)
               end
             end
 
-            if ::ActiveRecord::VERSION::STRING < "3.0" || ::ActiveRecord::VERSION::STRING > "3.1"
+            if ::ActiveRecord::VERSION::STRING < "3.0"
               def assign_attributes_with_attr_encrypted(*args)
                 attributes = args.shift.symbolize_keys
+                encrypted_attributes = self.class.encrypted_attributes.keys
+                assign_attributes_without_attr_encrypted attributes.except(*encrypted_attributes), *args
+                assign_attributes_without_attr_encrypted attributes.slice(*encrypted_attributes), *args
+              end
+              alias_method_chain :assign_attributes, :attr_encrypted
+            elsif ::ActiveRecord::VERSION::STRING > "3.1"
+              def assign_attributes_with_attr_encrypted(*args)
+                attributes = args.shift
+                return if attributes.nil?
+                attributes = attributes.symbolize_keys
                 encrypted_attributes = self.class.encrypted_attributes.keys
                 assign_attributes_without_attr_encrypted attributes.except(*encrypted_attributes), *args
                 assign_attributes_without_attr_encrypted attributes.slice(*encrypted_attributes), *args
