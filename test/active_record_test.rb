@@ -65,6 +65,12 @@ class PersonWithSerialization < ActiveRecord::Base
   serialize :password
 end
 
+class UntrustedParams < ActiveSupport::HashWithIndifferentAccess
+  def permitted?
+    false
+  end
+end
+
 class ActiveRecordTest < Test::Unit::TestCase
 
   def setup
@@ -113,5 +119,10 @@ class ActiveRecordTest < Test::Unit::TestCase
   def test_should_create_an_account_regardless_of_arguments_order
     Account.create!(:key => SECRET_KEY, :password => "password")
     Account.create!(:password => "password" , :key => SECRET_KEY)
+  end
+
+  def test_should_not_break_strong_parameters
+    untrusted_params = UntrustedParams.new(:id => 42)
+    assert_raise(ActiveModel::ForbiddenAttributesError) { Person.new(untrusted_params) }
   end
 end
