@@ -318,4 +318,14 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user2.email = 'email@example.com'
     assert_not_equal @user1.encrypted_email_salt, @user2.encrypted_email_salt
   end
+
+  def test_should_decrypt_second_record
+    @user1 = User.new
+    @user1.email = 'test@example.com'
+
+    @user2 = User.new
+    @user2.email = 'test@example.com'
+
+    assert_equal 'test@example.com', @user1.decrypt(:email, @user1.encrypted_email)
+  end
 end
