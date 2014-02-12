@@ -7,25 +7,26 @@ if defined?(ActiveRecord::Base)
             attr_encrypted_options[:encode] = true
             class << self
               alias_method_chain :method_missing, :attr_encrypted
-              if ::ActiveRecord::VERSION::STRING < "3"
-                alias_method :undefine_attribute_methods, :reset_column_information
-              end
+              alias_method :undefine_attribute_methods, :reset_column_information if ::ActiveRecord::VERSION::STRING < "3"
             end
+
+            def perform_attribute_assignment(method, new_attributes, *args)
+              return if new_attributes.blank?
+              attributes = new_attributes.symbolize_keys
+              encrypted_attributes = self.class.encrypted_attributes.keys
+              self.send method, attributes.except(*encrypted_attributes), *args
+              self.send method, attributes.slice(*encrypted_attributes), *args
+            end
+            private :perform_attribute_assignment
 
             if ::ActiveRecord::VERSION::STRING < "3.0" || ::ActiveRecord::VERSION::STRING > "3.1"
               def assign_attributes_with_attr_encrypted(*args)
-                attributes = args.shift.symbolize_keys
-                encrypted_attributes = self.class.encrypted_attributes.keys
-                assign_attributes_without_attr_encrypted attributes.except(*encrypted_attributes), *args
-                assign_attributes_without_attr_encrypted attributes.slice(*encrypted_attributes), *args
+                perform_attribute_assignment :assign_attributes_without_attr_encrypted, *args
               end
               alias_method_chain :assign_attributes, :attr_encrypted
             else
               def attributes_with_attr_encrypted=(*args)
-                attributes = args.shift.symbolize_keys
-                encrypted_attributes = self.class.encrypted_attributes.keys
-                self.send :attributes_without_attr_encrypted=, attributes.except(*encrypted_attributes), *args
-                self.send :attributes_without_attr_encrypted=, attributes.slice(*encrypted_attributes), *args
+                perform_attribute_assignment :attributes_without_attr_encrypted=, *args
               end
               alias_method_chain :attributes=, :attr_encrypted
             end
