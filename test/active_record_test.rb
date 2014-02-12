@@ -33,6 +33,7 @@ end
 create_tables
 
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
+ActiveRecord::Base.logger = Logger.new(nil) if ::ActiveRecord::VERSION::STRING < "3.0"
 
 class Person < ActiveRecord::Base
   self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
@@ -140,7 +141,11 @@ class ActiveRecordTest < Test::Unit::TestCase
 
   def test_should_assign_protected_attributes
     @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
-    @user.send :attributes=, {:login => 'modified', :is_admin => true}, false
+    if ::ActiveRecord::VERSION::STRING > "3.1"
+      @user.send :assign_attributes, {:login => 'modified', :is_admin => true}, :without_protection => true
+    else
+      @user.send :attributes=, {:login => 'modified', :is_admin => true}, false
+    end
     assert @user.is_admin?
   end
 end
