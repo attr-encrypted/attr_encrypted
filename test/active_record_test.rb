@@ -150,4 +150,16 @@ class ActiveRecordTest < Test::Unit::TestCase
       assert @user.is_admin?
     end
   end
+
+  def test_should_allow_assignment_of_nil_attributes
+    @person = Person.new
+    assert_nil(@person.attributes = nil)
+  end
+
+  if ::ActiveRecord::VERSION::STRING > "3.1"
+    def test_should_allow_assign_attributes_with_nil
+      @person = Person.new
+      assert_nil(@person.assign_attributes nil)
+    end
+  end
 end
