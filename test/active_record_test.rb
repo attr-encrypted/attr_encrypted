@@ -10,7 +10,7 @@ def create_tables
         t.string   :password
         t.string   :encrypted_credentials
         t.binary   :salt
-         t.string   :encrypted_email_salt
+        t.string   :encrypted_email_salt
         t.string   :encrypted_credentials_salt
         t.string   :encrypted_email_iv
         t.string   :encrypted_credentials_iv
@@ -19,6 +19,11 @@ def create_tables
         t.string :encrypted_password
         t.string :encrypted_password_iv
         t.string :encrypted_password_salt
+      end
+      create_table :users do |t|
+        t.string :login
+        t.string :encrypted_password
+        t.boolean :is_admin
       end
     end
   end
@@ -63,6 +68,12 @@ class PersonWithSerialization < ActiveRecord::Base
   self.table_name = 'people'
   attr_encrypted :email, :key => 'a secret key'
   serialize :password
+end
+
+class UserWithProtectedAttribute < ActiveRecord::Base
+  self.table_name = 'users'
+  attr_encrypted :password, :key => 'a secret key'
+  attr_protected :is_admin
 end
 
 class ActiveRecordTest < Test::Unit::TestCase
@@ -113,5 +124,23 @@ class ActiveRecordTest < Test::Unit::TestCase
   def test_should_create_an_account_regardless_of_arguments_order
     Account.create!(:key => SECRET_KEY, :password => "password")
     Account.create!(:password => "password" , :key => SECRET_KEY)
+  end
+
+  def test_should_assign_attributes
+    @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+    @user.attributes = {:login => 'modified', :is_admin => true}
+    assert_equal 'modified', @user.login
+  end
+
+  def test_should_not_assign_protected_attributes
+    @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+    @user.attributes = {:login => 'modified', :is_admin => true}
+    assert !@user.is_admin?
+  end
+
+  def test_should_assign_protected_attributes
+    @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+    @user.send :attributes=, {:login => 'modified', :is_admin => true}, false
+    assert @user.is_admin?
   end
 end
