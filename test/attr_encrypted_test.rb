@@ -1,5 +1,6 @@
 # encoding: UTF-8
 require File.expand_path('../test_helper', __FILE__)
+require 'mocha/test_unit'
 
 class SillyEncryptor
   def self.silly_encrypt(options)
