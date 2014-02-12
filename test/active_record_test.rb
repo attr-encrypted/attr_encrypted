@@ -74,7 +74,7 @@ end
 class UserWithProtectedAttribute < ActiveRecord::Base
   self.table_name = 'users'
   attr_encrypted :password, :key => 'a secret key'
-  attr_protected :is_admin
+  attr_protected :is_admin if ::ActiveRecord::VERSION::STRING < "4.0"
 end
 
 class ActiveRecordTest < Test::Unit::TestCase
@@ -133,19 +133,21 @@ class ActiveRecordTest < Test::Unit::TestCase
     assert_equal 'modified', @user.login
   end
 
-  def test_should_not_assign_protected_attributes
-    @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
-    @user.attributes = {:login => 'modified', :is_admin => true}
-    assert !@user.is_admin?
-  end
-
-  def test_should_assign_protected_attributes
-    @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
-    if ::ActiveRecord::VERSION::STRING > "3.1"
-      @user.send :assign_attributes, {:login => 'modified', :is_admin => true}, :without_protection => true
-    else
-      @user.send :attributes=, {:login => 'modified', :is_admin => true}, false
+  if ::ActiveRecord::VERSION::STRING < "4.0"
+    def test_should_not_assign_protected_attributes
+      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+      @user.attributes = {:login => 'modified', :is_admin => true}
+      assert !@user.is_admin?
     end
-    assert @user.is_admin?
+
+    def test_should_assign_protected_attributes
+      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+      if ::ActiveRecord::VERSION::STRING > "3.1"
+        @user.send :assign_attributes, {:login => 'modified', :is_admin => true}, :without_protection => true
+      else
+        @user.send :attributes=, {:login => 'modified', :is_admin => true}, false
+      end
+      assert @user.is_admin?
+    end
   end
 end
