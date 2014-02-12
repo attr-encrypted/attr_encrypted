@@ -289,4 +289,43 @@ class AttrEncryptedTest < Test::Unit::TestCase
     assert @user.email?
   end
 
+  def test_should_vary_iv_per_attribute
+    @user = User.new
+    @user.email = 'email@example.com'
+    @user.password = 'p455w0rd'
+    assert_not_equal @user.encrypted_email_iv, @user.crypted_password_test_iv
+  end
+
+  def test_should_vary_iv_per_instance
+    @user1 = User.new
+    @user1.email = 'email@example.com'
+    @user2 = User.new
+    @user2.email = 'email@example.com'
+    assert_not_equal @user1.encrypted_email_iv, @user2.encrypted_email_iv
+  end
+
+  def test_should_vary_salt_per_attribute
+    @user = User.new
+    @user.email = 'email@example.com'
+    @user.password = 'p455w0rd'
+    assert_not_equal @user.encrypted_email_salt, @user.crypted_password_test_salt
+  end
+
+  def test_should_vary_salt_per_instance
+    @user1 = User.new
+    @user1.email = 'email@example.com'
+    @user2 = User.new
+    @user2.email = 'email@example.com'
+    assert_not_equal @user1.encrypted_email_salt, @user2.encrypted_email_salt
+  end
+
+  def test_should_decrypt_second_record
+    @user1 = User.new
+    @user1.email = 'test@example.com'
+
+    @user2 = User.new
+    @user2.email = 'test@example.com'
+
+    assert_equal 'test@example.com', @user1.decrypt(:email, @user1.encrypted_email)
+  end
 end
