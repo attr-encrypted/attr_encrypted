@@ -114,4 +114,9 @@ class ActiveRecordTest < Test::Unit::TestCase
     Account.create!(:key => SECRET_KEY, :password => "password")
     Account.create!(:password => "password" , :key => SECRET_KEY)
   end
+  
+  def test_with_nil_update_attributes
+    @person = Person.create :email => 'test@example.com'
+    @person.update_attributes(nil)
+  end
 end
