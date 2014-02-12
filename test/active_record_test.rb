@@ -10,7 +10,7 @@ def create_tables
         t.string   :password
         t.string   :encrypted_credentials
         t.binary   :salt
-         t.string   :encrypted_email_salt
+        t.string   :encrypted_email_salt
         t.string   :encrypted_credentials_salt
         t.string   :encrypted_email_iv
         t.string   :encrypted_credentials_iv
@@ -20,6 +20,11 @@ def create_tables
         t.string :encrypted_password_iv
         t.string :encrypted_password_salt
       end
+      create_table :users do |t|
+        t.string :login
+        t.string :encrypted_password
+        t.boolean :is_admin
+      end
     end
   end
 end
@@ -28,6 +33,7 @@ end
 create_tables
 
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
+ActiveRecord::Base.logger = Logger.new(nil) if ::ActiveRecord::VERSION::STRING < "3.0"
 
 class Person < ActiveRecord::Base
   self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
@@ -63,6 +69,12 @@ class PersonWithSerialization < ActiveRecord::Base
   self.table_name = 'people'
   attr_encrypted :email, :key => 'a secret key'
   serialize :password
+end
+
+class UserWithProtectedAttribute < ActiveRecord::Base
+  self.table_name = 'users'
+  attr_encrypted :password, :key => 'a secret key'
+  attr_protected :is_admin if ::ActiveRecord::VERSION::STRING < "4.0"
 end
 
 class ActiveRecordTest < Test::Unit::TestCase
@@ -113,5 +125,29 @@ class ActiveRecordTest < Test::Unit::TestCase
   def test_should_create_an_account_regardless_of_arguments_order
     Account.create!(:key => SECRET_KEY, :password => "password")
     Account.create!(:password => "password" , :key => SECRET_KEY)
+  end
+
+  def test_should_assign_attributes
+    @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+    @user.attributes = {:login => 'modified', :is_admin => true}
+    assert_equal 'modified', @user.login
+  end
+
+  if ::ActiveRecord::VERSION::STRING < "4.0"
+    def test_should_not_assign_protected_attributes
+      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+      @user.attributes = {:login => 'modified', :is_admin => true}
+      assert !@user.is_admin?
+    end
+
+    def test_should_assign_protected_attributes
+      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+      if ::ActiveRecord::VERSION::STRING > "3.1"
+        @user.send :assign_attributes, {:login => 'modified', :is_admin => true}, :without_protection => true
+      else
+        @user.send :attributes=, {:login => 'modified', :is_admin => true}, false
+      end
+      assert @user.is_admin?
+    end
   end
 end
