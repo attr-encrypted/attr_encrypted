@@ -35,6 +35,16 @@ create_tables
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
 ActiveRecord::Base.logger = Logger.new(nil) if ::ActiveRecord::VERSION::STRING < "3.0"
 
+if ::ActiveRecord::VERSION::STRING > "4.0"
+  module Rack
+    module Test
+      class UploadedFile; end
+    end
+  end
+
+  require 'action_controller/metal/strong_parameters'
+end
+
 class Person < ActiveRecord::Base
   self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
   attr_encrypted :email, :key => SECRET_KEY
@@ -127,13 +137,38 @@ class ActiveRecordTest < Test::Unit::TestCase
     Account.create!(:password => "password" , :key => SECRET_KEY)
   end
 
-  def test_should_assign_attributes
-    @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
-    @user.attributes = {:login => 'modified', :is_admin => true}
-    assert_equal 'modified', @user.login
-  end
+  if ::ActiveRecord::VERSION::STRING > "4.0"
+    def test_should_assign_attributes
+      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+      @user.attributes = ActionController::Parameters.new(:login => 'modified', :is_admin => true).permit(:login)
+      assert_equal 'modified', @user.login
+    end
 
-  if ::ActiveRecord::VERSION::STRING < "4.0"
+    def test_should_not_assign_protected_attributes
+      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+      @user.attributes = ActionController::Parameters.new(:login => 'modified', :is_admin => true).permit(:login)
+      assert !@user.is_admin?
+    end
+
+    def test_should_raise_exception_if_not_permitted
+      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+      assert_raise ActiveModel::ForbiddenAttributesError do
+        @user.attributes = ActionController::Parameters.new(:login => 'modified', :is_admin => true)
+      end
+    end
+
+    def test_should_raise_exception_on_init_if_not_permitted
+      assert_raise ActiveModel::ForbiddenAttributesError do
+        @user = UserWithProtectedAttribute.new ActionController::Parameters.new(:login => 'modified', :is_admin => true)
+      end
+    end
+  else
+    def test_should_assign_attributes
+      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+      @user.attributes = {:login => 'modified', :is_admin => true}
+      assert_equal 'modified', @user.login
+    end
+
     def test_should_not_assign_protected_attributes
       @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
       @user.attributes = {:login => 'modified', :is_admin => true}
