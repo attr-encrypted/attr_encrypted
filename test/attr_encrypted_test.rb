@@ -328,4 +328,28 @@ class AttrEncryptedTest < Test::Unit::TestCase
 
     assert_equal 'test@example.com', @user1.decrypt(:email, @user1.encrypted_email)
   end
+
+  def test_should_raise_descriptive_error_when_key_changes
+    user = User.new
+    user.email = 'test@test.com'
+    User.encrypted_attributes[:email][:key] = 'foobarbazquxbang!'
+    user.instance_variable_set(:@email, nil)
+
+    assert_raise AttrEncrypted::Errors::BadDecryptError do
+      user.email
+    end
+  ensure
+    User.encrypted_attributes[:email][:key] = SECRET_KEY
+  end
+
+  def test_should_raise_descriptive_error_when_final_block_is_invalid
+    user = User.new
+    user.encrypted_email = 'totallywrongcyphertext'
+    user.encrypted_email_iv = 'Somewhatacceptetableivbutstilltotallybogus'
+    user.encrypted_email_salt = 'thisisareallyhorriblesalt'
+
+    assert_raise AttrEncrypted::Errors::BlockLengthError do
+      user.email
+    end
+  end
 end
