@@ -193,7 +193,17 @@ module AttrEncrypted
     options = encrypted_attributes[attribute.to_sym].merge(options)
     if options[:if] && !options[:unless] && !encrypted_value.nil? && !(encrypted_value.is_a?(String) && encrypted_value.empty?)
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
-      value = options[:encryptor].send(options[:decrypt_method], options.merge!(:value => encrypted_value))
+      begin
+        value = options[:encryptor].send(options[:decrypt_method], options.merge!(:value => encrypted_value))
+      rescue OpenSSL::Cipher::CipherError => ex
+        if ex.message == 'bad decrypt'
+          raise Errors::BadDecryptError, "Could not decrypt attribute #{ attribute }: key, iv, or salt may have changed or been corrupted."
+        elsif ex.message == 'wrong final block length'
+          raise Errors::BlockLengthError, "Could not decrypt attribute #{ attribute } the cyphertext has an invalid final block. It may have been truncated when stored to the database."
+        else
+          raise Errors::CipherError, "Could not decrypt attribute #{ attribute }"
+        end
+      end
       if options[:marshal]
         value = options[:marshaler].send(options[:load_method], value)
       elsif defined?(Encoding)
@@ -348,4 +358,5 @@ end
 
 Object.extend AttrEncrypted
 
+require 'attr_encrypted/errors'
 Dir[File.join(File.dirname(__FILE__), 'attr_encrypted', 'adapters', '*.rb')].each { |adapter| require adapter }
