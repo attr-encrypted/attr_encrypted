@@ -201,7 +201,7 @@ module AttrEncrypted
         elsif ex.message == 'wrong final block length'
           raise Errors::BlockLengthError, "Could not decrypt attribute #{ attribute } the cyphertext has an invalid final block. It may have been truncated when stored to the database."
         else
-          raise CipherError, "Could not decrypt attribute #{ attribute }"
+          raise Errors::CipherError, "Could not decrypt attribute #{ attribute }"
         end
       end
       if options[:marshal]

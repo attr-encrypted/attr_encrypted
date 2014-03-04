@@ -352,4 +352,17 @@ class AttrEncryptedTest < Test::Unit::TestCase
       user.email
     end
   end
+
+  def test_should_raise_descriptive_error_when_generic_cipher_error_is_raised
+    user = User.new
+    user.email = 'test@example.com'
+
+    Encryptor.expects(:decrypt).raises(OpenSSL::Cipher::CipherError)
+    user.instance_variable_set(:@email, nil)
+    assert_raise AttrEncrypted::Errors::CipherError do
+      user.email
+    end
+  ensure
+    Encryptor.unstub(:decrypt)
+  end
 end
