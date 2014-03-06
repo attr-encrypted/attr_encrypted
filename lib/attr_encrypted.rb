@@ -1,4 +1,5 @@
 require 'encryptor'
+require 'attr_encrypted/errors'
 
 # Adds attr_accessors that encrypt and decrypt an object's attributes
 module AttrEncrypted
@@ -204,6 +205,8 @@ module AttrEncrypted
     else
       encrypted_value
     end
+  rescue Encryptor::Errors::CipherError => ex
+    raise Errors::CipherError, "Could not decrypt cipher text ( #{encrypted_value} ) for #{ attribute }: #{ ex.message }"
   end
 
   # Encrypts a value for the attribute specified
@@ -225,6 +228,8 @@ module AttrEncrypted
     else
       value
     end
+  rescue Encryptor::Errors::CipherError => ex
+    raise Errors::CipherError, "Could not encrypt message (#{ value }) for #{ attribute }: #{ ex.message }"
   end
 
   # Contains a hash of encrypted attributes with virtual attribute names as keys

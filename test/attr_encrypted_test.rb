@@ -328,4 +328,30 @@ class AttrEncryptedTest < Test::Unit::TestCase
 
     assert_equal 'test@example.com', @user1.decrypt(:email, @user1.encrypted_email)
   end
+
+  def test_should_rescue_encryptor_cipher_error_on_encrypt
+    user = User.new
+
+    Encryptor.expects(:encrypt).raises(Encryptor::Errors::CipherError)
+
+    assert_raise AttrEncrypted::Errors::CipherError do
+      user.email = 'foo@bar.com'
+    end
+  ensure
+    Encryptor.unstub(:encrypt)
+  end
+
+  def test_should_rescue_encryptor_cipher_error_on_decrypt
+    user = User.new
+
+    Encryptor.expects(:decrypt).raises(Encryptor::Errors::CipherError)
+    user.email = 'foo@bar.com'
+    user.instance_variable_set(:@email, nil)
+
+    assert_raise AttrEncrypted::Errors::CipherError do
+      user.email
+    end
+  ensure
+    Encryptor.unstub(:decrypt)
+  end
 end
