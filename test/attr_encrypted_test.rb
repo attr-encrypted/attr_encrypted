@@ -382,4 +382,30 @@ class AttrEncryptedTest < Test::Unit::TestCase
   ensure
     Encryptor.unstub(:decrypt)
   end
+
+  def test_should_rescue_encryptor_iv_error_on_encrypt
+    user = User.new
+
+    Encryptor.expects(:encrypt).raises(Encryptor::Errors::IVLengthError)
+
+    assert_raise AttrEncrypted::Errors::IVLengthError do
+      user.email = 'foo@bar.com'
+    end
+  ensure
+    Encryptor.unstub(:encrypt)
+  end
+
+  def test_should_rescue_encryptor_iv_error_on_decrypt
+    user = User.new
+
+    Encryptor.expects(:decrypt).raises(Encryptor::Errors::IVLengthError)
+    user.email = 'foo@bar.com'
+    user.instance_variable_set(:@email, nil)
+
+    assert_raise AttrEncrypted::Errors::IVLengthError do
+      user.email
+    end
+  ensure
+    Encryptor.unstub(:decrypt)
+  end
 end

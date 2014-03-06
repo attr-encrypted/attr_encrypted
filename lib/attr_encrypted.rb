@@ -349,6 +349,8 @@ module AttrEncrypted
           raise Errors::BadDecryptError, base_message + " using the supplied key, salt and iv."
         when Encryptor::Errors::BlockLengthError
           raise Errors::BlockLengthError, base_message + " ciphertext may have been truncated by database or corrupted in transit."
+        when Encryptor::Errors::IVLengthError
+          raise Errors::IVLengthError, base_message + " iv is too short."
         else
           raise exception
         end

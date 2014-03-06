@@ -14,5 +14,6 @@ module AttrEncrypted
     class CipherError < Error; end
     class BadDecryptError < Error; end
     class BlockLengthError < Error; end
+    class IVLengthError < Error; end
   end
 end
