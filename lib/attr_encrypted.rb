@@ -205,8 +205,13 @@ module AttrEncrypted
     else
       encrypted_value
     end
-  rescue Encryptor::Errors::CipherError => ex
-    raise Errors::CipherError, "Could not decrypt cipher text ( #{encrypted_value} ) for #{ attribute }: #{ ex.message }"
+  rescue Encryptor::Error => ex
+    handle_encryptor_error({
+      exception: ex,
+      method: 'decrypt',
+      message: encrypted_value,
+      attribute: attribute
+    })
   end
 
   # Encrypts a value for the attribute specified
@@ -228,8 +233,13 @@ module AttrEncrypted
     else
       value
     end
-  rescue Encryptor::Errors::CipherError => ex
-    raise Errors::CipherError, "Could not encrypt message (#{ value }) for #{ attribute }: #{ ex.message }"
+  rescue Encryptor::Error => ex
+    handle_encryptor_error({
+      exception: ex,
+      method: 'encrypt',
+      message: value,
+      attribute: attribute,
+    })
   end
 
   # Contains a hash of encrypted attributes with virtual attribute names as keys
@@ -325,6 +335,20 @@ module AttrEncrypted
           option.call(self)
         else
           option
+        end
+      end
+
+      def handle_encryptor_error(options)
+        base_message = "Could not #{ options[:method] } message ( #{ options[:message] } ) for #{ options[:attribute] }"
+        exception = options[:exception]
+
+        case exception
+        when Encryptor::Errors::CipherError
+          raise Errors::CipherError, base_message + ": #{ exception.message }"
+        when Encryptor::Errors::BadDecryptError
+          raise Errors::BadDecryptError, base_message + " using the supplied key, salt and iv."
+        else
+          raise exception
         end
       end
 
