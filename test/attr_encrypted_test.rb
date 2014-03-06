@@ -368,4 +368,18 @@ class AttrEncryptedTest < Test::Unit::TestCase
   ensure
     Encryptor.unstub(:decrypt)
   end
+
+  def test_should_rescue_encryptor_block_length_error
+    user = User.new
+
+    Encryptor.expects(:decrypt).raises(Encryptor::Errors::BlockLengthError)
+    user.email = 'foo@bar.com'
+    user.instance_variable_set(:@email, nil)
+
+    assert_raise AttrEncrypted::Errors::BlockLengthError do
+      user.email
+    end
+  ensure
+    Encryptor.unstub(:decrypt)
+  end
 end

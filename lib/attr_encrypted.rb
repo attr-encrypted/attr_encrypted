@@ -347,6 +347,8 @@ module AttrEncrypted
           raise Errors::CipherError, base_message + ": #{ exception.message }"
         when Encryptor::Errors::BadDecryptError
           raise Errors::BadDecryptError, base_message + " using the supplied key, salt and iv."
+        when Encryptor::Errors::BlockLengthError
+          raise Errors::BlockLengthError, base_message + " ciphertext may have been truncated by database or corrupted in transit."
         else
           raise exception
         end
