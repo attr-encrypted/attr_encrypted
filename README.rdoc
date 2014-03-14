@@ -291,6 +291,22 @@ NOTE: This only works if all records are encrypted with the same encryption key 
 
 Just like the default options for <tt>ActiveRecord</tt>, the <tt>:encode</tt> option is set to true by default since you'll be storing everything in a database.
 
+== Running tests
+
+=== Run test suite against a single platform
+
+To run tests against specific versions of Ruby and Rails, invoke Rake via the
+<tt>script/run</tt> script passing in versions as appropriate. For example:
+
+  script/run -r 1.8.7 -g 2.3.8 bundle exec rake
+
+=== Run test suite against all platforms
+
+By omitting explicit versions, <tt>script/run</tt> will determine the set of
+supported platforms as specified in the <tt>.travis.yml</tt> file and run all
+valid combinations:
+
+  script/run bundle exec rake
 
 == Note on Patches/Pull Requests
 
@@ -298,5 +314,6 @@ Just like the default options for <tt>ActiveRecord</tt>, the <tt>:encode</tt> op
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a
   future version unintentionally.
+* Run all tests (see "Running tests" section above).
 * Commit, do not mess with rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.

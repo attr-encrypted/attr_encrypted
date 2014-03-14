@@ -1,4 +1,5 @@
 .DS_Store
-pkg
-Gemfile.lock
+.gemfiles
 coverage
+Gemfile.lock
+pkg

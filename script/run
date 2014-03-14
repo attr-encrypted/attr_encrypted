@@ -1,0 +1,149 @@
+#!/bin/bash
+SCRIPT_PATH=$(readlink -f $0)
+SCRIPT_DIR=$(dirname $SCRIPT_PATH)
+SCRIPT_NAME=$(basename $SCRIPT_PATH)
+REPO_DIR=$(git rev-parse --show-toplevel)
+RUBY_VERSION=
+RAILS_VERSION=
+
+type rbenv > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo 'Script requires rbenv'
+  exit 1
+fi
+
+show_usage() {
+  echo -e '\nRun command in specified Ruby/Bundler context\n'
+  echo 'Usage:'
+  echo -e "  $SCRIPT_NAME [ -h | -r <ruby-version> | -g <gemfile-version> ] <command-line>\n"
+}
+
+show_help() {
+  show_usage
+  echo 'Options:'
+  echo '  -h                 Shows this help information'
+  echo '  -r <ruby-version>  Specifies Ruby version'
+  echo '  -g <rails-version> Specifies Rails version'
+  echo -e '\nExamples:'
+  echo '  Run tests against all supported platforms via rake:'
+  echo "    $SCRIPT_NAME bundle exec rake"
+  echo '  Run tests against specific version of Ruby and gems via rake:'
+  echo -e "    $SCRIPT_NAME -r 1.8.7 -g 2.3.8 bundle exec rake\n"
+}
+
+rbenv_version() {
+  local ruby_version=$1; shift
+
+  ruby <<-EOF
+ruby_version = '$ruby_version'
+rbenv_versions = \`rbenv versions\`.chomp.split
+candidates = rbenv_versions.select { |x| x.start_with?(ruby_version) }
+rbenv_version = if candidates.size == 1
+  candidates.first
+else
+  # Find match with highest patch level
+  candidates.max_by { |x| Integer(x[ruby_version.length + 2, x.length]) }
+end
+puts rbenv_version
+EOF
+}
+
+run_bundle() {
+  local repo_dir=$1; shift
+  local base_gemfile=$1; shift
+  local ruby_version=$1; shift
+  local rails_version=$1; shift
+
+  local rbenv_version=$(rbenv_version $ruby_version)
+  local gemfile=$repo_dir/.gemfiles/Gemfile-$ruby_version-$rails_version
+
+  mkdir -p $repo_dir/.gemfiles
+  if [ $base_gemfile -nt $gemfile.lock ]; then
+    cat $base_gemfile | sed -e "s!^gemspec\$!gemspec :path => '$repo_dir'!" > $gemfile
+    RBENV_VERSION=$rbenv_version ACTIVERECORD=$rails_version BUNDLE_GEMFILE=$gemfile bundle
+    if [ $? -ne 0 ]; then
+      return 1
+    fi
+  fi
+}
+
+run_command() {
+  local repo_dir=$1; shift
+  local base_gemfile=$1; shift
+  local ruby_version=$1; shift
+  local rails_version=$1; shift
+
+  local rbenv_version=$(rbenv_version $ruby_version)
+  local gemfile=$repo_dir/.gemfiles/Gemfile-$ruby_version-$rails_version
+
+  RBENV_VERSION=$rbenv_version ACTIVERECORD=$rails_version BUNDLE_GEMFILE=$gemfile $@
+  if [ $? -ne 0 ]; then
+    return 1
+  fi
+}
+
+run_all() {
+  local runner=$1; shift
+  local repo_dir=$1; shift
+
+  local script_file=$(mktemp)
+  ruby > $script_file <<-EOF
+require 'yaml'
+require 'pathname'
+runner = '$runner'
+repo_dir = Pathname.new('$repo_dir')
+travis_config = YAML.load_file(repo_dir.join('.travis.yml'))
+excludes = travis_config['matrix']['exclude'].collect { |x| [x['rvm'], x['env']] }
+puts 'test_all_configurations() {'
+(travis_config['rvm'].product(travis_config['env']) - excludes).each do |configuration|
+  rails_version = configuration[1].scan(/\d+\.\d+\.\d+/).first
+  puts "  #{runner} #{repo_dir} Gemfile #{configuration[0]} #{rails_version} $@ || return 1"
+end
+puts '}'
+puts 'test_all_configurations'
+puts 'if [ \$? -eq 0 ]; then'
+puts '  echo -e \'\e[1;32mAll commands ran successfully\e[0m\''
+puts 'else'
+puts '  echo -e \'\e[1;31mCommand was cancelled by the user or aborted due to one or more errors\e[0m\''
+puts 'fi'
+EOF
+  source $script_file
+}
+
+while getopts hr:g: OPT; do
+  case $OPT in
+    h) show_help; exit 0;;
+    r) RUBY_VERSION=$OPTARG;;
+    g) RAILS_VERSION=$OPTARG;;
+    ?) show_usage; exit 1;;
+  esac
+done
+shift $((OPTIND - 1))
+
+if [[ "$@" == '' ]]; then
+  show_usage
+  exit 1
+fi
+if [[ "$RUBY_VERSION" != '' ]] && [[ "$RAILS_VERSION" == '' ]]; then
+  echo 'Specify both Ruby and Rails version'
+  show_usage
+  exit 1
+fi
+if [[ "$RUBY_VERSION" == '' ]] && [[ "$RAILS_VERSION" != '' ]]; then
+  echo 'Specify both Ruby and Rails version'
+  show_usage
+  exit 1
+fi
+
+if [ "$RUBY_VERSION" == '' ]; then
+  echo 'Running Bundler to lock gems'
+  run_all run_bundle $REPO_DIR
+  echo "Running command '$@'"
+  run_all run_command $REPO_DIR $@
+else
+  echo 'Running Bundler to lock gems'
+  run_bundle $REPO_DIR Gemfile $RUBY_VERSION $RAILS_VERSION
+  echo "Running command '$@'"
+  run_command $REPO_DIR Gemfile $RUBY_VERSION $RAILS_VERSION $@
+fi
+
