@@ -207,10 +207,10 @@ module AttrEncrypted
     end
   rescue Encryptor::Error => ex
     handle_encryptor_error({
-      exception: ex,
-      method: 'decrypt',
-      message: encrypted_value,
-      attribute: attribute
+      :exception => ex,
+      :method    => 'decrypt',
+      :message   => encrypted_value,
+      :attribute => attribute,
     })
   end
 
@@ -235,10 +235,10 @@ module AttrEncrypted
     end
   rescue Encryptor::Error => ex
     handle_encryptor_error({
-      exception: ex,
-      method: 'encrypt',
-      message: value,
-      attribute: attribute,
+      :exception => ex,
+      :method    => 'encrypt',
+      :message   => encrypted_value,
+      :attribute => attribute,
     })
   end
 
