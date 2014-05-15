@@ -3,21 +3,16 @@ rvm:
   - 1.8.7
   - 1.9.3
   - 2.0.0
-env:
-  - ACTIVERECORD=2.3.8
-  - ACTIVERECORD=3.0.0
-  - ACTIVERECORD=3.1.0
-  - ACTIVERECORD=3.2.0
-  - ACTIVERECORD=4.0.0
+gemfile:
+  - gemfiles/activerecord_3.0.gemfile
+  - gemfiles/activerecord_3.1.gemfile
+  - gemfiles/activerecord_3.2.gemfile
+  - gemfiles/activerecord_4.0.gemfile
 matrix:
   exclude:
     - rvm: 1.8.7
-      env: ACTIVERECORD=4.0.0
-    - rvm: 1.9.3
-      env: ACTIVERECORD=2.3.8
+      gemfile: gemfiles/activerecord_4.0.gemfile
     - rvm: 2.0.0
-      env: ACTIVERECORD=2.3.8
+      gemfile: gemfiles/activerecord_3.0.gemfile
     - rvm: 2.0.0
-      env: ACTIVERECORD=3.0.0
-    - rvm: 2.0.0
-      env: ACTIVERECORD=3.1.0
+      gemfile: gemfiles/activerecord_3.1.gemfile
