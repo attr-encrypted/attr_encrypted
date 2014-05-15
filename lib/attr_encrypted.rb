@@ -315,9 +315,9 @@ module AttrEncrypted
       # If the option is not a symbol or proc then the original option is returned
       def evaluate_attr_encrypted_option(option)
         if option.is_a?(Symbol) && respond_to?(option)
-          send(option)
+          evaluate_attr_encrypted_option(send(option))
         elsif option.respond_to?(:call)
-          option.call(self)
+          evaluate_attr_encrypted_option(option.call(self))
         else
           option
         end
