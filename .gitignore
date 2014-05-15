@@ -2,3 +2,4 @@
 pkg
 Gemfile.lock
 coverage
+gemfiles/*.gemfile.lock

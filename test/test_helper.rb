@@ -25,8 +25,6 @@ $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $:.unshift(File.dirname(__FILE__))
 require 'attr_encrypted'
 
-puts "\nTesting with ActiveRecord #{ActiveRecord::VERSION::STRING rescue ENV['ACTIVE_RECORD_VERSION']}"
-
 DB = Sequel.sqlite
 
 # The :after_initialize hook was removed in Sequel 4.0
