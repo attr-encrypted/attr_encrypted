@@ -328,4 +328,12 @@ class AttrEncryptedTest < Test::Unit::TestCase
 
     assert_equal 'test@example.com', @user1.decrypt(:email, @user1.encrypted_email)
   end
+
+  def test_should_evaluate_a_proc_option_for_conditional_encryption
+    @user = User.new
+    @user.should_encrypt= proc { false }
+    @clear_text = "this shouldn't encrypt"
+    @user.with_if_changed = @clear_text
+    assert_equal @clear_text, @user.encrypted_with_if_changed
+  end
 end
