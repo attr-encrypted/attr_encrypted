@@ -28,10 +28,12 @@ Gem::Specification.new do |s|
 
   s.add_dependency('encryptor', ['>= 1.3.0'])
   s.add_development_dependency('datamapper')
+  s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('mocha', '~>1.0.0')
+  s.add_development_dependency('pry')
+  s.add_development_dependency('pry-debugger') if RUBY_VERSION > '1.8.7'
   s.add_development_dependency('sequel')
   s.add_development_dependency('sqlite3')
-  s.add_development_dependency('dm-sqlite-adapter')
   # Lock to "rake" version 0.9.2.2 in order to use deprecated "rake/rdoctask".
   # Once we drop official support for Ruby 1.8.7, we can loosen this constraint
   # and allow our dependencies to "float" to the latest version of "rake".
