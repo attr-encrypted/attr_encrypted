@@ -228,7 +228,7 @@ module AttrEncrypted
   #   email = User.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
   def decrypt(attribute, encrypted_value, options = {})
     options = encrypted_attributes[attribute.to_sym].merge(options)
-    if options[:if] && !options[:unless] && !encrypted_value.nil? && !(encrypted_value.is_a?(String) && encrypted_value.empty?)
+    if options[:if] && !options[:unless] && not_empty?(encrypted_value)
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
       value = options[:encryptor].send(options[:decrypt_method], options.merge!(value: encrypted_value))
       if options[:marshal]
@@ -254,7 +254,7 @@ module AttrEncrypted
   #   encrypted_email = User.encrypt(:email, 'test@example.com')
   def encrypt(attribute, value, options = {})
     options = encrypted_attributes[attribute.to_sym].merge(options)
-    if options[:if] && !options[:unless] && !value.nil? && !(value.is_a?(String) && value.empty?)
+    if options[:if] && !options[:unless] && not_empty?(value)
       value = options[:marshal] ? options[:marshaler].send(options[:dump_method], value) : value.to_s
       encrypted_value = options[:encryptor].send(options[:encrypt_method], options.merge!(value: value))
       encrypted_value = [encrypted_value].pack(options[:encode]) if options[:encode]
@@ -262,6 +262,10 @@ module AttrEncrypted
     else
       value
     end
+  end
+
+  def not_empty?(value)
+    !value.nil? && !(value.is_a?(String) && value.empty?)
   end
 
   # Contains a hash of encrypted attributes with virtual attribute names as keys
