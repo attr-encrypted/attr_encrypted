@@ -142,6 +142,10 @@ class ActiveRecordTest < Minitest::Test
     Account.create!(:password => "password" , :key => SECRET_KEY)
   end
 
+  def test_should_set_attributes_regardless_of_arguments_order
+    Account.new.attributes = { :password => "password" , :key => SECRET_KEY }
+  end
+
   if ::ActiveRecord::VERSION::STRING > "4.0"
     def test_should_assign_attributes
       @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
