@@ -27,6 +27,7 @@ class User
   attr_encrypted :with_true_unless, :key => SECRET_KEY, :unless => true
   attr_encrypted :with_false_unless, :key => SECRET_KEY, :unless => false
   attr_encrypted :with_if_changed, :key => SECRET_KEY, :if => :should_encrypt
+  attr_encrypted :with_allow_empty, :key => SECRET_KEY, :allow_empty => true, :encryptor => SillyEncryptor, :encrypt_method => :silly_encrypt, :decrypt_method => :silly_decrypt, :some_arg => 'test'
 
   attr_encryptor :aliased, :key => SECRET_KEY
 
@@ -252,6 +253,14 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user.with_true_unless = 'testing'
     assert_not_nil @user.encrypted_with_true_unless
     assert_equal 'testing', @user.encrypted_with_true_unless
+  end
+
+  def test_should_encrypt_empty_with_empty_allowed
+    @user = User.new
+    assert_nil @user.encrypted_with_allow_empty
+    @user.with_allow_empty = ''
+    assert_not_nil @user.encrypted_with_allow_empty
+    assert_equal '', @user.with_allow_empty
   end
 
   def test_should_work_with_aliased_attr_encryptor
