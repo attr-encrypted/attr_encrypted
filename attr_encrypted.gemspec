@@ -27,21 +27,16 @@ Gem::Specification.new do |s|
   s.test_files = Dir['test/**/*']
 
   s.add_dependency('encryptor', ['>= 1.3.0'])
-  if RUBY_VERSION < '1.9.3'
-    # For Ruby 1.8.7 CI builds, we must force a dependency on the latest Ruby
-    # 1.8.7-compatible version of ActiveSupport (i.e. pre-4.0.0).
-    s.add_development_dependency('activerecord', ['>= 2.0.0'], ['< 4.0.0'])
-  else
-    # In practice, we'll always build the official gem using Ruby 1.9.3 or
-    # later, in which case we can allow installation on machines with any
-    # supported version of ActiveRecord from 2.0.0 onwards.
-    s.add_development_dependency('activerecord', ['>= 2.0.0'])
-  end
   s.add_development_dependency('datamapper')
+  s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('mocha', '~>1.0.0')
+  s.add_development_dependency('pry')
+  s.add_development_dependency('pry-debugger') if RUBY_VERSION > '1.8.7'
   s.add_development_dependency('sequel')
   s.add_development_dependency('sqlite3')
-  s.add_development_dependency('dm-sqlite-adapter')
+  # Lock to "rake" version 0.9.2.2 in order to use deprecated "rake/rdoctask".
+  # Once we drop official support for Ruby 1.8.7, we can loosen this constraint
+  # and allow our dependencies to "float" to the latest version of "rake".
   s.add_development_dependency('rake', '0.9.2.2')
   if RUBY_VERSION < '1.9.3'
     s.add_development_dependency('rcov')
