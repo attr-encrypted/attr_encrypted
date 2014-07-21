@@ -87,6 +87,11 @@ class UserWithProtectedAttribute < ActiveRecord::Base
   attr_protected :is_admin if ::ActiveRecord::VERSION::STRING < "4.0"
 end
 
+class PersonUsingAlias < ActiveRecord::Base
+  self.table_name = 'people'
+  attr_encryptor :email, :key => 'a secret key'
+end
+
 class ActiveRecordTest < Test::Unit::TestCase
 
   def setup
@@ -195,6 +200,18 @@ class ActiveRecordTest < Test::Unit::TestCase
     def test_should_allow_assign_attributes_with_nil
       @person = Person.new
       assert_nil(@person.assign_attributes nil)
+    end
+  end
+
+  class TestAlias < Test::Unit::TestCase
+    def test_that_alias_encrypts_column
+      user = PersonUsingAlias.new
+      user.email = 'test@example.com'
+      user.save
+
+      assert_not_nil user.encrypted_email
+      assert_not_equal user.email, user.encrypted_email
+      assert_equal user.email, PersonUsingAlias.find(:first).email
     end
   end
 end

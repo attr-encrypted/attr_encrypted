@@ -6,6 +6,7 @@ if defined?(ActiveRecord::Base)
           base.class_eval do
             attr_encrypted_options[:encode] = true
             class << self
+              alias_method :attr_encryptor, :attr_encrypted
               alias_method_chain :method_missing, :attr_encrypted
               alias_method :undefine_attribute_methods, :reset_column_information if ::ActiveRecord::VERSION::STRING < "3"
             end
