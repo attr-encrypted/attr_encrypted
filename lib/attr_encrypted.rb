@@ -1,4 +1,5 @@
 require 'encryptor'
+require 'attr_encrypted/errors'
 
 # Adds attr_accessors that encrypt and decrypt an object's attributes
 module AttrEncrypted
@@ -204,6 +205,13 @@ module AttrEncrypted
     else
       encrypted_value
     end
+  rescue Encryptor::Error => ex
+    handle_encryptor_error({
+      :exception => ex,
+      :method    => 'decrypt',
+      :message   => encrypted_value,
+      :attribute => attribute,
+    })
   end
 
   # Encrypts a value for the attribute specified
@@ -225,6 +233,13 @@ module AttrEncrypted
     else
       value
     end
+  rescue Encryptor::Error => ex
+    handle_encryptor_error({
+      :exception => ex,
+      :method    => 'encrypt',
+      :message   => encrypted_value,
+      :attribute => attribute,
+    })
   end
 
   # Contains a hash of encrypted attributes with virtual attribute names as keys
@@ -320,6 +335,24 @@ module AttrEncrypted
           option.call(self)
         else
           option
+        end
+      end
+
+      def handle_encryptor_error(options)
+        base_message = "Could not #{ options[:method] } message ( #{ options[:message] } ) for #{ options[:attribute] }"
+        exception = options[:exception]
+
+        case exception
+        when Encryptor::Errors::CipherError
+          raise Errors::CipherError, base_message + ": #{ exception.message }"
+        when Encryptor::Errors::BadDecryptError
+          raise Errors::BadDecryptError, base_message + " using the supplied key, salt and iv."
+        when Encryptor::Errors::BlockLengthError
+          raise Errors::BlockLengthError, base_message + " ciphertext may have been truncated by database or corrupted in transit."
+        when Encryptor::Errors::IVLengthError
+          raise Errors::IVLengthError, base_message + " iv is too short."
+        else
+          raise exception
         end
       end
 

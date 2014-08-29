@@ -1,6 +1,10 @@
 source "http://rubygems.org"
 
-gem 'encryptor', :git => 'https://github.com/attr-encrypted/encryptor'
+# if you're also working on encryptor use the local copy
+#gem 'encryptor', :path => '../encryptor'
+
+# if you are just working on attr_encrypted use this version
+gem 'encryptor', :git => 'https://github.com/12spokes/encryptor', :branch => 'rescue-cipher-error'
 
 gemspec
 
