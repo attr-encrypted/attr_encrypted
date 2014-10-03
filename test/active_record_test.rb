@@ -241,16 +241,14 @@ class ActiveRecordTest < Test::Unit::TestCase
     end
   end
 
-  class TestAlias < Test::Unit::TestCase
-    def test_that_alias_encrypts_column
-      user = PersonUsingAlias.new
-      user.email = 'test@example.com'
-      user.save
+  def test_that_alias_encrypts_column
+    user = PersonUsingAlias.new
+    user.email = 'test@example.com'
+    user.save
 
-      assert_not_nil user.encrypted_email
-      assert_not_equal user.email, user.encrypted_email
-      assert_equal user.email, PersonUsingAlias.find(:first).email
-    end
+    assert_not_nil user.encrypted_email
+    assert_not_equal user.email, user.encrypted_email
+    assert_equal user.email, PersonUsingAlias.find(:first).email
   end
 
   # See https://github.com/attr-encrypted/attr_encrypted/issues/68
