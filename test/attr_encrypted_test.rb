@@ -53,7 +53,7 @@ class SomeOtherClass
   end
 end
 
-class AttrEncryptedTest < Test::Unit::TestCase
+class AttrEncryptedTest < MiniTest::Unit::TestCase
 
   def test_should_store_email_in_encrypted_attributes
     assert User.encrypted_attributes.include?(:email)
@@ -68,7 +68,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
   end
 
   def test_attr_encrypted_should_not_use_the_same_attribute_name_for_two_attributes_in_the_same_line
-    assert_not_equal User.encrypted_attributes[:email][:attribute], User.encrypted_attributes[:without_encoding][:attribute]
+    refute_equal User.encrypted_attributes[:email][:attribute], User.encrypted_attributes[:without_encoding][:attribute]
   end
 
   def test_attr_encrypted_should_return_false_for_salt
@@ -96,15 +96,15 @@ class AttrEncryptedTest < Test::Unit::TestCase
   end
 
   def test_should_encrypt_email
-    assert_not_nil User.encrypt_email('test@example.com')
-    assert_not_equal 'test@example.com', User.encrypt_email('test@example.com')
+    refute_nil User.encrypt_email('test@example.com')
+    refute_equal 'test@example.com', User.encrypt_email('test@example.com')
   end
 
   def test_should_encrypt_email_when_modifying_the_attr_writer
     @user = User.new
     assert_nil @user.encrypted_email
     @user.email = 'test@example.com'
-    assert_not_nil @user.encrypted_email
+    refute_nil @user.encrypted_email
     assert_equal User.encrypt_email('test@example.com'), @user.encrypted_email
   end
 
@@ -118,7 +118,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
 
   def test_should_decrypt_email
     encrypted_email = User.encrypt_email('test@example.com')
-    assert_not_equal 'test@test.com', encrypted_email
+    refute_equal 'test@test.com', encrypted_email
     assert_equal 'test@example.com', User.decrypt_email(encrypted_email)
   end
 
@@ -152,7 +152,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
   def test_should_encrypt_with_marshaling
     @user = User.new
     @user.with_marshaling = [1, 2, 3]
-    assert_not_nil @user.encrypted_with_marshaling
+    refute_nil @user.encrypted_with_marshaling
   end
 
   def test_should_use_custom_encryptor_and_crypt_method_names_and_arguments
@@ -163,7 +163,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user = User.new
     assert_nil @user.ssn_encrypted
     @user.ssn = 'testing'
-    assert_not_nil @user.ssn_encrypted
+    refute_nil @user.ssn_encrypted
     encrypted =  Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.ssn_encrypted_iv.unpack("m").first, :salt => @user.ssn_encrypted_salt )
     assert_equal encrypted, @user.ssn_encrypted
   end
@@ -172,7 +172,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user = User.new
     assert_nil @user.crypted_password_test
     @user.password = 'testing'
-    assert_not_nil @user.crypted_password_test
+    refute_nil @user.crypted_password_test
     encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.crypted_password_test_iv.unpack("m").first, :salt =>  @user.crypted_password_test_salt)
     assert_equal encrypted, @user.crypted_password_test
   end
@@ -181,7 +181,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user = User.new
     assert_nil @user.crypted_password_test
     @user.password = 'testing'
-    assert_not_nil @user.crypted_password_test
+    refute_nil @user.crypted_password_test
     encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.crypted_password_test_iv.unpack("m").first, :salt => @user.crypted_password_test_salt)
     assert_equal encrypted, @user.crypted_password_test
   end
@@ -224,7 +224,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user = User.new
     assert_nil @user.encrypted_with_true_if
     @user.with_true_if = 'testing'
-    assert_not_nil @user.encrypted_with_true_if
+    refute_nil @user.encrypted_with_true_if
     encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.encrypted_with_true_if_iv.unpack("m").first, :salt => @user.encrypted_with_true_if_salt)
     assert_equal encrypted, @user.encrypted_with_true_if
   end
@@ -233,7 +233,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user = User.new
     assert_nil @user.encrypted_with_false_if
     @user.with_false_if = 'testing'
-    assert_not_nil @user.encrypted_with_false_if
+    refute_nil @user.encrypted_with_false_if
     assert_equal 'testing', @user.encrypted_with_false_if
   end
 
@@ -241,7 +241,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user = User.new
     assert_nil @user.encrypted_with_false_unless
     @user.with_false_unless = 'testing'
-    assert_not_nil @user.encrypted_with_false_unless
+    refute_nil @user.encrypted_with_false_unless
     encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.encrypted_with_false_unless_iv.unpack("m").first, :salt => @user.encrypted_with_false_unless_salt)
     assert_equal encrypted,  @user.encrypted_with_false_unless
   end
@@ -250,7 +250,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user = User.new
     assert_nil @user.encrypted_with_true_unless
     @user.with_true_unless = 'testing'
-    assert_not_nil @user.encrypted_with_true_unless
+    refute_nil @user.encrypted_with_true_unless
     assert_equal 'testing', @user.encrypted_with_true_unless
   end
 
@@ -288,7 +288,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user = User.new
     @user.email = 'email@example.com'
     @user.password = 'p455w0rd'
-    assert_not_equal @user.encrypted_email_iv, @user.crypted_password_test_iv
+    refute_equal @user.encrypted_email_iv, @user.crypted_password_test_iv
   end
 
   def test_should_vary_iv_per_instance
@@ -296,14 +296,14 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user1.email = 'email@example.com'
     @user2 = User.new
     @user2.email = 'email@example.com'
-    assert_not_equal @user1.encrypted_email_iv, @user2.encrypted_email_iv
+    refute_equal @user1.encrypted_email_iv, @user2.encrypted_email_iv
   end
 
   def test_should_vary_salt_per_attribute
     @user = User.new
     @user.email = 'email@example.com'
     @user.password = 'p455w0rd'
-    assert_not_equal @user.encrypted_email_salt, @user.crypted_password_test_salt
+    refute_equal @user.encrypted_email_salt, @user.crypted_password_test_salt
   end
 
   def test_should_vary_salt_per_instance
@@ -311,7 +311,7 @@ class AttrEncryptedTest < Test::Unit::TestCase
     @user1.email = 'email@example.com'
     @user2 = User.new
     @user2.email = 'email@example.com'
-    assert_not_equal @user1.encrypted_email_salt, @user2.encrypted_email_salt
+    refute_equal @user1.encrypted_email_salt, @user2.encrypted_email_salt
   end
 
   def test_should_decrypt_second_record

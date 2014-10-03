@@ -10,12 +10,11 @@ SimpleCov.start do
   add_filter 'test'
 end
 
-require 'test/unit'
-require 'digest/sha2'
-require 'rubygems'
-gem 'activerecord', ENV['ACTIVE_RECORD_VERSION'] if ENV['ACTIVE_RECORD_VERSION']
+require 'minitest/autorun'
+require 'minitest/unit'
 require 'active_record'
 require 'data_mapper'
+require 'digest/sha2'
 require 'sequel'
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
