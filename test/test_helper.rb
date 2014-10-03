@@ -23,7 +23,11 @@ require 'attr_encrypted'
 
 puts "\nTesting with ActiveRecord #{ActiveRecord::VERSION::STRING rescue ENV['ACTIVE_RECORD_VERSION']}"
 
-DB = Sequel.sqlite
+DB = if defined?(RUBY_ENGINE) && RUBY_ENGINE.to_sym == :jruby
+  Sequel.jdbc('jdbc:sqlite::memory:')
+else
+  Sequel.sqlite
+end
 
 # The :after_initialize hook was removed in Sequel 4.0
 # and had been deprecated for a while before that:
@@ -32,4 +36,3 @@ DB = Sequel.sqlite
 Sequel::Model.plugin :after_initialize
 
 SECRET_KEY = 4.times.map { Digest::SHA256.hexdigest((Time.now.to_i * rand(5)).to_s) }.join
-

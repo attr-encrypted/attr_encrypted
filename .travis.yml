@@ -3,6 +3,7 @@ rvm:
   - 1.9.3
   - 2.0.0
   - 2.1
+  - jruby
 env:
   - ACTIVERECORD=2.3.8
   - ACTIVERECORD=3.0.0

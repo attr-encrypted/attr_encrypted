@@ -41,7 +41,11 @@ Gem::Specification.new do |s|
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
   s.add_development_dependency('sequel')
-  s.add_development_dependency('sqlite3')
+  if defined?(RUBY_ENGINE) && RUBY_ENGINE.to_sym == :jruby
+    s.add_development_dependency('activerecord-jdbcsqlite3-adapter')
+  else
+    s.add_development_dependency('sqlite3')
+  end
   s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('simplecov')
   s.add_development_dependency('simplecov-rcov')
