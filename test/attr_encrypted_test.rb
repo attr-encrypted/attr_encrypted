@@ -261,11 +261,6 @@ class AttrEncryptedTest < Test::Unit::TestCase
   def test_should_always_reset_options
     @user = User.new
     @user.with_if_changed = "encrypt_stuff"
-    @user.stubs(:instance_variable_get).returns(nil)
-    @user.stubs(:instance_variable_set).raises("BadStuff")
-    assert_raise RuntimeError do
-      @user.with_if_changed
-    end
 
     @user = User.new
     @user.should_encrypt = false

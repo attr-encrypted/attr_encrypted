@@ -266,11 +266,6 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
   def test_should_always_reset_options
     @user = LegacyUser.new
     @user.with_if_changed = "encrypt_stuff"
-    @user.stubs(:instance_variable_get).returns(nil)
-    @user.stubs(:instance_variable_set).raises("BadStuff")
-    assert_raise RuntimeError do 
-      @user.with_if_changed
-    end
 
     @user = LegacyUser.new
     @user.should_encrypt = false
