@@ -39,6 +39,48 @@ Encrypting attributes has never been easier:
 
 The <tt>attr_encrypted</tt> method is also aliased as <tt>attr_encryptor</tt> to conform to Ruby's <tt>attr_</tt> naming conventions. I should have called this project <tt>attr_encryptor</tt> but it was too late when I realized it ='(.
 
+=== Adding required columns via database migration
+
+By default, <tt>attr_encrypted</tt> uses the <tt>:single_iv_and_salt</tt>
+encryption mode for compatibility with previous versions of the gem. This mode
+uses a single IV and salt for each encrypted column. Create or modify your model
+to add a column with the <tt>encrypted_</tt> prefix (which can be modified, see
+below), e.g. <tt>encrypted_ssn</tt> via a migration like the following:
+
+  create_table :users do |t|
+    t.string :name
+    t.string :encrypted_ssn
+    t.timestamps
+  end
+
+For enhanced security, you can use the <tt>:per_attribute_iv_and_salt</tt> mode.
+This requires additional <tt>_salt</tt> and <tt>_iv</tt> columns with the
+<tt>encrypted_</tt> prefix as follows and generates a unique salt and IV per
+attribute:
+
+  create_table :users do |t|
+    t.string :name
+    t.string :encrypted_ssn
+    t.string :encrypted_ssn_salt
+    t.string :encrypted_ssn_iv
+    t.string :domain
+    t.timestamps
+  end
+
+This mode is enabled by specifying a value of <tt>:per_attribute_iv_and_salt</tt>
+via the <tt>:mode</tt> option as follows:
+
+  class User
+    attr_accessor :name
+    attr_encrypted :ssn, :key => 'a secret key', :mode => :per_attribute_iv_and_salt
+  end
+
+Note that there are alternatives to storing the IV and salt in separate columns:
+for example, see here[https://github.com/attr-encrypted/attr_encrypted/issues/118#issuecomment-45806629].
+Note that migration from the old encryption scheme to the new is nontrivial. One
+approach is described here[http://jjasonclark.com/switching_from_attr_encrypted_to_attr_encryptor],
+though these instructions describe the now-defunct <tt>attr_encryptor</tt> gem
+whose functionality has been merged into this project.
 
 === Specifying the encrypted attribute name
 
