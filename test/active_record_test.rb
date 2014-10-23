@@ -70,6 +70,11 @@ class PersonWithValidation < Person
   validates_presence_of :email
 end
 
+class PersonWithProcMode < Person
+  attr_encrypted :email,       :key => SECRET_KEY, :mode => Proc.new { :per_attribute_iv_and_salt }
+  attr_encrypted :credentials, :key => SECRET_KEY, :mode => Proc.new { :single_iv_and_salt }
+end
+
 class Account < ActiveRecord::Base
   attr_accessor :key
   attr_encrypted :password, :key => Proc.new {|account| account.key}
@@ -194,6 +199,22 @@ class ActiveRecordTest < Test::Unit::TestCase
   def test_should_allow_assignment_of_nil_attributes
     @person = Person.new
     assert_nil(@person.attributes = nil)
+  end
+
+  def test_should_allow_proc_based_mode
+    @person = PersonWithProcMode.create :email => 'test@example.com', :password => 'password123'
+
+    # Email is :per_attribute_iv_and_salt
+    assert_equal @person.class.encrypted_attributes[:email][:mode].class, Proc
+    assert_equal @person.class.encrypted_attributes[:email][:mode].call, :per_attribute_iv_and_salt
+    assert_not_nil @person.encrypted_email_salt
+    assert_not_nil @person.encrypted_email_iv
+
+    # Credentials is :single_iv_and_salt
+    assert_equal @person.class.encrypted_attributes[:credentials][:mode].class, Proc
+    assert_equal @person.class.encrypted_attributes[:credentials][:mode].call, :single_iv_and_salt
+    assert_nil @person.encrypted_credentials_salt
+    assert_nil @person.encrypted_credentials_iv
   end
 
   if ::ActiveRecord::VERSION::STRING > "3.1"
