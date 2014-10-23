@@ -302,7 +302,7 @@ module AttrEncrypted
 
       # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
       def evaluated_attr_encrypted_options_for(attribute)
-        if self.class.encrypted_attributes[attribute.to_sym][:mode] == :per_attribute_iv_and_salt
+        if evaluate_attr_encrypted_option(self.class.encrypted_attributes[attribute.to_sym][:mode]) == :per_attribute_iv_and_salt
           load_iv_for_attribute(attribute, self.class.encrypted_attributes[attribute.to_sym][:algorithm])
           load_salt_for_attribute(attribute)
         end
