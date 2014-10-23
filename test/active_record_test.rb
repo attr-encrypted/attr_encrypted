@@ -212,7 +212,7 @@ class ActiveRecordTest < Minitest::Test
   end
 
   def test_should_allow_proc_based_mode
-    @person = PersonWithProcMode.create :email => 'test@example.com', :password => 'password123'
+    @person = PersonWithProcMode.create :email => 'test@example.com', :credentials => 'password123'
 
     # Email is :per_attribute_iv_and_salt
     assert_equal @person.class.encrypted_attributes[:email][:mode].class, Proc
