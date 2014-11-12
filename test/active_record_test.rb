@@ -25,6 +25,9 @@ def create_tables
         t.string :encrypted_password
         t.boolean :is_admin
       end
+      create_table :prime_ministers do |t|
+        t.string :encrypted_name
+      end
     end
   end
 end
@@ -95,6 +98,10 @@ end
 class PersonUsingAlias < ActiveRecord::Base
   self.table_name = 'people'
   attr_encryptor :email, :key => 'a secret key'
+end
+
+class PrimeMinister < ActiveRecord::Base
+  attr_encrypted :name, :marshal => true, :key => 'SECRET_KEY'
 end
 
 class ActiveRecordTest < Test::Unit::TestCase
@@ -234,5 +241,18 @@ class ActiveRecordTest < Test::Unit::TestCase
       assert_not_equal user.email, user.encrypted_email
       assert_equal user.email, PersonUsingAlias.find(:first).email
     end
+  end
+
+  # See https://github.com/attr-encrypted/attr_encrypted/issues/68
+  def test_should_invalidate_virtual_attributes_on_reload
+    pm = PrimeMinister.new(:name => 'Winston Churchill')
+    pm.save!
+    assert_equal 'Winston Churchill', pm.name
+    pm.name = 'Neville Chamberlain'
+    assert_equal 'Neville Chamberlain', pm.name
+
+    result = pm.reload
+    assert_equal pm, result
+    assert_equal 'Winston Churchill', pm.name
   end
 end

@@ -4,6 +4,17 @@ if defined?(ActiveRecord::Base)
       module ActiveRecord
         def self.extended(base) # :nodoc:
           base.class_eval do
+
+            # https://github.com/attr-encrypted/attr_encrypted/issues/68
+            def reload_with_attr_encrypted(*args, &block)
+              result = reload_without_attr_encrypted(*args, &block)
+              self.class.encrypted_attributes.keys.each do |attribute_name|
+                instance_variable_set("@#{attribute_name}", nil)
+              end
+              result
+            end
+            alias_method_chain :reload, :attr_encrypted
+
             attr_encrypted_options[:encode] = true
             class << self
               alias_method :attr_encryptor, :attr_encrypted
