@@ -154,16 +154,6 @@ class ActiveRecordTest < Test::Unit::TestCase
     Account.create!(:password => "password" , :key => SECRET_KEY)
   end
 
-  def test_should_set_attributes_regardless_of_arguments_order
-    Account.new.attributes = { :password => "password" , :key => SECRET_KEY }
-  end
-
-  def test_should_preserve_hash_key_type
-    hash = { :foo => 'bar' }
-    account = Account.create!(:key => hash)
-    assert_equal account.key, hash
-  end
-
   if ::ActiveRecord::VERSION::STRING > "4.0"
     def test_should_assign_attributes
       @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
