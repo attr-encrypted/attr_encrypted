@@ -24,10 +24,9 @@ if defined?(ActiveRecord::Base)
 
             def perform_attribute_assignment(method, new_attributes, *args)
               return if new_attributes.blank?
-              attributes = new_attributes.respond_to?(:with_indifferent_access) ? new_attributes.with_indifferent_access : new_attributes.symbolize_keys
-              encrypted_attributes = self.class.encrypted_attributes.keys
-              self.send method, attributes.except(*encrypted_attributes), *args
-              self.send method, attributes.slice(*encrypted_attributes), *args
+
+              send method, new_attributes.reject { |k, _|  self.class.encrypted_attributes.key?(k.to_sym) }, *args
+              send method, new_attributes.reject { |k, _| !self.class.encrypted_attributes.key?(k.to_sym) }, *args
             end
             private :perform_attribute_assignment
 
@@ -47,7 +46,7 @@ if defined?(ActiveRecord::Base)
 
         protected
 
-          # Ensures the attribute methods for db fields have been defined before calling the original 
+          # Ensures the attribute methods for db fields have been defined before calling the original
           # <tt>attr_encrypted</tt> method
           def attr_encrypted(*attrs)
             define_attribute_methods rescue nil
@@ -56,12 +55,12 @@ if defined?(ActiveRecord::Base)
             attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr| alias_method "#{attr}_before_type_cast", attr }
           end
 
-          # Allows you to use dynamic methods like <tt>find_by_email</tt> or <tt>scoped_by_email</tt> for 
+          # Allows you to use dynamic methods like <tt>find_by_email</tt> or <tt>scoped_by_email</tt> for
           # encrypted attributes
           #
           # NOTE: This only works when the <tt>:key</tt> option is specified as a string (see the README)
           #
-          # This is useful for encrypting fields like email addresses. Your user's email addresses 
+          # This is useful for encrypting fields like email addresses. Your user's email addresses
           # are encrypted in the database, but you can still look up a user by email for logging in
           #
           # Example
