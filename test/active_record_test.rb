@@ -154,6 +154,10 @@ class ActiveRecordTest < Test::Unit::TestCase
     Account.create!(:password => "password" , :key => SECRET_KEY)
   end
 
+  def test_should_set_attributes_regardless_of_arguments_order
+    assert_nothing_raised { Account.new.attributes = { :password => "password" , :key => SECRET_KEY } }
+  end
+
   def test_should_preserve_hash_key_type
     hash = { :foo => 'bar' }
     account = Account.create!(:key => hash)
