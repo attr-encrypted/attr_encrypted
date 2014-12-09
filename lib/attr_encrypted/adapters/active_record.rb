@@ -46,13 +46,17 @@ if defined?(ActiveRecord::Base)
 
         protected
 
-          # Ensures the attribute methods for db fields have been defined before calling the original
           # <tt>attr_encrypted</tt> method
           def attr_encrypted(*attrs)
-            define_attribute_methods rescue nil
             super
-            undefine_attribute_methods
             attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr| alias_method "#{attr}_before_type_cast", attr }
+          end
+
+          def attribute_instance_methods_as_symbols
+            # We add accessor methods of the db columns to the list of instance
+            # methods returned to let ActiveRecord define the accessor methods
+            # for the db columns
+            columns_hash.keys.inject(super) {|instance_methods, column_name| instance_methods.concat [column_name.to_sym, :"#{column_name}="]}
           end
 
           # Allows you to use dynamic methods like <tt>find_by_email</tt> or <tt>scoped_by_email</tt> for
