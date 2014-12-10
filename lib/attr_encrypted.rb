@@ -1,4 +1,4 @@
-require 'attr_encrypted/railtie' if defined? Rails
+require 'attr_encrypted/railtie' if defined? ::Rails::Railtie
 require 'encryptor'
 
 # Adds attr_accessors that encrypt and decrypt an object's attributes
@@ -345,4 +345,10 @@ module AttrEncrypted
         self.class.encrypted_attributes[attribute.to_sym] = self.class.encrypted_attributes[attribute.to_sym].merge(:salt => salt)
       end
   end
+end
+
+unless defined? ::Rails::Railtie
+  Object.extend AttrEncrypted
+
+  Dir[File.join(File.dirname(__FILE__), 'attr_encrypted', 'adapters', '*.rb')].each { |adapter| require adapter }
 end
