@@ -7,6 +7,7 @@ require File.expand_path('../test_helper', __FILE__)
 # versions.
 class CompatibilityTest < Test::Unit::TestCase
   def self.setup
+    ActiveRecord::Base.establish_connection :adapter => 'sqlite3', :database => ':memory:'
     ActiveRecord::Base.connection.tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }
     create_tables
   end
