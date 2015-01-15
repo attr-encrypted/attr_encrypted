@@ -74,32 +74,16 @@ class LegacyCompatibilityTest < Test::Unit::TestCase
 
   def test_marshalling_backwards_compatibility
     self.class.setup
-    # Marshalling formats changed significantly from Ruby 1.8.7 to 1.9.3.
-    # Also, Date class did not correctly support marshalling pre-1.9.3, so here
-    # we just marshal it as a string in the Ruby 1.8.7 case.
-    if RUBY_VERSION < '1.9.3'
-      pet = LegacyMarshallingPet.create!(
-        :name => 'Fido',
-        :encrypted_nickname => 'xhayxWxfkfbNyOS2w1qBMPV49Gfvs6dcZFBopMK2zQA=',
-        :encrypted_birthdate => 'f4ufXun4GXzahH4MQ1eTBQ=='
-      )
-    else
-      pet = LegacyMarshallingPet.create!(
-        :name => 'Fido',
-        :encrypted_nickname => '7RwoT64in4H+fGVBPYtRcN0K4RtriIy1EP4nDojUa8g=',
-        :encrypted_birthdate => 'bSp9sJhXQSp2QlNZHiujtcK4lRVBE8HQhn1y7moQ63bGJR20hvRSZ73ePAmm+wc5'
-      )
-    end
+    pet = LegacyMarshallingPet.create!(
+      :name => 'Fido',
+      :encrypted_nickname => '7RwoT64in4H+fGVBPYtRcN0K4RtriIy1EP4nDojUa8g=',
+      :encrypted_birthdate => 'bSp9sJhXQSp2QlNZHiujtcK4lRVBE8HQhn1y7moQ63bGJR20hvRSZ73ePAmm+wc5'
+    )
 
     assert_equal 'Fido', pet.name
     assert_equal 'Mummy\'s little helper', pet.nickname
 
-    # See earlier comment.
-    if RUBY_VERSION < '1.9.3'
-      assert_equal '2011-07-09', pet.birthdate
-    else
-      assert_equal Date.new(2011, 7, 9), pet.birthdate
-    end
+    assert_equal Date.new(2011, 7, 9), pet.birthdate
   end
 end
 
