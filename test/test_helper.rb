@@ -21,8 +21,6 @@ $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $:.unshift(File.dirname(__FILE__))
 require 'attr_encrypted'
 
-puts "\nTesting with ActiveRecord #{ActiveRecord::VERSION::STRING rescue ENV['ACTIVE_RECORD_VERSION']}"
-
 DB = if defined?(RUBY_ENGINE) && RUBY_ENGINE.to_sym == :jruby
   Sequel.jdbc('jdbc:sqlite::memory:')
 else
