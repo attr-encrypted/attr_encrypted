@@ -43,6 +43,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('sequel')
   if defined?(RUBY_ENGINE) && RUBY_ENGINE.to_sym == :jruby
     s.add_development_dependency('activerecord-jdbcsqlite3-adapter')
+    s.add_development_dependency('jdbc-sqlite3', '< 3.8.7') # 3.8.7 is nice and broke
   else
     s.add_development_dependency('sqlite3')
   end
