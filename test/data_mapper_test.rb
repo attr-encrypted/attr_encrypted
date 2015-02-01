@@ -27,7 +27,7 @@ end
 
 DataMapper.auto_migrate!
 
-class DataMapperTest < Test::Unit::TestCase
+class DataMapperTest < MiniTest::Unit::TestCase
 
   def setup
     Client.all.each(&:destroy)
@@ -36,16 +36,16 @@ class DataMapperTest < Test::Unit::TestCase
   def test_should_encrypt_email
     @client = Client.new :email => 'test@example.com'
     assert @client.save
-    assert_not_nil @client.encrypted_email
-    assert_not_equal @client.email, @client.encrypted_email
+    refute_nil @client.encrypted_email
+    refute_equal @client.email, @client.encrypted_email
     assert_equal @client.email, Client.first.email
   end
 
   def test_should_marshal_and_encrypt_credentials
     @client = Client.new
     assert @client.save
-    assert_not_nil @client.encrypted_credentials
-    assert_not_equal @client.credentials, @client.encrypted_credentials
+    refute_nil @client.encrypted_credentials
+    refute_equal @client.credentials, @client.encrypted_credentials
     assert_equal @client.credentials, Client.first.credentials
     assert Client.first.credentials.is_a?(Hash)
   end

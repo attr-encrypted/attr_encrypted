@@ -48,7 +48,7 @@ class LegacySomeOtherClass
   end
 end
 
-class LegacyAttrEncryptedTest < Test::Unit::TestCase
+class LegacyAttrEncryptedTest < MiniTest::Unit::TestCase
 
   def test_should_store_email_in_encrypted_attributes
     assert LegacyUser.encrypted_attributes.include?(:email)
@@ -63,7 +63,7 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
   end
 
   def test_attr_encrypted_should_not_use_the_same_attribute_name_for_two_attributes_in_the_same_line
-    assert_not_equal LegacyUser.encrypted_attributes[:email][:attribute], LegacyUser.encrypted_attributes[:without_encoding][:attribute]
+    refute_equal LegacyUser.encrypted_attributes[:email][:attribute], LegacyUser.encrypted_attributes[:without_encoding][:attribute]
   end
 
   def test_attr_encrypted_should_return_false_for_salt
@@ -91,15 +91,15 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
   end
 
   def test_should_encrypt_email
-    assert_not_nil LegacyUser.encrypt_email('test@example.com')
-    assert_not_equal 'test@example.com', LegacyUser.encrypt_email('test@example.com')
+    refute_nil LegacyUser.encrypt_email('test@example.com')
+    refute_equal 'test@example.com', LegacyUser.encrypt_email('test@example.com')
   end
 
   def test_should_encrypt_email_when_modifying_the_attr_writer
     @user = LegacyUser.new
     assert_nil @user.encrypted_email
     @user.email = 'test@example.com'
-    assert_not_nil @user.encrypted_email
+    refute_nil @user.encrypted_email
     assert_equal LegacyUser.encrypt_email('test@example.com'), @user.encrypted_email
   end
 
@@ -113,7 +113,7 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
 
   def test_should_decrypt_email
     encrypted_email = LegacyUser.encrypt_email('test@example.com')
-    assert_not_equal 'test@test.com', encrypted_email
+    refute_equal 'test@test.com', encrypted_email
     assert_equal 'test@example.com', LegacyUser.decrypt_email(encrypted_email)
   end
 
@@ -153,7 +153,7 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
   def test_should_encrypt_with_marshaling
     @user = LegacyUser.new
     @user.with_marshaling = [1, 2, 3]
-    assert_not_nil @user.encrypted_with_marshaling
+    refute_nil @user.encrypted_with_marshaling
     assert_equal LegacyUser.encrypt_with_marshaling([1, 2, 3]), @user.encrypted_with_marshaling
   end
 
@@ -173,7 +173,7 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
     @user = LegacyUser.new
     assert_nil @user.ssn_encrypted
     @user.ssn = 'testing'
-    assert_not_nil @user.ssn_encrypted
+    refute_nil @user.ssn_encrypted
     assert_equal Encryptor.encrypt(:value => 'testing', :key => @user.salt), @user.ssn_encrypted
   end
 
@@ -181,7 +181,7 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
     @user = LegacyUser.new
     assert_nil @user.crypted_password_test
     @user.password = 'testing'
-    assert_not_nil @user.crypted_password_test
+    refute_nil @user.crypted_password_test
     assert_equal Encryptor.encrypt(:value => 'testing', :key => 'LegacyUser'), @user.crypted_password_test
   end
 
@@ -189,7 +189,7 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
     @user = LegacyUser.new
     assert_nil @user.crypted_password_test
     @user.password = 'testing'
-    assert_not_nil @user.crypted_password_test
+    refute_nil @user.crypted_password_test
     assert_equal Encryptor.encrypt(:value => 'testing', :key => 'LegacyUser'), @user.crypted_password_test
   end
 
@@ -231,7 +231,7 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
     @user = LegacyUser.new
     assert_nil @user.encrypted_with_true_if
     @user.with_true_if = 'testing'
-    assert_not_nil @user.encrypted_with_true_if
+    refute_nil @user.encrypted_with_true_if
     assert_equal Encryptor.encrypt(:value => 'testing', :key => 'secret key'), @user.encrypted_with_true_if
   end
 
@@ -239,7 +239,7 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
     @user = LegacyUser.new
     assert_nil @user.encrypted_with_false_if
     @user.with_false_if = 'testing'
-    assert_not_nil @user.encrypted_with_false_if
+    refute_nil @user.encrypted_with_false_if
     assert_equal 'testing', @user.encrypted_with_false_if
   end
 
@@ -247,7 +247,7 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
     @user = LegacyUser.new
     assert_nil @user.encrypted_with_false_unless
     @user.with_false_unless = 'testing'
-    assert_not_nil @user.encrypted_with_false_unless
+    refute_nil @user.encrypted_with_false_unless
     assert_equal Encryptor.encrypt(:value => 'testing', :key => 'secret key'), @user.encrypted_with_false_unless
   end
 
@@ -255,7 +255,7 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
     @user = LegacyUser.new
     assert_nil @user.encrypted_with_true_unless
     @user.with_true_unless = 'testing'
-    assert_not_nil @user.encrypted_with_true_unless
+    refute_nil @user.encrypted_with_true_unless
     assert_equal 'testing', @user.encrypted_with_true_unless
   end
 
@@ -266,11 +266,6 @@ class LegacyAttrEncryptedTest < Test::Unit::TestCase
   def test_should_always_reset_options
     @user = LegacyUser.new
     @user.with_if_changed = "encrypt_stuff"
-    @user.stubs(:instance_variable_get).returns(nil)
-    @user.stubs(:instance_variable_set).raises("BadStuff")
-    assert_raise RuntimeError do 
-      @user.with_if_changed
-    end
 
     @user = LegacyUser.new
     @user.should_encrypt = false

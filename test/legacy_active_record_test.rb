@@ -45,7 +45,7 @@ class LegacyPersonWithValidation < LegacyPerson
   validates_uniqueness_of :encrypted_email
 end
 
-class LegacyActiveRecordTest < Test::Unit::TestCase
+class LegacyActiveRecordTest < MiniTest::Unit::TestCase
 
   def setup
     ActiveRecord::Base.connection.tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }
@@ -55,22 +55,22 @@ class LegacyActiveRecordTest < Test::Unit::TestCase
   def test_should_decrypt_with_correct_encoding
     if defined?(Encoding)
       @person = LegacyPerson.create :email => 'test@example.com'
-      assert_equal 'UTF-8', LegacyPerson.find(:first).email.encoding.name
+      assert_equal 'UTF-8', LegacyPerson.first.email.encoding.name
     end
   end
 
   def test_should_encrypt_email
     @person = LegacyPerson.create :email => 'test@example.com'
-    assert_not_nil @person.encrypted_email
-    assert_not_equal @person.email, @person.encrypted_email
-    assert_equal @person.email, LegacyPerson.find(:first).email
+    refute_nil @person.encrypted_email
+    refute_equal @person.email, @person.encrypted_email
+    assert_equal @person.email, LegacyPerson.first.email
   end
 
   def test_should_marshal_and_encrypt_credentials
     @person = LegacyPerson.create
-    assert_not_nil @person.encrypted_credentials
-    assert_not_equal @person.credentials, @person.encrypted_credentials
-    assert_equal @person.credentials, LegacyPerson.find(:first).credentials
+    refute_nil @person.encrypted_credentials
+    refute_equal @person.credentials, @person.encrypted_credentials
+    assert_equal @person.credentials, LegacyPerson.first.credentials
   end
 
   def test_should_find_by_email
@@ -86,13 +86,13 @@ class LegacyActiveRecordTest < Test::Unit::TestCase
 
   def test_should_scope_by_email
     @person = LegacyPerson.create(:email => 'test@example.com')
-    assert_equal @person, LegacyPerson.scoped_by_email('test@example.com').find(:first) rescue NoMethodError
+    assert_equal @person, LegacyPerson.scoped_by_email('test@example.com').first rescue NoMethodError
   end
 
   def test_should_scope_by_email_and_password
     LegacyPerson.create(:email => 'test@example.com', :password => 'invalid')
     @person = LegacyPerson.create(:email => 'test@example.com', :password => 'test')
-    assert_equal @person, LegacyPerson.scoped_by_email_and_password('test@example.com', 'test').find(:first) rescue NoMethodError
+    assert_equal @person, LegacyPerson.scoped_by_email_and_password('test@example.com', 'test').first rescue NoMethodError
   end
 
   def test_should_encode_by_default

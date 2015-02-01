@@ -22,7 +22,7 @@ end
 
 DataMapper.auto_migrate!
 
-class LegacyDataMapperTest < Test::Unit::TestCase
+class LegacyDataMapperTest < MiniTest::Unit::TestCase
 
   def setup
     LegacyClient.all.each(&:destroy)
@@ -31,16 +31,16 @@ class LegacyDataMapperTest < Test::Unit::TestCase
   def test_should_encrypt_email
     @client = LegacyClient.new :email => 'test@example.com'
     assert @client.save
-    assert_not_nil @client.encrypted_email
-    assert_not_equal @client.email, @client.encrypted_email
+    refute_nil @client.encrypted_email
+    refute_equal @client.email, @client.encrypted_email
     assert_equal @client.email, LegacyClient.first.email
   end
 
   def test_should_marshal_and_encrypt_credentials
     @client = LegacyClient.new
     assert @client.save
-    assert_not_nil @client.encrypted_credentials
-    assert_not_equal @client.credentials, @client.encrypted_credentials
+    refute_nil @client.encrypted_credentials
+    refute_equal @client.credentials, @client.encrypted_credentials
     assert_equal @client.credentials, LegacyClient.first.credentials
     assert LegacyClient.first.credentials.is_a?(Hash)
   end
