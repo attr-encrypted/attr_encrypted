@@ -56,7 +56,11 @@ if defined?(ActiveRecord::Base)
             # We add accessor methods of the db columns to the list of instance
             # methods returned to let ActiveRecord define the accessor methods
             # for the db columns
-            columns_hash.keys.inject(super) {|instance_methods, column_name| instance_methods.concat [column_name.to_sym, :"#{column_name}="]}
+            if table_exists?
+              columns_hash.keys.inject(super) {|instance_methods, column_name| instance_methods.concat [column_name.to_sym, :"#{column_name}="]}
+            else
+              super
+            end
           end
 
           # Allows you to use dynamic methods like <tt>find_by_email</tt> or <tt>scoped_by_email</tt> for
