@@ -13,6 +13,9 @@ if RUBY_VERSION >= '1.9.3'
 end
 
 require 'minitest'
+require "codeclimate-test-reporter"
+CodeClimate::TestReporter.start
+
 require 'minitest/autorun'
 require 'digest/sha2'
 require 'rubygems'

@@ -21,3 +21,6 @@ matrix:
       env: ACTIVERECORD=3.0.0
     - rvm: 2.0.0
       env: ACTIVERECORD=3.1.0
+addons:
+  code_climate:
+    repo_token: a90435ed4954dd6e9f3697a20c5bc3754f67d94703f870e8fc7b00f69f5b2d06
