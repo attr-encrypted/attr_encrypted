@@ -48,7 +48,7 @@ class LegacySomeOtherClass
   end
 end
 
-class LegacyAttrEncryptedTest < MiniTest::Test
+class LegacyAttrEncryptedTest < Minitest::Test
 
   def test_should_store_email_in_encrypted_attributes
     assert LegacyUser.encrypted_attributes.include?(:email)

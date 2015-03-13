@@ -27,7 +27,7 @@ end
 
 DataMapper.auto_migrate!
 
-class DataMapperTest < MiniTest::Test
+class DataMapperTest < Minitest::Test
 
   def setup
     Client.all.each(&:destroy)

@@ -104,7 +104,7 @@ class PrimeMinister < ActiveRecord::Base
   attr_encrypted :name, :marshal => true, :key => 'SECRET_KEY'
 end
 
-class ActiveRecordTest < MiniTest::Test
+class ActiveRecordTest < Minitest::Test
 
   def setup
     ActiveRecord::Base.connection.tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }

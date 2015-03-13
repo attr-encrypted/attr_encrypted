@@ -22,7 +22,7 @@ end
 
 DataMapper.auto_migrate!
 
-class LegacyDataMapperTest < MiniTest::Test
+class LegacyDataMapperTest < Minitest::Test
 
   def setup
     LegacyClient.all.each(&:destroy)
