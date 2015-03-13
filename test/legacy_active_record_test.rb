@@ -45,7 +45,7 @@ class LegacyPersonWithValidation < LegacyPerson
   validates_uniqueness_of :encrypted_email
 end
 
-class LegacyActiveRecordTest < MiniTest::Unit::TestCase
+class LegacyActiveRecordTest < MiniTest::Test
 
   def setup
     ActiveRecord::Base.connection.tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }

@@ -53,7 +53,7 @@ class SomeOtherClass
   end
 end
 
-class AttrEncryptedTest < MiniTest::Unit::TestCase
+class AttrEncryptedTest < MiniTest::Test
 
   def test_should_store_email_in_encrypted_attributes
     assert User.encrypted_attributes.include?(:email)

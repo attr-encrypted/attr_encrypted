@@ -18,7 +18,7 @@ class LegacyHuman < Sequel::Model(:legacy_humans)
   end
 end
 
-class LegacySequelTest < MiniTest::Unit::TestCase
+class LegacySequelTest < MiniTest::Test
 
   def setup
     LegacyHuman.all.each(&:destroy)

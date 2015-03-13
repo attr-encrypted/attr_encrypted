@@ -22,7 +22,7 @@ class Human < Sequel::Model(:humans)
   end
 end
 
-class SequelTest < MiniTest::Unit::TestCase
+class SequelTest < MiniTest::Test
 
   def setup
     Human.all.each(&:destroy)
