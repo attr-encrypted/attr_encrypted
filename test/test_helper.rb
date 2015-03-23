@@ -14,7 +14,12 @@ require "codeclimate-test-reporter"
 CodeClimate::TestReporter.start
 
 require 'minitest/autorun'
-require 'minitest/unit'
+
+# Rails 4.0.x pins to an old minitest
+unless defined?(MiniTest::Test)
+  MiniTest::Test = MiniTest::Unit::TestCase
+end
+
 require 'active_record'
 require 'data_mapper'
 require 'digest/sha2'
