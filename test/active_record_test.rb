@@ -92,7 +92,7 @@ class PersonUsingAlias < ActiveRecord::Base
   attr_encryptor :email, :key => 'a secret key'
 end
 
-class ActiveRecordTest < Test::Unit::TestCase
+class ActiveRecordTest < Minitest::Test
 
   def setup
     ActiveRecord::Base.connection.tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }
@@ -102,15 +102,15 @@ class ActiveRecordTest < Test::Unit::TestCase
 
   def test_should_encrypt_email
     @person = Person.create :email => 'test@example.com'
-    assert_not_nil @person.encrypted_email
-    assert_not_equal @person.email, @person.encrypted_email
+    refute_nil @person.encrypted_email
+    refute_equal @person.email, @person.encrypted_email
     assert_equal @person.email, Person.find(:first).email
   end
 
   def test_should_marshal_and_encrypt_credentials
     @person = Person.create
-    assert_not_nil @person.encrypted_credentials
-    assert_not_equal @person.credentials, @person.encrypted_credentials
+    refute_nil @person.encrypted_credentials
+    refute_equal @person.credentials, @person.encrypted_credentials
     assert_equal @person.credentials, Person.find(:first).credentials
   end
 
@@ -127,7 +127,7 @@ class ActiveRecordTest < Test::Unit::TestCase
   def test_should_encrypt_decrypt_with_iv
     @person = Person.create :email => 'test@example.com'
     @person2 = Person.find(@person.id)
-    assert_not_nil @person2.encrypted_email_iv
+    refute_nil @person2.encrypted_email_iv
     assert_equal 'test@example.com', @person2.email
   end
 
@@ -157,13 +157,13 @@ class ActiveRecordTest < Test::Unit::TestCase
 
     def test_should_raise_exception_if_not_permitted
       @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
-      assert_raise ActiveModel::ForbiddenAttributesError do
+      assert_raises ActiveModel::ForbiddenAttributesError do
         @user.attributes = ActionController::Parameters.new(:login => 'modified', :is_admin => true)
       end
     end
 
     def test_should_raise_exception_on_init_if_not_permitted
-      assert_raise ActiveModel::ForbiddenAttributesError do
+      assert_raises ActiveModel::ForbiddenAttributesError do
         @user = UserWithProtectedAttribute.new ActionController::Parameters.new(:login => 'modified', :is_admin => true)
       end
     end
@@ -203,15 +203,13 @@ class ActiveRecordTest < Test::Unit::TestCase
     end
   end
 
-  class TestAlias < Test::Unit::TestCase
-    def test_that_alias_encrypts_column
-      user = PersonUsingAlias.new
-      user.email = 'test@example.com'
-      user.save
+  def test_that_alias_encrypts_column
+    user = PersonUsingAlias.new
+    user.email = 'test@example.com'
+    user.save
 
-      assert_not_nil user.encrypted_email
-      assert_not_equal user.email, user.encrypted_email
-      assert_equal user.email, PersonUsingAlias.find(:first).email
-    end
+    refute_nil user.encrypted_email
+    refute_equal user.email, user.encrypted_email
+    assert_equal user.email, PersonUsingAlias.find(:first).email
   end
 end

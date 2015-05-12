@@ -12,7 +12,8 @@ if RUBY_VERSION >= '1.9.3'
   end
 end
 
-require 'test/unit'
+require 'minitest'
+require 'minitest/autorun'
 require 'digest/sha2'
 require 'rubygems'
 gem 'activerecord', ENV['ACTIVE_RECORD_VERSION'] if ENV['ACTIVE_RECORD_VERSION']

@@ -37,6 +37,7 @@ Gem::Specification.new do |s|
     # supported version of ActiveRecord from 2.0.0 onwards.
     s.add_development_dependency('activerecord', ['>= 2.0.0'])
   end
+  s.add_development_dependency('minitest')
   s.add_development_dependency('datamapper')
   s.add_development_dependency('mocha', '~>1.0.0')
   s.add_development_dependency('sequel')

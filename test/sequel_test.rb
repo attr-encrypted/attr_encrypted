@@ -22,7 +22,7 @@ class Human < Sequel::Model(:humans)
   end
 end
 
-class SequelTest < Test::Unit::TestCase
+class SequelTest < Minitest::Test
 
   def setup
     Human.all.each(&:destroy)
@@ -31,8 +31,8 @@ class SequelTest < Test::Unit::TestCase
   def test_should_encrypt_email
     @human = Human.new :email => 'test@example.com'
     assert @human.save
-    assert_not_nil @human.encrypted_email
-    assert_not_equal @human.email, @human.encrypted_email
+    refute_nil @human.encrypted_email
+    refute_equal @human.email, @human.encrypted_email
     assert_equal @human.email, Human.first.email
   end
 
@@ -40,8 +40,8 @@ class SequelTest < Test::Unit::TestCase
 
     @human = Human.new :credentials => { :username => 'example', :password => 'test' }
     assert @human.save
-    assert_not_nil @human.encrypted_credentials
-    assert_not_equal @human.credentials, @human.encrypted_credentials
+    refute_nil @human.encrypted_credentials
+    refute_equal @human.credentials, @human.encrypted_credentials
     assert_equal @human.credentials, Human.first.credentials
     assert Human.first.credentials.is_a?(Hash)
   end
