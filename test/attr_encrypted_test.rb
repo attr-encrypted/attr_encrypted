@@ -164,7 +164,7 @@ class AttrEncryptedTest < Minitest::Test
     assert_nil @user.ssn_encrypted
     @user.ssn = 'testing'
     refute_nil @user.ssn_encrypted
-    encrypted =  Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.ssn_encrypted_iv.unpack("m").first, :salt => @user.ssn_encrypted_salt )
+    encrypted =  Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.ssn_encrypted_iv.unpack("m").first, :salt => @user.ssn_encrypted_salt.unpack("m").first )
     assert_equal encrypted, @user.ssn_encrypted
   end
 
@@ -173,7 +173,7 @@ class AttrEncryptedTest < Minitest::Test
     assert_nil @user.crypted_password_test
     @user.password = 'testing'
     refute_nil @user.crypted_password_test
-    encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.crypted_password_test_iv.unpack("m").first, :salt =>  @user.crypted_password_test_salt)
+    encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.crypted_password_test_iv.unpack("m").first, :salt =>  @user.crypted_password_test_salt.unpack("m").first)
     assert_equal encrypted, @user.crypted_password_test
   end
 
@@ -182,7 +182,7 @@ class AttrEncryptedTest < Minitest::Test
     assert_nil @user.crypted_password_test
     @user.password = 'testing'
     refute_nil @user.crypted_password_test
-    encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.crypted_password_test_iv.unpack("m").first, :salt => @user.crypted_password_test_salt)
+    encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.crypted_password_test_iv.unpack("m").first, :salt => @user.crypted_password_test_salt.unpack("m").first)
     assert_equal encrypted, @user.crypted_password_test
   end
 
@@ -225,7 +225,7 @@ class AttrEncryptedTest < Minitest::Test
     assert_nil @user.encrypted_with_true_if
     @user.with_true_if = 'testing'
     refute_nil @user.encrypted_with_true_if
-    encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.encrypted_with_true_if_iv.unpack("m").first, :salt => @user.encrypted_with_true_if_salt)
+    encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.encrypted_with_true_if_iv.unpack("m").first, :salt => @user.encrypted_with_true_if_salt.unpack("m").first)
     assert_equal encrypted, @user.encrypted_with_true_if
   end
 
@@ -242,7 +242,7 @@ class AttrEncryptedTest < Minitest::Test
     assert_nil @user.encrypted_with_false_unless
     @user.with_false_unless = 'testing'
     refute_nil @user.encrypted_with_false_unless
-    encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.encrypted_with_false_unless_iv.unpack("m").first, :salt => @user.encrypted_with_false_unless_salt)
+    encrypted = Encryptor.encrypt(:value => 'testing', :key => SECRET_KEY, :iv => @user.encrypted_with_false_unless_iv.unpack("m").first, :salt => @user.encrypted_with_false_unless_salt.unpack("m").first)
     assert_equal encrypted,  @user.encrypted_with_false_unless
   end
 
