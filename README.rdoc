@@ -1,4 +1,4 @@
-= attr_encrypted {<img src="https://travis-ci.org/attr-encrypted/attr_encrypted.png" />}[https://travis-ci.org/attr-encrypted/attr_encrypted] {<img src="https://codeclimate.com/github/attr-encrypted/attr_encrypted/badges/gpa.svg" />}[https://codeclimate.com/github/attr-encrypted/attr_encrypted]{<img src="https://codeclimate.com/github/attr-encrypted/attr_encrypted/badges/gpa.svg" />}[https://codeclimate.com/github/attr-encrypted/attr_encrypted]
+= attr_encrypted {<img src="https://travis-ci.org/attr-encrypted/attr_encrypted.png" />}[https://travis-ci.org/attr-encrypted/attr_encrypted]
 
 Generates attr_accessors that encrypt and decrypt attributes transparently
 
