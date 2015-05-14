@@ -352,7 +352,7 @@ module AttrEncrypted
       end
 
       def decode_salt_if_encoded(salt)
-        salt.slice(0).eql?('_') ? salt.unpack("m").first : salt
+        salt.slice(0).eql?('_') ? salt.slice(1..-1).unpack("m").first : salt
       end
   end
 
