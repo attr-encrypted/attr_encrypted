@@ -3,7 +3,7 @@ module AttrEncrypted
   module Version
     MAJOR = 1
     MINOR = 3
-    PATCH = 5
+    PATCH = 4
 
     # Returns a version string by joining <tt>MAJOR</tt>, <tt>MINOR</tt>, and <tt>PATCH</tt> with <tt>'.'</tt>
     #
