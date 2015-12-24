@@ -11,6 +11,7 @@ if defined?(DataMapper)
 
         def included_with_attr_encrypted(base)
           included_without_attr_encrypted(base)
+          base.extend AttrEncrypted
           base.attr_encrypted_options[:encode] = true
         end
       end
