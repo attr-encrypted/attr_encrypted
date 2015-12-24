@@ -13,10 +13,18 @@ It works with ANY class, however, you get a few extra features when you're using
 == Usage
 
 === Basic
-
 Encrypting attributes has never been easier:
 
+If you're using an ORM like <tt>ActiveRecord</tt>, <tt>DataMapper</tt>, or <tt>Sequel</tt>, using attr_encryped is easy:
+
   class User
+    attr_encrypted :ssn, :key => 'a secret key'
+  end
+
+If you're using a PORO, you have to do a little bit more work by extending the class:
+
+  class User
+    extend AttrEncrypted
     attr_accessor :name
     attr_encrypted :ssn, :key => 'a secret key'
   
@@ -31,6 +39,7 @@ Encrypting attributes has never been easier:
   
   @user = User.new
   @user.ssn = '123-45-6789'
+  @user.ssn # returns the unencrypted object ie. '123-45-6789'
   @user.encrypted_ssn # returns the encrypted version of :ssn
   @user.save
   

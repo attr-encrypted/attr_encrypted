@@ -364,6 +364,5 @@ module AttrEncrypted
 
 end
 
-Object.extend AttrEncrypted
 
 Dir[File.join(File.dirname(__FILE__), 'attr_encrypted', 'adapters', '*.rb')].each { |adapter| require adapter }

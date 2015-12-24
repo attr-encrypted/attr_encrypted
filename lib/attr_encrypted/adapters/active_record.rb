@@ -101,5 +101,6 @@ if defined?(ActiveRecord::Base)
     end
   end
 
+  ActiveRecord::Base.extend AttrEncrypted
   ActiveRecord::Base.extend AttrEncrypted::Adapters::ActiveRecord
 end
