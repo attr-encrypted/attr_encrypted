@@ -153,6 +153,10 @@ module AttrEncrypted
         value.respond_to?(:empty?) ? !value.empty? : !!value
       end
 
+      define_method("#{attribute}_was") do
+        decrypt(attribute, send("#{encrypted_attribute_name}_was"))
+      end
+
       encrypted_attributes[attribute.to_sym] = options.merge(:attribute => encrypted_attribute_name)
     end
   end

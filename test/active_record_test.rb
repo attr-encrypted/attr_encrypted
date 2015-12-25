@@ -264,4 +264,14 @@ class ActiveRecordTest < Minitest::Test
     assert_equal pm, result
     assert_equal 'Winston Churchill', pm.name
   end
+
+  def test_should_support_attribute_was
+    pm = PrimeMinister.new(:name => 'Winston Churchill')
+    pm.save!
+    assert_equal 'Winston Churchill', pm.name
+
+    pm.name = 'John Doe'
+    assert_equal 'John Doe', pm.name
+    assert_equal 'Winston Churchill', pm.name_was
+  end
 end
