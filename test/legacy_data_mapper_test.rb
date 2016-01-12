@@ -1,17 +1,20 @@
-require File.expand_path('../test_helper', __FILE__)
+require_relative 'test_helper'
 
 DataMapper.setup(:default, 'sqlite3::memory:')
 
 class LegacyClient
   include DataMapper::Resource
+  self.attr_encrypted_options[:insecure_mode] = true
+  self.attr_encrypted_options[:algorithm] = 'aes-256-cbc'
+  self.attr_encrypted_options[:mode] = :single_iv_and_salt
 
   property :id, Serial
   property :encrypted_email, String
   property :encrypted_credentials, Text
   property :salt, String
 
-  attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |client| Encryptor.encrypt(:value => client.salt, :key => 'some private key') }, :marshal => true
+  attr_encrypted :email, :key => 'a secret key', mode: :single_iv_and_salt
+  attr_encrypted :credentials, :key => Proc.new { |client| Encryptor.encrypt(:value => client.salt, :key => 'some private key', insecure_mode: true, algorithm: 'aes-256-cbc') }, :marshal => true, mode: :single_iv_and_salt
 
   def initialize(attrs = {})
     super attrs

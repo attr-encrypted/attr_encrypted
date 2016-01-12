@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../test_helper', __FILE__)
+require_relative 'test_helper'
 
 class LegacySillyEncryptor
   def self.silly_encrypt(options)
@@ -14,6 +14,9 @@ end
 class LegacyUser
   extend AttrEncrypted
   self.attr_encrypted_options[:key] = Proc.new { |user| user.class.to_s } # default key
+  self.attr_encrypted_options[:insecure_mode] = true
+  self.attr_encrypted_options[:algorithm] = 'aes-256-cbc'
+  self.attr_encrypted_options[:mode] = :single_iv_and_salt
 
   attr_encrypted :email, :without_encoding, :key => 'secret key'
   attr_encrypted :password, :prefix => 'crypted_', :suffix => '_test'
@@ -176,7 +179,7 @@ class LegacyAttrEncryptedTest < Minitest::Test
     assert_nil @user.ssn_encrypted
     @user.ssn = 'testing'
     refute_nil @user.ssn_encrypted
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => @user.salt), @user.ssn_encrypted
+    assert_equal Encryptor.encrypt(:value => 'testing', :key => @user.salt, insecure_mode: true, algorithm: 'aes-256-cbc'), @user.ssn_encrypted
   end
 
   def test_should_evaluate_a_key_passed_as_a_proc
@@ -184,7 +187,7 @@ class LegacyAttrEncryptedTest < Minitest::Test
     assert_nil @user.crypted_password_test
     @user.password = 'testing'
     refute_nil @user.crypted_password_test
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => 'LegacyUser'), @user.crypted_password_test
+    assert_equal Encryptor.encrypt(:value => 'testing', :key => 'LegacyUser', insecure_mode: true, algorithm: 'aes-256-cbc'), @user.crypted_password_test
   end
 
   def test_should_use_options_found_in_the_attr_encrypted_options_attribute
@@ -192,7 +195,7 @@ class LegacyAttrEncryptedTest < Minitest::Test
     assert_nil @user.crypted_password_test
     @user.password = 'testing'
     refute_nil @user.crypted_password_test
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => 'LegacyUser'), @user.crypted_password_test
+    assert_equal Encryptor.encrypt(:value => 'testing', :key => 'LegacyUser', insecure_mode: true, algorithm: 'aes-256-cbc'), @user.crypted_password_test
   end
 
   def test_should_inherit_encrypted_attributes
@@ -235,7 +238,7 @@ class LegacyAttrEncryptedTest < Minitest::Test
     assert_nil @user.encrypted_with_true_if
     @user.with_true_if = 'testing'
     refute_nil @user.encrypted_with_true_if
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => 'secret key'), @user.encrypted_with_true_if
+    assert_equal Encryptor.encrypt(:value => 'testing', :key => 'secret key', insecure_mode: true, algorithm: 'aes-256-cbc'), @user.encrypted_with_true_if
   end
 
   def test_should_not_encrypt_with_false_if
@@ -251,7 +254,7 @@ class LegacyAttrEncryptedTest < Minitest::Test
     assert_nil @user.encrypted_with_false_unless
     @user.with_false_unless = 'testing'
     refute_nil @user.encrypted_with_false_unless
-    assert_equal Encryptor.encrypt(:value => 'testing', :key => 'secret key'), @user.encrypted_with_false_unless
+    assert_equal Encryptor.encrypt(:value => 'testing', :key => 'secret key', insecure_mode: true, algorithm: 'aes-256-cbc'), @user.encrypted_with_false_unless
   end
 
   def test_should_not_encrypt_with_true_unless

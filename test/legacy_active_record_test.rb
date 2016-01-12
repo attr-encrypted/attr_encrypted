@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../test_helper', __FILE__)
+require_relative 'test_helper'
 
 ActiveRecord::Base.establish_connection :adapter => 'sqlite3', :database => ':memory:'
 
@@ -22,8 +22,12 @@ create_people_table
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
 
 class LegacyPerson < ActiveRecord::Base
+  self.attr_encrypted_options[:insecure_mode] = true
+  self.attr_encrypted_options[:algorithm] = 'aes-256-cbc'
+  self.attr_encrypted_options[:mode] = :single_iv_and_salt
+
   attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => 'some private key') }, :marshal => true
+  attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => 'some private key', insecure_mode: true, algorithm: 'aes-256-cbc') }, :marshal => true
 
   ActiveSupport::Deprecation.silenced = true
   def after_initialize; end

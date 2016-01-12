@@ -273,9 +273,9 @@ class AttrEncryptedTest < Minitest::Test
   end
 
   def test_should_cast_values_as_strings_before_encrypting
-    string_encrypted_email = User.encrypt_email('3')
-    assert_equal string_encrypted_email, User.encrypt_email(3)
-    assert_equal '3', User.decrypt_email(string_encrypted_email)
+    string_encrypted_email = User.encrypt_email('3', iv: @iv)
+    assert_equal string_encrypted_email, User.encrypt_email(3, iv: @iv)
+    assert_equal '3', User.decrypt_email(string_encrypted_email, iv: @iv)
   end
 
   def test_should_create_query_accessor

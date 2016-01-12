@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../test_helper', __FILE__)
+require_relative 'test_helper'
 
 # Test to ensure that existing representations in database do not break on
 # migrating to new versions of this gem. This ensures that future versions of
@@ -12,10 +12,14 @@ class LegacyCompatibilityTest < Minitest::Test
     PET_BIRTHDATE_SALT = Digest::SHA256.hexdigest('my-really-really-secret-pet-birthdate-salt')
     PET_BIRTHDATE_KEY = 'my-really-really-secret-pet-birthdate-key'
 
+    self.attr_encrypted_options[:insecure_mode] = true
+    self.attr_encrypted_options[:algorithm] = 'aes-256-cbc'
+    self.attr_encrypted_options[:mode] = :single_iv_and_salt
+
     attr_encrypted :nickname,
-      :key => proc { Encryptor.encrypt(:value => PET_NICKNAME_SALT, :key => PET_NICKNAME_KEY) }
+      :key => proc { Encryptor.encrypt(:value => PET_NICKNAME_SALT, :key => PET_NICKNAME_KEY, insecure_mode: true, algorithm: 'aes-256-cbc') }
     attr_encrypted :birthdate,
-      :key => proc { Encryptor.encrypt(:value => PET_BIRTHDATE_SALT, :key => PET_BIRTHDATE_KEY) }
+      :key => proc { Encryptor.encrypt(:value => PET_BIRTHDATE_SALT, :key => PET_BIRTHDATE_KEY, insecure_mode: true, algorithm: 'aes-256-cbc') }
   end
 
   class LegacyMarshallingPet < ActiveRecord::Base
@@ -24,12 +28,16 @@ class LegacyCompatibilityTest < Minitest::Test
     PET_BIRTHDATE_SALT = Digest::SHA256.hexdigest('my-really-really-secret-pet-birthdate-salt')
     PET_BIRTHDATE_KEY = 'my-really-really-secret-pet-birthdate-key'
 
+    self.attr_encrypted_options[:insecure_mode] = true
+    self.attr_encrypted_options[:algorithm] = 'aes-256-cbc'
+    self.attr_encrypted_options[:mode] = :single_iv_and_salt
+
     attr_encrypted :nickname,
-      :key => proc { Encryptor.encrypt(:value => PET_NICKNAME_SALT, :key => PET_NICKNAME_KEY) },
-      :marshal => true
+                   :key => proc { Encryptor.encrypt(:value => PET_NICKNAME_SALT, :key => PET_NICKNAME_KEY, insecure_mode: true, algorithm: 'aes-256-cbc') },
+                   :marshal => true
     attr_encrypted :birthdate,
-      :key => proc { Encryptor.encrypt(:value => PET_BIRTHDATE_SALT, :key => PET_BIRTHDATE_KEY) },
-      :marshal => true
+                   :key => proc { Encryptor.encrypt(:value => PET_BIRTHDATE_SALT, :key => PET_BIRTHDATE_KEY, insecure_mode: true, algorithm: 'aes-256-cbc') },
+                   :marshal => true
   end
 
   def setup
