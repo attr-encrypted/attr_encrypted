@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   s.files      = Dir['{bin,lib}/**/*'] + %w(MIT-LICENSE Rakefile README.rdoc)
   s.test_files = Dir['test/**/*']
 
-  s.add_dependency('encryptor', ['>= 1.3.0'])
+  s.add_dependency('encryptor', ['~> 1.3.0'])
   if RUBY_VERSION < '1.9.3'
     # For Ruby 1.8.7 CI builds, we must force a dependency on the latest Ruby
     # 1.8.7-compatible version of ActiveSupport (i.e. pre-4.0.0).
@@ -39,6 +39,7 @@ Gem::Specification.new do |s|
   end
   s.add_development_dependency('minitest')
   s.add_development_dependency('datamapper')
+  s.add_development_dependency('addressable', '2.3.7')
   s.add_development_dependency('mocha', '~>1.0.0')
   s.add_development_dependency('sequel')
   s.add_development_dependency('sqlite3')
