@@ -12,7 +12,6 @@ if RUBY_VERSION >= '1.9.3'
   end
 end
 
-require 'minitest'
 require 'minitest/autorun'
 require 'digest/sha2'
 require 'rubygems'
@@ -27,6 +26,8 @@ $:.unshift(File.dirname(__FILE__))
 require 'attr_encrypted'
 
 puts "\nTesting with ActiveRecord #{ActiveRecord::VERSION::STRING rescue ENV['ACTIVE_RECORD_VERSION']}"
+
+Minitest::Test = Minitest::Unit::TestCase if ActiveRecord::VERSION::STRING >= '4.0.0'
 
 DB = Sequel.sqlite
 
