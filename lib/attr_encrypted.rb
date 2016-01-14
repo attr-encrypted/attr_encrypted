@@ -117,7 +117,9 @@ module AttrEncrypted
       :encryptor        => Encryptor,
       :encrypt_method   => 'encrypt',
       :decrypt_method   => 'decrypt',
-      :mode             => :default
+      :mode             => :default,
+      :algorithm        => 'aes-256-gcm',
+
     }.merge!(attr_encrypted_options).merge!(attributes.last.is_a?(Hash) ? attributes.pop : {})
 
     options[:encode] = options[:default_encoding] if options[:encode] == true
@@ -336,8 +338,8 @@ module AttrEncrypted
         iv = send("#{encrypted_attribute_name}_iv")
         if(iv == nil)
           begin
-            algorithm = algorithm || "aes-256-cbc"
-            algo = OpenSSL::Cipher::Cipher.new(algorithm)
+            algo = OpenSSL::Cipher.new(algorithm)
+            algo.encrypt
             iv = [algo.random_iv].pack("m")
             send("#{encrypted_attribute_name}_iv=", iv)
           rescue RuntimeError
