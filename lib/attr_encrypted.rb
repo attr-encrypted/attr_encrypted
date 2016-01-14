@@ -117,24 +117,27 @@ module AttrEncrypted
       :encryptor        => Encryptor,
       :encrypt_method   => 'encrypt',
       :decrypt_method   => 'decrypt',
-      :mode             => :single_iv_and_salt
+      :mode             => :default
     }.merge!(attr_encrypted_options).merge!(attributes.last.is_a?(Hash) ? attributes.pop : {})
 
     options[:encode] = options[:default_encoding] if options[:encode] == true
 
     attributes.each do |attribute|
       encrypted_attribute_name = (options[:attribute] ? options[:attribute] : [options[:prefix], attribute, options[:suffix]].join).to_sym
-      iv_name = "#{encrypted_attribute_name}_iv".to_sym
-      salt_name = "#{encrypted_attribute_name}_salt".to_sym
 
       instance_methods_as_symbols = attribute_instance_methods_as_symbols
       attr_reader encrypted_attribute_name unless instance_methods_as_symbols.include?(encrypted_attribute_name)
       attr_writer encrypted_attribute_name unless instance_methods_as_symbols.include?(:"#{encrypted_attribute_name}=")
 
-      if options[:mode] == :per_attribute_iv_and_salt
+
+      unless options[:mode] == :single_iv_and_salt
+        iv_name = "#{encrypted_attribute_name}_iv".to_sym
         attr_reader iv_name unless instance_methods_as_symbols.include?(iv_name)
         attr_writer iv_name unless instance_methods_as_symbols.include?(:"#{iv_name}=")
+      end
 
+      if options[:mode] == :per_attribute_iv_and_salt
+        salt_name = "#{encrypted_attribute_name}_salt".to_sym
         attr_reader salt_name unless instance_methods_as_symbols.include?(salt_name)
         attr_writer salt_name unless instance_methods_as_symbols.include?(:"#{salt_name}=")
       end
@@ -303,8 +306,12 @@ module AttrEncrypted
 
       # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
       def evaluated_attr_encrypted_options_for(attribute)
-        if evaluate_attr_encrypted_option(self.class.encrypted_attributes[attribute.to_sym][:mode]) == :per_attribute_iv_and_salt
+        mode = evaluate_attr_encrypted_option(self.class.encrypted_attributes[attribute.to_sym][:mode])
+        unless mode == :single_iv_and_salt
           load_iv_for_attribute(attribute, self.class.encrypted_attributes[attribute.to_sym][:algorithm])
+        end
+
+        if mode == :per_attribute_iv_and_salt
           load_salt_for_attribute(attribute)
         end
 
