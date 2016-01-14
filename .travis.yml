@@ -1,13 +1,13 @@
 sudo: false
 language: ruby
+cache: bundler
 rvm:
-  - 1.9.3
   - 2.0.0
   - 2.1
   - 2.2
-  - jruby
+  - 2.3.0
+  - rbx
 env:
-  - ACTIVERECORD=2.3.8
   - ACTIVERECORD=3.0.0
   - ACTIVERECORD=3.1.0
   - ACTIVERECORD=3.2.0
@@ -16,8 +16,6 @@ env:
   - ACTIVERECORD=4.2.0
 matrix:
   exclude:
-    - rvm: 1.9.3
-      env: ACTIVERECORD=2.3.8
     - rvm: 2.0.0
       env: ACTIVERECORD=2.3.8
     - rvm: 2.0.0
