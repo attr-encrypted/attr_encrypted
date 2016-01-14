@@ -1,5 +1,5 @@
 # encoding: UTF-8
-require File.expand_path('../test_helper', __FILE__)
+require_relative 'test_helper'
 
 class SillyEncryptor
   def self.silly_encrypt(options)
@@ -56,13 +56,16 @@ class SomeOtherClass
 end
 
 class AttrEncryptedTest < Minitest::Test
+  def setup
+    @iv = SecureRandom.random_bytes(12)
+  end
 
   def test_should_store_email_in_encrypted_attributes
     assert User.encrypted_attributes.include?(:email)
   end
 
   def test_should_not_store_salt_in_encrypted_attributes
-    assert !User.encrypted_attributes.include?(:salt)
+    refute User.encrypted_attributes.include?(:salt)
   end
 
   def test_attr_encrypted_should_return_true_for_email
@@ -90,16 +93,16 @@ class AttrEncryptedTest < Minitest::Test
   end
 
   def test_should_not_encrypt_nil_value
-    assert_nil User.encrypt_email(nil)
+    assert_nil User.encrypt_email(nil, iv: @iv)
   end
 
   def test_should_not_encrypt_empty_string
-    assert_equal '', User.encrypt_email('')
+    assert_equal '', User.encrypt_email('', iv: @iv)
   end
 
   def test_should_encrypt_email
-    refute_nil User.encrypt_email('test@example.com')
-    refute_equal 'test@example.com', User.encrypt_email('test@example.com')
+    refute_nil User.encrypt_email('test@example.com', iv: @iv)
+    refute_equal 'test@example.com', User.encrypt_email('test@example.com', iv: @iv)
   end
 
   def test_should_encrypt_email_when_modifying_the_attr_writer
@@ -111,17 +114,17 @@ class AttrEncryptedTest < Minitest::Test
   end
 
   def test_should_not_decrypt_nil_value
-    assert_nil User.decrypt_email(nil)
+    assert_nil User.decrypt_email(nil, iv: @iv)
   end
 
   def test_should_not_decrypt_empty_string
-    assert_equal '', User.decrypt_email('')
+    assert_equal '', User.decrypt_email('', iv: @iv)
   end
 
   def test_should_decrypt_email
-    encrypted_email = User.encrypt_email('test@example.com')
+    encrypted_email = User.encrypt_email('test@example.com', iv: @iv)
     refute_equal 'test@test.com', encrypted_email
-    assert_equal 'test@example.com', User.decrypt_email(encrypted_email)
+    assert_equal 'test@example.com', User.decrypt_email(encrypted_email, iv: @iv)
   end
 
   def test_should_decrypt_email_when_reading
@@ -132,23 +135,23 @@ class AttrEncryptedTest < Minitest::Test
   end
 
   def test_should_encrypt_with_encoding
-    assert_equal User.encrypt_with_encoding('test'), [User.encrypt_without_encoding('test')].pack('m')
+    assert_equal User.encrypt_with_encoding('test', iv: @iv), [User.encrypt_without_encoding('test', iv: @iv)].pack('m')
   end
 
   def test_should_decrypt_with_encoding
-    encrypted = User.encrypt_with_encoding('test')
-    assert_equal 'test', User.decrypt_with_encoding(encrypted)
-    assert_equal User.decrypt_with_encoding(encrypted), User.decrypt_without_encoding(encrypted.unpack('m').first)
+    encrypted = User.encrypt_with_encoding('test', iv: @iv)
+    assert_equal 'test', User.decrypt_with_encoding(encrypted, iv: @iv)
+    assert_equal User.decrypt_with_encoding(encrypted, iv: @iv), User.decrypt_without_encoding(encrypted.unpack('m').first, iv: @iv)
   end
 
   def test_should_encrypt_with_custom_encoding
-    assert_equal User.encrypt_with_encoding('test'), [User.encrypt_without_encoding('test')].pack('m')
+    assert_equal User.encrypt_with_encoding('test', iv: @iv), [User.encrypt_without_encoding('test', iv: @iv)].pack('m')
   end
 
   def test_should_decrypt_with_custom_encoding
-    encrypted = User.encrypt_with_encoding('test')
-    assert_equal 'test', User.decrypt_with_encoding(encrypted)
-    assert_equal User.decrypt_with_encoding(encrypted), User.decrypt_without_encoding(encrypted.unpack('m').first)
+    encrypted = User.encrypt_with_encoding('test', iv: @iv)
+    assert_equal 'test', User.decrypt_with_encoding(encrypted, iv: @iv)
+    assert_equal User.decrypt_with_encoding(encrypted, iv: @iv), User.decrypt_without_encoding(encrypted.unpack('m').first, iv: @iv)
   end
 
   def test_should_encrypt_with_marshaling

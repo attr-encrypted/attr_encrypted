@@ -1,4 +1,4 @@
-require File.expand_path('../test_helper', __FILE__)
+require_relative 'test_helper'
 
 ActiveRecord::Base.establish_connection :adapter => 'sqlite3', :database => ':memory:'
 
@@ -51,7 +51,7 @@ end
 class Person < ActiveRecord::Base
   self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
   attr_encrypted :email, :key => SECRET_KEY
-  attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => SECRET_KEY) }, :marshal => true
+  attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => SECRET_KEY, iv: SecureRandom.random_bytes(12)) }, :marshal => true
 
   if ActiveRecord::VERSION::STRING < "3"
     def after_initialize
@@ -75,7 +75,7 @@ end
 
 class PersonWithProcMode < Person
   attr_encrypted :email,       :key => SECRET_KEY, :mode => Proc.new { :per_attribute_iv_and_salt }
-  attr_encrypted :credentials, :key => SECRET_KEY, :mode => Proc.new { :single_iv_and_salt }
+  attr_encrypted :credentials, :key => SECRET_KEY, :mode => Proc.new { :single_iv_and_salt }, insecure_mode: true
 end
 
 class Account < ActiveRecord::Base
@@ -85,23 +85,23 @@ end
 
 class PersonWithSerialization < ActiveRecord::Base
   self.table_name = 'people'
-  attr_encrypted :email, :key => 'a secret key'
+  attr_encrypted :email, :key => SECRET_KEY
   serialize :password
 end
 
 class UserWithProtectedAttribute < ActiveRecord::Base
   self.table_name = 'users'
-  attr_encrypted :password, :key => 'a secret key'
+  attr_encrypted :password, :key => SECRET_KEY
   attr_protected :is_admin if ::ActiveRecord::VERSION::STRING < "4.0"
 end
 
 class PersonUsingAlias < ActiveRecord::Base
   self.table_name = 'people'
-  attr_encryptor :email, :key => 'a secret key'
+  attr_encryptor :email, :key => SECRET_KEY
 end
 
 class PrimeMinister < ActiveRecord::Base
-  attr_encrypted :name, :marshal => true, :key => 'SECRET_KEY'
+  attr_encrypted :name, :marshal => true, :key => SECRET_KEY
 end
 
 class ActiveRecordTest < Minitest::Test
