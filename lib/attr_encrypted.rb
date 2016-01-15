@@ -70,10 +70,10 @@ module AttrEncrypted
   #                        Defaults to false.
   #
   #   :mode             => Selects encryption mode for attribute: choose <tt>:single_iv_and_salt</tt> for compatibility
-  #                        with the old attr_encrypted API: the default IV and salt of the underlying encryptor object
-  #                        is used; <tt>:per_attribute_iv_and_salt</tt> uses a per-attribute IV and salt attribute and
-  #                        is the recommended mode for new deployments.
-  #                        Defaults to <tt>:single_iv_and_salt</tt>.
+  #                        with the old attr_encrypted API: the IV is derived from the encryption key by the underlying Encryptor class; salt is not used.
+  #                        The <tt>:per_attribute_iv_and_salt</tt> mode uses a per-attribute IV and salt. The salt is used to derive a unique key per attribute.
+  #                        A <tt>:default</default> mode derives a unique IV per attribute; salt is not used.
+  #                        Defaults to <tt>:default</tt>.
   #
   # You can specify your own default options
   #
