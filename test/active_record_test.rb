@@ -36,7 +36,6 @@ end
 create_tables
 
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
-ActiveRecord::Base.logger = Logger.new(nil) if ::ActiveRecord::VERSION::STRING < "3.0"
 
 if ::ActiveRecord::VERSION::STRING > "4.0"
   module Rack
@@ -53,13 +52,7 @@ class Person < ActiveRecord::Base
   attr_encrypted :email, :key => SECRET_KEY
   attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => SECRET_KEY, iv: SecureRandom.random_bytes(12)) }, :marshal => true
 
-  if ActiveRecord::VERSION::STRING < "3"
-    def after_initialize
-      initialize_salt_and_credentials
-    end
-  else
-    after_initialize :initialize_salt_and_credentials
-  end
+  after_initialize :initialize_salt_and_credentials
 
   protected
 
