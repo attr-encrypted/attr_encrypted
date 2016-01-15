@@ -55,6 +55,16 @@ class SomeOtherClass
   end
 end
 
+class YetAnotherClass
+  extend AttrEncrypted
+
+  attr_encrypted :email, :key => SECRET_KEY
+
+  def initialize(email: nil)
+    self.email = email
+  end
+end
+
 class AttrEncryptedTest < Minitest::Test
   def setup
     @iv = SecureRandom.random_bytes(12)
@@ -297,6 +307,12 @@ class AttrEncryptedTest < Minitest::Test
     refute_equal @user.encrypted_email_iv, @user.crypted_password_test_iv
   end
 
+  def test_should_generate_iv_per_attribute_by_default
+    thing = YetAnotherClass.new(email: 'thing@thing.com')
+    assert_respond_to thing, :encrypted_email_iv
+    refute thing.encrypted_email_iv.nil?, "IV should not be empty when initializing objects"
+  end
+
   def test_should_vary_iv_per_instance
     @user1 = User.new
     @user1.email = 'email@example.com'
@@ -320,6 +336,11 @@ class AttrEncryptedTest < Minitest::Test
     refute_equal @user1.encrypted_email_salt, @user2.encrypted_email_salt
   end
 
+  def test_should_not_generate_salt_per_attribute_by_default
+    thing = YetAnotherClass.new(email: 'thing@thing.com')
+    refute_respond_to thing, :encrypted_email_salt
+  end
+
   def test_should_decrypt_second_record
     @user1 = User.new
     @user1.email = 'test@example.com'
@@ -328,5 +349,10 @@ class AttrEncryptedTest < Minitest::Test
     @user2.email = 'test@example.com'
 
     assert_equal 'test@example.com', @user1.decrypt(:email, @user1.encrypted_email)
+  end
+
+  def test_should_specify_the_default_algorithm
+    assert YetAnotherClass.encrypted_attributes[:email][:algorithm]
+    assert_equal YetAnotherClass.encrypted_attributes[:email][:algorithm], 'aes-256-gcm'
   end
 end
