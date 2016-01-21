@@ -45,3 +45,7 @@ end
 Sequel::Model.plugin :after_initialize
 
 SECRET_KEY = SecureRandom.random_bytes(32)
+
+def base64_encoding_regex
+  /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{4})$/
+end

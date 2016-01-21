@@ -28,6 +28,10 @@ def create_tables
       create_table :prime_ministers do |t|
         t.string :encrypted_name
       end
+      create_table :addresses do |t|
+        t.binary :encrypted_street
+        t.binary :encrypted_street_iv
+      end
     end
   end
 end
@@ -95,6 +99,10 @@ end
 
 class PrimeMinister < ActiveRecord::Base
   attr_encrypted :name, :marshal => true, :key => SECRET_KEY
+end
+
+class Address < ActiveRecord::Base
+  attr_encrypted :street, marshal: false, encode: false, encode_iv: false, key: SECRET_KEY
 end
 
 class ActiveRecordTest < Minitest::Test
@@ -256,5 +264,13 @@ class ActiveRecordTest < Minitest::Test
     result = pm.reload
     assert_equal pm, result
     assert_equal 'Winston Churchill', pm.name
+  end
+
+  def test_should_save_encrypted_data_as_binary
+    street = '123 Elm'
+    address = Address.new(street: street)
+    address.save!
+    refute_equal address.encrypted_street, street
+    assert_equal Address.first.street, street
   end
 end

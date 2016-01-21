@@ -43,6 +43,10 @@ module AttrEncrypted
   #                        just 'true'. See http://www.ruby-doc.org/core/classes/Array.html#M002245 for more encoding directives.
   #                        Defaults to false unless you're using it with ActiveRecord, DataMapper, or Sequel.
   #
+  #   :encode_iv        => Defaults to true.
+
+  #   :encode_salt      => Defaults to true.
+  #
   #   :default_encoding => Defaults to 'm' (base64).
   #
   #   :marshal          => If set to true, attributes will be marshaled as well as encrypted. This is useful if you're planning
@@ -109,6 +113,8 @@ module AttrEncrypted
       :if               => true,
       :unless           => false,
       :encode           => false,
+      :encode_iv        => true,
+      :encode_salt      => true,
       :default_encoding => 'm',
       :marshal          => false,
       :marshaler        => Marshal,
@@ -123,6 +129,8 @@ module AttrEncrypted
     }.merge!(attr_encrypted_options).merge!(attributes.last.is_a?(Hash) ? attributes.pop : {})
 
     options[:encode] = options[:default_encoding] if options[:encode] == true
+    options[:encode_iv] = options[:default_encoding] if options[:encode_iv] == true
+    options[:encode_salt] = options[:default_encoding] if options[:encode_salt] == true
 
     attributes.each do |attribute|
       encrypted_attribute_name = (options[:attribute] ? options[:attribute] : [options[:prefix], attribute, options[:suffix]].join).to_sym
@@ -131,18 +139,13 @@ module AttrEncrypted
       attr_reader encrypted_attribute_name unless instance_methods_as_symbols.include?(encrypted_attribute_name)
       attr_writer encrypted_attribute_name unless instance_methods_as_symbols.include?(:"#{encrypted_attribute_name}=")
 
+      iv_name = "#{encrypted_attribute_name}_iv".to_sym
+      attr_reader iv_name unless instance_methods_as_symbols.include?(iv_name)
+      attr_writer iv_name unless instance_methods_as_symbols.include?(:"#{iv_name}=")
 
-      unless options[:mode] == :single_iv_and_salt
-        iv_name = "#{encrypted_attribute_name}_iv".to_sym
-        attr_reader iv_name unless instance_methods_as_symbols.include?(iv_name)
-        attr_writer iv_name unless instance_methods_as_symbols.include?(:"#{iv_name}=")
-      end
-
-      if options[:mode] == :per_attribute_iv_and_salt
-        salt_name = "#{encrypted_attribute_name}_salt".to_sym
-        attr_reader salt_name unless instance_methods_as_symbols.include?(salt_name)
-        attr_writer salt_name unless instance_methods_as_symbols.include?(:"#{salt_name}=")
-      end
+      salt_name = "#{encrypted_attribute_name}_salt".to_sym
+      attr_reader salt_name unless instance_methods_as_symbols.include?(salt_name)
+      attr_writer salt_name unless instance_methods_as_symbols.include?(:"#{salt_name}=")
 
       define_method(attribute) do
         instance_variable_get("@#{attribute}") || instance_variable_set("@#{attribute}", decrypt(attribute, send(encrypted_attribute_name)))
@@ -308,16 +311,18 @@ module AttrEncrypted
 
       # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
       def evaluated_attr_encrypted_options_for(attribute)
-        mode = evaluate_attr_encrypted_option(self.class.encrypted_attributes[attribute.to_sym][:mode])
-        unless mode == :single_iv_and_salt
-          load_iv_for_attribute(attribute, self.class.encrypted_attributes[attribute.to_sym][:algorithm])
+        evaluated_options = self.class.encrypted_attributes[attribute.to_sym].inject({}) do |hash, (option, value)|
+          hash[option] = ( option == :attribute  ? value : evaluate_attr_encrypted_option(value) ) ; hash
         end
+        evaluated_options.tap do |options|
+          unless options[:mode] == :single_iv_and_salt
+            load_iv_for_attribute(attribute, options)
+          end
 
-        if mode == :per_attribute_iv_and_salt
-          load_salt_for_attribute(attribute)
+          if options[:mode] == :per_attribute_iv_and_salt
+            load_salt_for_attribute(attribute, options)
+          end
         end
-
-        self.class.encrypted_attributes[attribute.to_sym].inject({}) { |hash, (option, value)| hash[option] = evaluate_attr_encrypted_option(value); hash }
       end
 
       # Evaluates symbol (method reference) or proc (responds to call) options
@@ -333,35 +338,53 @@ module AttrEncrypted
         end
       end
 
-      def load_iv_for_attribute(attribute, algorithm)
-        encrypted_attribute_name = self.class.encrypted_attributes[attribute.to_sym][:attribute]
+      def load_iv_for_attribute(attribute, options)
+        encrypted_attribute_name = options[:attribute]
+        encode_iv = options[:encode_iv]
         iv = send("#{encrypted_attribute_name}_iv")
         if(iv == nil)
           begin
-            algo = OpenSSL::Cipher.new(algorithm)
-            algo.encrypt
-            iv = [algo.random_iv].pack("m")
+            iv = generate_iv(options[:algorithm])
+            iv = [iv].pack(encode_iv) if encode_iv
             send("#{encrypted_attribute_name}_iv=", iv)
           rescue RuntimeError
           end
         end
-        self.class.encrypted_attributes[attribute.to_sym] = self.class.encrypted_attributes[attribute.to_sym].merge(:iv => iv.unpack("m").first) if (iv && !iv.empty?)
+        if iv && !iv.empty?
+          iv = iv.unpack(encode_iv).first if encode_iv
+          options[:iv] = iv
+        end
       end
 
-      def load_salt_for_attribute(attribute)
-        encrypted_attribute_name = self.class.encrypted_attributes[attribute.to_sym][:attribute]
-        salt = send("#{encrypted_attribute_name}_salt") || send("#{encrypted_attribute_name}_salt=", generate_random_base64_encoded_salt)
-        salt = decode_salt_if_encoded(salt)
-        self.class.encrypted_attributes[attribute.to_sym] = self.class.encrypted_attributes[attribute.to_sym].merge(:salt => salt)
+      def generate_iv(algorithm)
+        algo = OpenSSL::Cipher.new(algorithm)
+        algo.encrypt
+        algo.random_iv
       end
 
-      def generate_random_base64_encoded_salt
+      def load_salt_for_attribute(attribute, options)
+        encrypted_attribute_name = options[:attribute]
+        encode_salt = options[:encode_salt]
+        salt = send("#{encrypted_attribute_name}_salt")
+        if (salt == nil)
+          salt = SecureRandom.random_bytes
+          salt = prefix_and_encode_salt(salt, encode_salt) if encode_salt
+          send("#{encrypted_attribute_name}_salt=", salt)
+        end
+        if salt && !salt.empty?
+          salt = decode_salt_if_encoded(salt, encode_salt) if encode_salt
+          options[:salt] = salt
+        end
+      end
+
+      def prefix_and_encode_salt(salt, encoding)
         prefix = '_'
-        prefix + [SecureRandom.random_bytes].pack("m")
+        prefix + [salt].pack(encoding)
       end
 
-      def decode_salt_if_encoded(salt)
-        salt.slice(0).eql?('_') ? salt.slice(1..-1).unpack("m").first : salt
+      def decode_salt_if_encoded(salt, encoding)
+        prefix = '_'
+        salt.slice(0).eql?(prefix) ? salt.slice(1..-1).unpack(encoding).first : salt
       end
   end
 

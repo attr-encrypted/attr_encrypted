@@ -34,7 +34,9 @@ class User
   attr_accessor :salt
   attr_accessor :should_encrypt
 
-  def initialize
+  def initialize(email: nil, encrypted_email_iv: nil)
+    self.email = email
+    self.encrypted_email_iv = encrypted_email_iv
     self.salt = Time.now.to_i.to_s
     self.should_encrypt = true
   end
@@ -57,12 +59,19 @@ end
 
 class YetAnotherClass
   extend AttrEncrypted
+  self.attr_encrypted_options[:encode_iv] = false
 
   attr_encrypted :email, :key => SECRET_KEY
+  attr_encrypted :phone_number, :key => SECRET_KEY, mode: Proc.new { |thing| thing.mode }, encode_iv: Proc.new { |thing| thing.encode_iv }, encode_salt: Proc.new { |thing| thing.encode_salt }
 
-  def initialize(email: nil)
+  def initialize(email: nil, encode_iv: 'm', encode_salt: 'm', mode: :per_attribute_iv_and_salt)
     self.email = email
+    @encode_iv = encode_iv
+    @encode_salt = encode_salt
+    @mode = mode
   end
+
+  attr_reader :encode_iv, :encode_salt, :mode
 end
 
 class AttrEncryptedTest < Minitest::Test
@@ -120,7 +129,9 @@ class AttrEncryptedTest < Minitest::Test
     assert_nil @user.encrypted_email
     @user.email = 'test@example.com'
     refute_nil @user.encrypted_email
-    assert_equal User.encrypt_email('test@example.com'), @user.encrypted_email
+    iv = @user.encrypted_email_iv.unpack('m').first
+    salt = @user.encrypted_email_salt[1..-1].unpack('m').first
+    assert_equal User.encrypt_email('test@example.com', iv: iv, salt: salt), @user.encrypted_email
   end
 
   def test_should_not_decrypt_nil_value
@@ -140,7 +151,9 @@ class AttrEncryptedTest < Minitest::Test
   def test_should_decrypt_email_when_reading
     @user = User.new
     assert_nil @user.email
-    @user.encrypted_email = User.encrypt_email('test@example.com')
+    iv = @user.encrypted_email_iv.unpack('m').first
+    salt = @user.encrypted_email_salt[1..-1].unpack('m').first
+    @user.encrypted_email = User.encrypt_email('test@example.com', iv: iv, salt: salt)
     assert_equal 'test@example.com', @user.email
   end
 
@@ -309,8 +322,7 @@ class AttrEncryptedTest < Minitest::Test
 
   def test_should_generate_iv_per_attribute_by_default
     thing = YetAnotherClass.new(email: 'thing@thing.com')
-    assert_respond_to thing, :encrypted_email_iv
-    refute thing.encrypted_email_iv.nil?, "IV should not be empty when initializing objects"
+    refute_nil thing.encrypted_email_iv
   end
 
   def test_should_vary_iv_per_instance
@@ -319,6 +331,7 @@ class AttrEncryptedTest < Minitest::Test
     @user2 = User.new
     @user2.email = 'email@example.com'
     refute_equal @user1.encrypted_email_iv, @user2.encrypted_email_iv
+    refute_equal @user1.encrypted_email, @user2.encrypted_email
   end
 
   def test_should_vary_salt_per_attribute
@@ -338,7 +351,7 @@ class AttrEncryptedTest < Minitest::Test
 
   def test_should_not_generate_salt_per_attribute_by_default
     thing = YetAnotherClass.new(email: 'thing@thing.com')
-    refute_respond_to thing, :encrypted_email_salt
+    assert_nil thing.encrypted_email_salt
   end
 
   def test_should_decrypt_second_record
@@ -354,5 +367,20 @@ class AttrEncryptedTest < Minitest::Test
   def test_should_specify_the_default_algorithm
     assert YetAnotherClass.encrypted_attributes[:email][:algorithm]
     assert_equal YetAnotherClass.encrypted_attributes[:email][:algorithm], 'aes-256-gcm'
+  end
+
+  def test_should_not_encode_iv_when_encode_iv_is_false
+    email = 'thing@thing.com'
+    thing = YetAnotherClass.new(email: email)
+    refute thing.encrypted_email_iv =~ base64_encoding_regex
+    assert_equal thing.email, email
+  end
+
+  def test_should_base64_encode_iv_by_default
+    phone_number = '555-555-5555'
+    thing = YetAnotherClass.new
+    thing.phone_number = phone_number
+    assert thing.encrypted_phone_number_iv =~ base64_encoding_regex
+    assert_equal thing.phone_number, phone_number
   end
 end
