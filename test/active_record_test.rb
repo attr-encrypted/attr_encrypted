@@ -31,6 +31,8 @@ def create_tables
       create_table :addresses do |t|
         t.binary :encrypted_street
         t.binary :encrypted_street_iv
+        t.binary :encrypted_zipcode
+        t.string :mode
       end
     end
   end
@@ -102,7 +104,10 @@ class PrimeMinister < ActiveRecord::Base
 end
 
 class Address < ActiveRecord::Base
-  attr_encrypted :street, marshal: false, encode: false, encode_iv: false, key: SECRET_KEY
+  self.attr_encrypted_options[:marshal] = false
+  self.attr_encrypted_options[:encode] = false
+  attr_encrypted :street, encode_iv: false, key: SECRET_KEY
+  attr_encrypted :zipcode, key: SECRET_KEY, mode: Proc.new { |address| address.mode.to_sym }, insecure_mode: true
 end
 
 class ActiveRecordTest < Minitest::Test
@@ -272,5 +277,12 @@ class ActiveRecordTest < Minitest::Test
     address.save!
     refute_equal address.encrypted_street, street
     assert_equal Address.first.street, street
+  end
+
+  def test_should_evaluate_proc_based_mode
+    street = '123 Elm'
+    zipcode = '12345'
+    address = Address.new(street: street, zipcode: zipcode, mode: :single_iv_and_salt)
+    assert_nil address.encrypted_zipcode_iv
   end
 end
