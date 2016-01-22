@@ -19,7 +19,6 @@ if defined?(ActiveRecord::Base)
             class << self
               alias_method :attr_encryptor, :attr_encrypted
               alias_method_chain :method_missing, :attr_encrypted
-              alias_method :undefine_attribute_methods, :reset_column_information if ::ActiveRecord::VERSION::STRING < "3"
             end
 
             def perform_attribute_assignment(method, new_attributes, *args)
@@ -30,7 +29,7 @@ if defined?(ActiveRecord::Base)
             end
             private :perform_attribute_assignment
 
-            if ::ActiveRecord::VERSION::STRING < "3.0" || ::ActiveRecord::VERSION::STRING > "3.1"
+            if ::ActiveRecord::VERSION::STRING > "3.1"
               def assign_attributes_with_attr_encrypted(*args)
                 perform_attribute_assignment :assign_attributes_without_attr_encrypted, *args
               end
