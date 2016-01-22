@@ -76,8 +76,8 @@ module AttrEncrypted
   #   :mode             => Selects encryption mode for attribute: choose <tt>:single_iv_and_salt</tt> for compatibility
   #                        with the old attr_encrypted API: the IV is derived from the encryption key by the underlying Encryptor class; salt is not used.
   #                        The <tt>:per_attribute_iv_and_salt</tt> mode uses a per-attribute IV and salt. The salt is used to derive a unique key per attribute.
-  #                        A <tt>:default</default> mode derives a unique IV per attribute; salt is not used.
-  #                        Defaults to <tt>:default</tt>.
+  #                        A <tt>:per_attribute_iv</default> mode derives a unique IV per attribute; salt is not used.
+  #                        Defaults to <tt>:per_attribute_iv</tt>.
   #
   # You can specify your own default options
   #
@@ -123,7 +123,7 @@ module AttrEncrypted
       :encryptor        => Encryptor,
       :encrypt_method   => 'encrypt',
       :decrypt_method   => 'decrypt',
-      :mode             => :default,
+      :mode             => :per_attribute_iv,
       :algorithm        => 'aes-256-gcm',
 
     }.merge!(attr_encrypted_options).merge!(attributes.last.is_a?(Hash) ? attributes.pop : {})
@@ -285,6 +285,7 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
     def decrypt(attribute, encrypted_value)
+      self.class.encrypted_attributes[attribute.to_sym][:operation] = :decrypting
       self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
     end
 
@@ -304,6 +305,7 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.encrypt(:email, 'test@example.com')
     def encrypt(attribute, value)
+      self.class.encrypted_attributes[attribute.to_sym][:operation] = :encrypting
       self.class.encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
     end
 
@@ -311,9 +313,13 @@ module AttrEncrypted
 
       # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
       def evaluated_attr_encrypted_options_for(attribute)
-        evaluated_options = self.class.encrypted_attributes[attribute.to_sym].inject({}) do |hash, (option, value)|
-          hash[option] = ( option == :attribute  ? value : evaluate_attr_encrypted_option(value) ) ; hash
+        evaluated_options = Hash.new
+        self.class.encrypted_attributes[attribute.to_sym].map do |option, value|
+          # Evaluate all values except the value of the :attribute option
+          value = option == :attribute ? value : evaluate_attr_encrypted_option(value)
+          evaluated_options[option] = value
         end
+
         evaluated_options.tap do |options|
           unless options[:mode] == :single_iv_and_salt
             load_iv_for_attribute(attribute, options)
