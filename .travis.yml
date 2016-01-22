@@ -2,7 +2,7 @@ sudo: false
 language: ruby
 cache: bundler
 rvm:
-  - 2.0.0
+  - 2.0
   - 2.1
   - 2.2
   - 2.3.0
@@ -16,28 +16,6 @@ env:
   - ACTIVERECORD=4.2.0
 matrix:
   exclude:
-    - rvm: 2.0.0
-      env: ACTIVERECORD=2.3.8
-    - rvm: 2.0.0
-      env: ACTIVERECORD=3.0.0
-    - rvm: 2.0.0
-      env: ACTIVERECORD=3.1.0
-    - rvm: 2.1
-      env: ACTIVERECORD=2.3.8
-    - rvm: 2.1
-      env: ACTIVERECORD=3.0.0
-    - rvm: 2.1
-      env: ACTIVERECORD=3.1.0
-    - rvm: 2.1
-      env: ACTIVERECORD=3.2.0
-    - rvm: 2.2
-      env: ACTIVERECORD=2.3.8
-    - rvm: 2.2
-      env: ACTIVERECORD=3.0.0
-    - rvm: 2.2
-      env: ACTIVERECORD=3.1.0
-    - rvm: 2.2
-      env: ACTIVERECORD=3.2.0
   allow_failures:
     - rvm: rbx
   fast_finish: true
