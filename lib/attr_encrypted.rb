@@ -348,7 +348,7 @@ module AttrEncrypted
         encrypted_attribute_name = options[:attribute]
         encode_iv = options[:encode_iv]
         iv = send("#{encrypted_attribute_name}_iv")
-        if(iv == nil)
+        if options[:operation] == :encrypting
           begin
             iv = generate_iv(options[:algorithm])
             iv = [iv].pack(encode_iv) if encode_iv

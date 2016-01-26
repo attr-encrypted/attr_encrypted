@@ -34,9 +34,8 @@ class User
   attr_accessor :salt
   attr_accessor :should_encrypt
 
-  def initialize(email: nil, encrypted_email_iv: nil)
+  def initialize(email: nil)
     self.email = email
-    self.encrypted_email_iv = encrypted_email_iv
     self.salt = Time.now.to_i.to_s
     self.should_encrypt = true
   end
@@ -382,5 +381,13 @@ class AttrEncryptedTest < Minitest::Test
     thing.phone_number = phone_number
     assert thing.encrypted_phone_number_iv =~ base64_encoding_regex
     assert_equal thing.phone_number, phone_number
+  end
+
+  def test_should_generate_unique_iv_for_every_encrypt_operation
+    user = User.new
+    user.email = 'initial_value@test.com'
+    original_iv = user.encrypted_email_iv
+    user.email = 'revised_value@test.com'
+    refute_equal original_iv, user.encrypted_email_iv
   end
 end
