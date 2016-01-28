@@ -314,11 +314,12 @@ module AttrEncrypted
       # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
       def evaluated_attr_encrypted_options_for(attribute)
         evaluated_options = Hash.new
+        attribute_option_value = self.class.encrypted_attributes[attribute.to_sym][:attribute]
         self.class.encrypted_attributes[attribute.to_sym].map do |option, value|
-          # Evaluate all values except the value of the :attribute option
-          value = option == :attribute ? value : evaluate_attr_encrypted_option(value)
-          evaluated_options[option] = value
+          evaluated_options[option] = evaluate_attr_encrypted_option(value)
         end
+
+        evaluated_options[:attribute] = attribute_option_value
 
         evaluated_options.tap do |options|
           unless options[:mode] == :single_iv_and_salt
