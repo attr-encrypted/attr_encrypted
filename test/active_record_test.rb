@@ -164,6 +164,13 @@ class ActiveRecordTest < Minitest::Test
     assert_equal account.key, hash
   end
 
+  def test_should_create_changed_predicate
+    person = Person.create!(:email => 'test@example.com')
+    assert !person.email_changed?
+    person.email = 'test2@example.com'
+    assert person.email_changed?
+  end
+
   if ::ActiveRecord::VERSION::STRING > "4.0"
     def test_should_assign_attributes
       @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
