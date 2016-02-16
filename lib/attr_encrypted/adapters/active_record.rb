@@ -18,7 +18,6 @@ if defined?(ActiveRecord::Base)
             attr_encrypted_options[:encode] = true
 
             class << self
-              alias_method :attr_encryptor, :attr_encrypted
               alias_method_chain :method_missing, :attr_encrypted
             end
 
