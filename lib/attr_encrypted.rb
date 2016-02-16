@@ -50,8 +50,7 @@ module AttrEncrypted
   #   :default_encoding => Defaults to 'm' (base64).
   #
   #   :marshal          => If set to true, attributes will be marshaled as well as encrypted. This is useful if you're planning
-  #                        on encrypting something other than a string. Defaults to false unless you're using it with ActiveRecord
-  #                        or DataMapper.
+  #                        on encrypting something other than a string. Defaults to false.
   #
   #   :marshaler        => The object to use for marshaling. Defaults to Marshal.
   #
@@ -107,26 +106,8 @@ module AttrEncrypted
   #
   #   See README for more examples
   def attr_encrypted(*attributes)
-    options = {
-      :prefix           => 'encrypted_',
-      :suffix           => '',
-      :if               => true,
-      :unless           => false,
-      :encode           => false,
-      :encode_iv        => true,
-      :encode_salt      => true,
-      :default_encoding => 'm',
-      :marshal          => false,
-      :marshaler        => Marshal,
-      :dump_method      => 'dump',
-      :load_method      => 'load',
-      :encryptor        => Encryptor,
-      :encrypt_method   => 'encrypt',
-      :decrypt_method   => 'decrypt',
-      :mode             => :per_attribute_iv,
-      :algorithm        => 'aes-256-gcm',
-
-    }.merge!(attr_encrypted_options).merge!(attributes.last.is_a?(Hash) ? attributes.pop : {})
+    options = attributes.last.is_a?(Hash) ? attributes.pop : {}
+    options = attr_encrypted_default_options.dup.merge!(attr_encrypted_options).merge!(options)
 
     options[:encode] = options[:default_encoding] if options[:encode] == true
     options[:encode_iv] = options[:default_encoding] if options[:encode_iv] == true
@@ -173,6 +154,31 @@ module AttrEncrypted
   def attr_encrypted_options
     @attr_encrypted_options ||= superclass.attr_encrypted_options.dup
   end
+
+  def attr_encrypted_default_options
+    {
+      :prefix           => 'encrypted_',
+      :suffix           => '',
+      :if               => true,
+      :unless           => false,
+      :encode           => false,
+      :encode_iv        => true,
+      :encode_salt      => true,
+      :default_encoding => 'm',
+      :marshal          => false,
+      :marshaler        => Marshal,
+      :dump_method      => 'dump',
+      :load_method      => 'load',
+      :encryptor        => Encryptor,
+      :encrypt_method   => 'encrypt',
+      :decrypt_method   => 'decrypt',
+      :mode             => :per_attribute_iv,
+      :algorithm        => 'aes-256-gcm',
+
+    }
+  end
+
+  private :attr_encrypted_default_options
 
   # Checks if an attribute is configured with <tt>attr_encrypted</tt>
   #
