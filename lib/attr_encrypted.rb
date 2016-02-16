@@ -14,84 +14,104 @@ module AttrEncrypted
 
   # Generates attr_accessors that encrypt and decrypt attributes transparently
   #
-  # Options (any other options you specify are passed to the encryptor's encrypt and decrypt methods)
+  # Options (any other options you specify are passed to the Encryptor's encrypt and decrypt methods)
   #
-  #   :attribute        => The name of the referenced encrypted attribute. For example
-  #                        <tt>attr_accessor :email, :attribute => :ee</tt> would generate an
-  #                        attribute named 'ee' to store the encrypted email. This is useful when defining
-  #                        one attribute to encrypt at a time or when the :prefix and :suffix options
-  #                        aren't enough. Defaults to nil.
+  #   attribute:        The name of the referenced encrypted attribute. For example
+  #                     <tt>attr_accessor :email, attribute: :ee</tt> would generate an
+  #                     attribute named 'ee' to store the encrypted email. This is useful when defining
+  #                     one attribute to encrypt at a time or when the :prefix and :suffix options
+  #                     aren't enough. Defaults to nil.
   #
-  #   :prefix           => A prefix used to generate the name of the referenced encrypted attributes.
-  #                        For example <tt>attr_accessor :email, :password, :prefix => 'crypted_'</tt> would
-  #                        generate attributes named 'crypted_email' and 'crypted_password' to store the
-  #                        encrypted email and password. Defaults to 'encrypted_'.
+  #   prefix:           A prefix used to generate the name of the referenced encrypted attributes.
+  #                     For example <tt>attr_accessor :email, prefix: 'crypted_'</tt> would
+  #                     generate attributes named 'crypted_email' to store the encrypted
+  #                     email and password. Defaults to 'encrypted_'.
   #
-  #   :suffix           => A suffix used to generate the name of the referenced encrypted attributes.
-  #                        For example <tt>attr_accessor :email, :password, :prefix => '', :suffix => '_encrypted'</tt>
-  #                        would generate attributes named 'email_encrypted' and 'password_encrypted' to store the
-  #                        encrypted email. Defaults to ''.
+  #   suffix:           A suffix used to generate the name of the referenced encrypted attributes.
+  #                     For example <tt>attr_accessor :email, prefix: '', suffix: '_encrypted'</tt>
+  #                     would generate attributes named 'email_encrypted' to store the
+  #                     encrypted email. Defaults to ''.
   #
-  #   :key              => The encryption key. This option may not be required if you're using a custom encryptor. If you pass
-  #                        a symbol representing an instance method then the :key option will be replaced with the result of the
-  #                        method before being passed to the encryptor. Objects that respond to :call are evaluated as well (including procs).
-  #                        Any other key types will be passed directly to the encryptor.
+  #   key:              The encryption key. This option may not be required if
+  #                     you're using a custom encryptor. If you pass a symbol
+  #                     representing an instance method then the :key option
+  #                     will be replaced with the result of the method before
+  #                     being passed to the encryptor. Objects that respond
+  #                     to :call are evaluated as well (including procs).
+  #                     Any other key types will be passed directly to the encryptor.
+  #                     Defaults to nil.
   #
-  #   :encode           => If set to true, attributes will be encoded as well as encrypted. This is useful if you're
-  #                        planning on storing the encrypted attributes in a database. The default encoding is 'm' (base64),
-  #                        however this can be overwritten by setting the :encode option to some other encoding string instead of
-  #                        just 'true'. See http://www.ruby-doc.org/core/classes/Array.html#M002245 for more encoding directives.
-  #                        Defaults to false unless you're using it with ActiveRecord, DataMapper, or Sequel.
+  #   encode:           If set to true, attributes will be encoded as well as
+  #                     encrypted. This is useful if you're planning on storing
+  #                     the encrypted attributes in a database. The default
+  #                     encoding is 'm' (base64), however this can be overwritten
+  #                     by setting the :encode option to some other encoding
+  #                     string instead of just 'true'. See
+  #                     http://www.ruby-doc.org/core/classes/Array.html#M002245
+  #                     for more encoding directives.
+  #                     Defaults to false unless you're using it with ActiveRecord, DataMapper, or Sequel.
   #
-  #   :encode_iv        => Defaults to true.
+  #   encode_iv:        Defaults to true.
 
-  #   :encode_salt      => Defaults to true.
+  #   encode_salt:      Defaults to true.
   #
-  #   :default_encoding => Defaults to 'm' (base64).
+  #   default_encoding: Defaults to 'm' (base64).
   #
-  #   :marshal          => If set to true, attributes will be marshaled as well as encrypted. This is useful if you're planning
-  #                        on encrypting something other than a string. Defaults to false.
+  #   marshal:          If set to true, attributes will be marshaled as well
+  #                     as encrypted. This is useful if you're planning on
+  #                     encrypting something other than a string.
+  #                     Defaults to false.
   #
-  #   :marshaler        => The object to use for marshaling. Defaults to Marshal.
+  #   marshaler:        The object to use for marshaling.
+  #                     Defaults to Marshal.
   #
-  #   :dump_method      => The dump method name to call on the <tt>:marshaler</tt> object to. Defaults to 'dump'.
+  #   dump_method:      The dump method name to call on the <tt>:marshaler</tt> object to.
+  #                     Defaults to 'dump'.
   #
-  #   :load_method      => The load method name to call on the <tt>:marshaler</tt> object. Defaults to 'load'.
+  #   load_method:      The load method name to call on the <tt>:marshaler</tt> object.
+  #                     Defaults to 'load'.
   #
-  #   :encryptor        => The object to use for encrypting. Defaults to Encryptor.
+  #   encryptor:        The object to use for encrypting.
+  #                     Defaults to Encryptor.
   #
-  #   :encrypt_method   => The encrypt method name to call on the <tt>:encryptor</tt> object. Defaults to 'encrypt'.
+  #   encrypt_method:   The encrypt method name to call on the <tt>:encryptor</tt> object.
+  #                     Defaults to 'encrypt'.
   #
-  #   :decrypt_method   => The decrypt method name to call on the <tt>:encryptor</tt> object. Defaults to 'decrypt'.
+  #   decrypt_method:   The decrypt method name to call on the <tt>:encryptor</tt> object.
+  #                     Defaults to 'decrypt'.
   #
-  #   :if               => Attributes are only encrypted if this option evaluates to true. If you pass a symbol representing an instance
-  #                        method then the result of the method will be evaluated. Any objects that respond to <tt>:call</tt> are evaluated as well.
-  #                        Defaults to true.
+  #   if:               Attributes are only encrypted if this option evaluates
+  #                     to true. If you pass a symbol representing an instance
+  #                     method then the result of the method will be evaluated.
+  #                     Any objects that respond to <tt>:call</tt> are evaluated as well.
+  #                     Defaults to true.
   #
-  #   :unless           => Attributes are only encrypted if this option evaluates to false. If you pass a symbol representing an instance
-  #                        method then the result of the method will be evaluated. Any objects that respond to <tt>:call</tt> are evaluated as well.
-  #                        Defaults to false.
+  #   unless:           Attributes are only encrypted if this option evaluates
+  #                     to false. If you pass a symbol representing an instance
+  #                     method then the result of the method will be evaluated.
+  #                     Any objects that respond to <tt>:call</tt> are evaluated as well.
+  #                     Defaults to false.
   #
-  #   :mode             => Selects encryption mode for attribute: choose <tt>:single_iv_and_salt</tt> for compatibility
-  #                        with the old attr_encrypted API: the IV is derived from the encryption key by the underlying Encryptor class; salt is not used.
-  #                        The <tt>:per_attribute_iv_and_salt</tt> mode uses a per-attribute IV and salt. The salt is used to derive a unique key per attribute.
-  #                        A <tt>:per_attribute_iv</default> mode derives a unique IV per attribute; salt is not used.
-  #                        Defaults to <tt>:per_attribute_iv</tt>.
+  #   mode:             Selects encryption mode for attribute: choose <tt>:single_iv_and_salt</tt> for compatibility
+  #                     with the old attr_encrypted API: the IV is derived from the encryption key by the underlying Encryptor class; salt is not used.
+  #                     The <tt>:per_attribute_iv_and_salt</tt> mode uses a per-attribute IV and salt. The salt is used to derive a unique key per attribute.
+  #                     A <tt>:per_attribute_iv</default> mode derives a unique IV per attribute; salt is not used.
+  #                     Defaults to <tt>:per_attribute_iv</tt>.
   #
   # You can specify your own default options
   #
   #   class User
-  #     # now all attributes will be encoded and marshaled by default
-  #     attr_encrypted_options.merge!(:encode => true, :marshal => true, :some_other_option => true)
-  #     attr_encrypted :configuration, :key => 'my secret key'
+  #     # Now all attributes will be encoded and marshaled by default
+  #     attr_encrypted_options.merge!(encode: true, marshal: true, some_other_option: true)
+  #     attr_encrypted :configuration, key: 'my secret key'
   #   end
   #
   #
   # Example
   #
   #   class User
-  #     attr_encrypted :email, :credit_card, :key => 'some secret key'
-  #     attr_encrypted :configuration, :key => 'some other secret key', :marshal => true
+  #     attr_encrypted :email, key: 'some secret key'
+  #     attr_encrypted :configuration, key: 'some other secret key', marshal: true
   #   end
   #
   #   @user = User.new
@@ -101,7 +121,7 @@ module AttrEncrypted
   #   @user.email? # true
   #   @user.encrypted_email # returns the encrypted version of 'test@example.com'
   #
-  #   @user.configuration = { :time_zone => 'UTC' }
+  #   @user.configuration = { time_zone: 'UTC' }
   #   @user.encrypted_configuration # returns the encrypted version of configuration
   #
   #   See README for more examples
@@ -142,7 +162,7 @@ module AttrEncrypted
         value.respond_to?(:empty?) ? !value.empty? : !!value
       end
 
-      encrypted_attributes[attribute.to_sym] = options.merge(:attribute => encrypted_attribute_name)
+      encrypted_attributes[attribute.to_sym] = options.merge(attribute: encrypted_attribute_name)
     end
   end
 
@@ -157,24 +177,23 @@ module AttrEncrypted
 
   def attr_encrypted_default_options
     {
-      :prefix           => 'encrypted_',
-      :suffix           => '',
-      :if               => true,
-      :unless           => false,
-      :encode           => false,
-      :encode_iv        => true,
-      :encode_salt      => true,
-      :default_encoding => 'm',
-      :marshal          => false,
-      :marshaler        => Marshal,
-      :dump_method      => 'dump',
-      :load_method      => 'load',
-      :encryptor        => Encryptor,
-      :encrypt_method   => 'encrypt',
-      :decrypt_method   => 'decrypt',
-      :mode             => :per_attribute_iv,
-      :algorithm        => 'aes-256-gcm',
-
+      prefix:            'encrypted_',
+      suffix:            '',
+      if:                true,
+      unless:            false,
+      encode:            false,
+      encode_iv:         true,
+      encode_salt:       true,
+      default_encoding:  'm',
+      marshal:           false,
+      marshaler:         Marshal,
+      dump_method:       'dump',
+      load_method:       'load',
+      encryptor:         Encryptor,
+      encrypt_method:    'encrypt',
+      decrypt_method:    'decrypt',
+      mode:              :per_attribute_iv,
+      algorithm:         'aes-256-gcm',
     }
   end
 
@@ -208,7 +227,7 @@ module AttrEncrypted
     options = encrypted_attributes[attribute.to_sym].merge(options)
     if options[:if] && !options[:unless] && !encrypted_value.nil? && !(encrypted_value.is_a?(String) && encrypted_value.empty?)
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
-      value = options[:encryptor].send(options[:decrypt_method], options.merge!(:value => encrypted_value))
+      value = options[:encryptor].send(options[:decrypt_method], options.merge!(value: encrypted_value))
       if options[:marshal]
         value = options[:marshaler].send(options[:load_method], value)
       elsif defined?(Encoding)
@@ -234,7 +253,7 @@ module AttrEncrypted
     options = encrypted_attributes[attribute.to_sym].merge(options)
     if options[:if] && !options[:unless] && !value.nil? && !(value.is_a?(String) && value.empty?)
       value = options[:marshal] ? options[:marshaler].send(options[:dump_method], value) : value.to_s
-      encrypted_value = options[:encryptor].send(options[:encrypt_method], options.merge!(:value => value))
+      encrypted_value = options[:encryptor].send(options[:encrypt_method], options.merge!(value: value))
       encrypted_value = [encrypted_value].pack(options[:encode]) if options[:encode]
       encrypted_value
     else
@@ -248,10 +267,10 @@ module AttrEncrypted
   # Example
   #
   #   class User
-  #     attr_encrypted :email, :key => 'my secret key'
+  #     attr_encrypted :email, key: 'my secret key'
   #   end
   #
-  #   User.encrypted_attributes # { :email => { :attribute => 'encrypted_email', :key => 'my secret key' } }
+  #   User.encrypted_attributes # { email: { attribute: 'encrypted_email', key: 'my secret key' } }
   def encrypted_attributes
     @encrypted_attributes ||= superclass.encrypted_attributes.dup
   end
@@ -262,7 +281,7 @@ module AttrEncrypted
   # Example
   #
   #   class User
-  #     attr_encrypted :email, :key => 'my secret key'
+  #     attr_encrypted :email, key: 'my secret key'
   #   end
   #
   #   User.encrypt_email('SOME_ENCRYPTED_EMAIL_STRING')
@@ -281,7 +300,7 @@ module AttrEncrypted
     #
     #  class User
     #    attr_accessor :secret_key
-    #    attr_encrypted :email, :key => :secret_key
+    #    attr_encrypted :email, key: :secret_key
     #
     #    def initialize(secret_key)
     #      self.secret_key = secret_key
@@ -301,7 +320,7 @@ module AttrEncrypted
     #
     #  class User
     #    attr_accessor :secret_key
-    #    attr_encrypted :email, :key => :secret_key
+    #    attr_encrypted :email, key: :secret_key
     #
     #    def initialize(secret_key)
     #      self.secret_key = secret_key

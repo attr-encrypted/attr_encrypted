@@ -89,7 +89,7 @@ if defined?(ActiveRecord::Base)
           # Example
           #
           #   class User < ActiveRecord::Base
-          #     attr_encrypted :email, :key => 'secret key'
+          #     attr_encrypted :email, key: 'secret key'
           #   end
           #
           #   User.find_by_email_and_password('test@example.com', 'testing')
