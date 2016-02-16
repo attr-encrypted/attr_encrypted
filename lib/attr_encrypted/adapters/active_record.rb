@@ -16,6 +16,7 @@ if defined?(ActiveRecord::Base)
             alias_method_chain :reload, :attr_encrypted
 
             attr_encrypted_options[:encode] = true
+
             class << self
               alias_method :attr_encryptor, :attr_encrypted
               alias_method_chain :method_missing, :attr_encrypted
@@ -48,13 +49,19 @@ if defined?(ActiveRecord::Base)
           # <tt>attr_encrypted</tt> method
           def attr_encrypted(*attrs)
             super
-            attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr| alias_method "#{attr}_before_type_cast", attr }
+            options = attrs.extract_options!
+            attr = attrs.pop
+            options.merge! encrypted_attributes[attr]
 
-            encrypted_attributes.each do |attribute, options|
-              define_method("#{attribute}_changed?") do
-                send(attribute) != decrypt(attribute, send("#{options[:attribute]}_was"))
-              end
+            define_method("#{attr}_changed?") do
+              send(attr) != decrypt(attr, send("#{options[:attribute]}_was"))
             end
+
+            define_method("#{attr}_was") do
+              decrypt(attr, send("#{options[:attribute]}_was")) if send("#{attr}_changed?")
+            end
+
+            alias_method "#{attr}_before_type_cast", attr
           end
 
           def attribute_instance_methods_as_symbols
