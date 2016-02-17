@@ -99,8 +99,9 @@ if defined?(ActiveRecord::Base)
             if match = /^(find|scoped)_(all_by|by)_([_a-zA-Z]\w*)$/.match(method.to_s)
               attribute_names = match.captures.last.split('_and_')
               attribute_names.each_with_index do |attribute, index|
-                if attr_encrypted?(attribute)
+                if attr_encrypted?(attribute) && encrypted_attributes[attribute.to_sym][:mode] == :single_iv_and_salt
                   args[index] = send("encrypt_#{attribute}", args[index])
+                  puts "DEPRECATION WARNING: This feature will be removed in the next major release."
                   attribute_names[index] = encrypted_attributes[attribute.to_sym][:attribute]
                 end
               end
