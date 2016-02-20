@@ -310,7 +310,7 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
     def decrypt(attribute, encrypted_value)
-      self.class.encrypted_attributes[attribute.to_sym][:operation] = :decrypting
+      encrypted_attributes[attribute.to_sym][:operation] = :decrypting
       self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
     end
 
@@ -330,8 +330,12 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.encrypt(:email, 'test@example.com')
     def encrypt(attribute, value)
-      self.class.encrypted_attributes[attribute.to_sym][:operation] = :encrypting
+      encrypted_attributes[attribute.to_sym][:operation] = :encrypting
       self.class.encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
+    end
+
+    def encrypted_attributes
+      @encrypted_attributes ||= self.class.encrypted_attributes.dup
     end
 
     protected
@@ -339,7 +343,7 @@ module AttrEncrypted
       # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
       def evaluated_attr_encrypted_options_for(attribute)
         evaluated_options = Hash.new
-        attribute_option_value = self.class.encrypted_attributes[attribute.to_sym][:attribute]
+        attribute_option_value = encrypted_attributes[attribute.to_sym][:attribute]
         self.class.encrypted_attributes[attribute.to_sym].map do |option, value|
           evaluated_options[option] = evaluate_attr_encrypted_option(value)
         end
