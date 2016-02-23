@@ -8,8 +8,16 @@ It works with ANY class, however, you get a few extra features when you're using
 
 ## Installation
 
+Add attr_encrypted to your gemfile:
+
+```ruby
+  gem attr_encrypted, "~> 2.0.0"
+```
+
+Then install the gem:
+
 ```bash
-  gem install attr_encrypted
+  bundle install
 ```
 
 ## Usage
@@ -18,7 +26,7 @@ If you're using an ORM like `ActiveRecord`, `DataMapper`, or `Sequel`, using att
 
 ```ruby
   class User
-    attr_encrypted :ssn, key: 'a secret key'
+    attr_encrypted :ssn, key: 'This is a key that is 256 bits!!'
   end
 ```
 
@@ -28,7 +36,7 @@ If you're using a PORO, you have to do a little bit more work by extending the c
   class User
     extend AttrEncrypted
     attr_accessor :name
-    attr_encrypted :ssn, key: 'a secret key'
+    attr_encrypted :ssn, key: 'This is a key that is 256 bits!!'
   
     def load
       # loads the stored data
@@ -117,11 +125,35 @@ Here is an example of passing a proc/lambda object as the `:key` option as well:
 
 ### Default options
 
-You can specify default options for all encrypted attributes in your class. Instead of having to define your class like this:
+The following are the default options used by `attr_encrypted`:
+
+```ruby
+  prefix:            'encrypted_',
+  suffix:            '',
+  if:                true,
+  unless:            false,
+  encode:            false,
+  encode_iv:         true,
+  encode_salt:       true,
+  default_encoding:  'm',
+  marshal:           false,
+  marshaler:         Marshal,
+  dump_method:       'dump',
+  load_method:       'load',
+  encryptor:         Encryptor,
+  encrypt_method:    'encrypt',
+  decrypt_method:    'decrypt',
+  mode:              :per_attribute_iv,
+  algorithm:         'aes-256-gcm',
+```
+
+All of the aforementioned options are explained in depth below.
+
+Additionally, you can specify default options for all encrypted attributes in your class. Instead of having to define your class like this:
 
 ```ruby
   class User
-    attr_encrypted :email, key: 'a secret key', prefix: '', suffix: '_crypted'
+    attr_encrypted :email, key: 'This is a key that is 256 bits!!', prefix: '', suffix: '_crypted'
     attr_encrypted :ssn, key: 'a different secret key', prefix: '', suffix: '_crypted'
     attr_encrypted :credit_card, key: 'another secret key', prefix: '', suffix: '_crypted'
   end
@@ -132,7 +164,7 @@ You can simply define some default options like so:
 ```ruby
   class User
     attr_encrypted_options.merge!(prefix: '', :suffix => '_crypted')
-    attr_encrypted :email, key: 'a secret key'
+    attr_encrypted :email, key: 'This is a key that is 256 bits!!'
     attr_encrypted :ssn, key: 'a different secret key'
     attr_encrypted :credit_card, key: 'another secret key'
   end
@@ -146,7 +178,7 @@ You can simply pass the name of the encrypted attribute as the `:attribute` opti
 
 ```ruby
   class User
-    attr_encrypted :email, key: 'a secret key', attribute: 'email_encrypted'
+    attr_encrypted :email, key: 'This is a key that is 256 bits!!', attribute: 'email_encrypted'
   end
 ```
 
@@ -159,7 +191,7 @@ If you don't like the `encrypted_#{attribute}` naming convention then you can sp
 
 ```ruby
   class User
-    attr_encrypted :email, key: 'a secret key', prefix: 'secret_', suffix: '_crypted'
+    attr_encrypted :email, key: 'This is a key that is 256 bits!!', prefix: 'secret_', suffix: '_crypted'
   end
 ```
 
@@ -177,7 +209,7 @@ You can specify unique keys for each attribute if you'd like:
 
 ```ruby
   class User
-    attr_encrypted :email, key: 'a secret key'
+    attr_encrypted :email, key: 'This is a key that is 256 bits!!'
     attr_encrypted :ssn, key: 'a different secret key'
   end
 ```
@@ -191,8 +223,8 @@ There may be times that you want to only encrypt when certain conditions are met
 
 ```ruby
   class User < ActiveRecord::Base
-    attr_encrypted :email, key: 'a secret key', unless: Rails.env.development?
-    attr_encrypted :ssn, key: 'a secret key', if: Rails.env.development?
+    attr_encrypted :email, key: 'This is a key that is 256 bits!!', unless: Rails.env.development?
+    attr_encrypted :ssn, key: 'This is a key that is 256 bits!!', if: Rails.env.development?
   end
 ```
 
@@ -221,11 +253,18 @@ Simply set up your class like so:
 
 ```ruby
   class User
-    attr_encrypted :email, secret_key: 'a secret key', encryptor: SillyEncryptor, encrypt_method: :silly_encrypt, decrypt_method: :silly_decrypt
+    attr_encrypted :email, secret_key: 'This is a key that is 256 bits!!', encryptor: SillyEncryptor, encrypt_method: :silly_encrypt, decrypt_method: :silly_decrypt
   end
 ```
 
 Any options that you pass to `attr_encrypted` will be passed to the encryptor class along with the `:value` option which contains the string to encrypt/decrypt. Notice that the above example uses `:secret_key` instead of `:key`. See [encryptor](https://github.com/attr-encrypted/encryptor) for more info regarding the default encryptor class.
+
+
+### The `:mode` option
+
+The mode options allows you to specify in what mode your data will be encrypted. There are currently three modes: `:per_attribute_iv`, `:per_attribute_iv_and_salt`, and `:single_iv_and_salt`.
+
+__NOTE: `:per_attribute_iv_and_salt` and `:single_iv_and_salt` modes are deprecated and will be removed in the next major release.__
 
 
 ### The `:algorithm` option
@@ -234,7 +273,7 @@ The default `Encryptor` class uses the standard ruby OpenSSL library. Its defaul
 
 ```ruby
   class User
-    attr_encrypted :email, key: 'a secret key', algorithm: 'aes-256-cbc'
+    attr_encrypted :email, key: 'This is a key that is 256 bits!!', algorithm: 'aes-256-cbc'
   end
 ```
 
@@ -289,7 +328,7 @@ Let's say you'd like to encrypt your user's email addresses, but you also need a
 
 ```ruby
   class User < ActiveRecord::Base
-    attr_encrypted :email, key: 'a secret key'
+    attr_encrypted :email, key: 'This is a key that is 256 bits!!'
     attr_encrypted :password, key: 'some other secret key'
   end
 ```
@@ -303,6 +342,8 @@ You can now lookup and login users like so:
 The call to `find_by_email_and_password` is intercepted and modified to `find_by_encrypted_email_and_encrypted_password('ENCRYPTED EMAIL', 'ENCRYPTED PASSWORD')`. The dynamic scope methods like `scoped_by_email_and_password` work the same way.
 
 NOTE: This only works if all records are encrypted with the same encryption key (per attribute).
+
+__NOTE: This feature is deprecated and will be removed in the next major release.__
 
 
 ### DataMapper and Sequel
@@ -320,6 +361,7 @@ attr_encrypted v2.0.0 now depends on encryptor v2.0.0. As part of both major rel
 * Default `:algorithm` is now 'aes-256-gcm', the default `:algorithm` in attr_encrypted v1.x was 'aes-256-cbc'.
 * The encryption key provided must be of appropriate length respective to the algorithm used. Previously, encryptor did not verify minimum key length.
 * The dynamic finders available in ActiveRecord will only work with `:single_iv_and_salt` mode. It is strongly advised that you do not use this mode. If you can search the encrypted data, it wasn't encrypted securely. This functionality will be deprecated in the next major release.
+* `:per_attribute_iv_and_salt` and `:single_iv_and_salt` modes are deprecated and will be removed in the next major release.
 
 Backwards compatibility is supported by providing a special option that is passed to encryptor, namely, `:insecure_mode`:
 
@@ -331,6 +373,22 @@ Backwards compatibility is supported by providing a special option that is passe
 
 The `:insecure_mode` option will allow encryptor to ignore the new security requirements. It is strongly advised that if you use this older insecure behavior that you migrate to the newer more secure behavior.
 
+
+## Upgrading from attr_encrypted v1.x to v2.x
+
+Modify your gemfile to include the new version of attr_encrypted:
+
+```ruby
+  gem attr_encrypted, "~> 2.0.0"
+```
+
+The update attr_encrypted:
+
+```bash
+  bundle update attr_encrypted
+```
+
+Then modify your models using attr\_encrypted to account for the changes in default options. Specifically, pass in the `:mode` and `:algorithm` options that you were using if you had not previously done so. If your key is insufficient length relative to the algorithm that you use, you should also pass in `insecure_mode: true`; this will prevent Encryptor from raising an exception regarding insufficient key length. Please see the Deprecations sections for more details including an example of how to specify your model with default options from attr_encrypted v1.x.
 
 ## Things to consider before using attr_encrypted
 

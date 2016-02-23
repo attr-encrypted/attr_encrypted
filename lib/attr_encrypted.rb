@@ -20,17 +20,20 @@ module AttrEncrypted
   #                     <tt>attr_accessor :email, attribute: :ee</tt> would generate an
   #                     attribute named 'ee' to store the encrypted email. This is useful when defining
   #                     one attribute to encrypt at a time or when the :prefix and :suffix options
-  #                     aren't enough. Defaults to nil.
+  #                     aren't enough.
+  #                     Defaults to nil.
   #
   #   prefix:           A prefix used to generate the name of the referenced encrypted attributes.
   #                     For example <tt>attr_accessor :email, prefix: 'crypted_'</tt> would
   #                     generate attributes named 'crypted_email' to store the encrypted
-  #                     email and password. Defaults to 'encrypted_'.
+  #                     email and password.
+  #                     Defaults to 'encrypted_'.
   #
   #   suffix:           A suffix used to generate the name of the referenced encrypted attributes.
   #                     For example <tt>attr_accessor :email, prefix: '', suffix: '_encrypted'</tt>
   #                     would generate attributes named 'email_encrypted' to store the
-  #                     encrypted email. Defaults to ''.
+  #                     encrypted email.
+  #                     Defaults to ''.
   #
   #   key:              The encryption key. This option may not be required if
   #                     you're using a custom encryptor. If you pass a symbol
@@ -334,6 +337,9 @@ module AttrEncrypted
       self.class.encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
     end
 
+    # Copies the class level hash of encrypted attributes with virtual attribute names as keys
+    # and their corresponding options as values to the instance
+    #
     def encrypted_attributes
       @encrypted_attributes ||= self.class.encrypted_attributes.dup
     end
