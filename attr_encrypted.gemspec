@@ -23,8 +23,8 @@ Gem::Specification.new do |s|
 
   s.require_paths = ['lib']
 
-  s.files      = Dir['{bin,lib}/**/*'] + %w(MIT-LICENSE Rakefile README.rdoc)
-  s.test_files = Dir['test/**/*']
+  s.files      = `git ls-files`.split("\n")
+  s.test_files = `git ls-files -- test/*`.split("\n")
 
   s.required_ruby_version = '>= 2.0.0'
 
@@ -51,5 +51,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency('simplecov')
   s.add_development_dependency('simplecov-rcov')
   s.add_development_dependency("codeclimate-test-reporter")
+
+  s.cert_chain  = ['certs/saghaulor.pem']
+  s.signing_key = File.expand_path("~/.ssh/gem-private_key.pem") if $0 =~ /gem\z/
+
+  s.post_install_message = "\n\n\nWARNING: Several insecure default options and features have been deprecated in attr_encrypted v2.0.0. Please see the README for more details.\n\n\n"
 
 end
