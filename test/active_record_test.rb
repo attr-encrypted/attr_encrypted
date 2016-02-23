@@ -1,4 +1,4 @@
-require File.expand_path('../test_helper', __FILE__)
+require_relative 'test_helper'
 
 ActiveRecord::Base.establish_connection :adapter => 'sqlite3', :database => ':memory:'
 
@@ -28,6 +28,12 @@ def create_tables
       create_table :prime_ministers do |t|
         t.string :encrypted_name
       end
+      create_table :addresses do |t|
+        t.binary :encrypted_street
+        t.binary :encrypted_street_iv
+        t.binary :encrypted_zipcode
+        t.string :mode
+      end
     end
   end
 end
@@ -36,7 +42,6 @@ end
 create_tables
 
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
-ActiveRecord::Base.logger = Logger.new(nil) if ::ActiveRecord::VERSION::STRING < "3.0"
 
 if ::ActiveRecord::VERSION::STRING > "4.0"
   module Rack
@@ -51,15 +56,9 @@ end
 class Person < ActiveRecord::Base
   self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
   attr_encrypted :email, :key => SECRET_KEY
-  attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => SECRET_KEY) }, :marshal => true
+  attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => SECRET_KEY, iv: SecureRandom.random_bytes(12)) }, :marshal => true
 
-  if ActiveRecord::VERSION::STRING < "3"
-    def after_initialize
-      initialize_salt_and_credentials
-    end
-  else
-    after_initialize :initialize_salt_and_credentials
-  end
+  after_initialize :initialize_salt_and_credentials
 
   protected
 
@@ -75,7 +74,7 @@ end
 
 class PersonWithProcMode < Person
   attr_encrypted :email,       :key => SECRET_KEY, :mode => Proc.new { :per_attribute_iv_and_salt }
-  attr_encrypted :credentials, :key => SECRET_KEY, :mode => Proc.new { :single_iv_and_salt }
+  attr_encrypted :credentials, :key => SECRET_KEY, :mode => Proc.new { :single_iv_and_salt }, insecure_mode: true
 end
 
 class Account < ActiveRecord::Base
@@ -85,23 +84,30 @@ end
 
 class PersonWithSerialization < ActiveRecord::Base
   self.table_name = 'people'
-  attr_encrypted :email, :key => 'a secret key'
+  attr_encrypted :email, :key => SECRET_KEY
   serialize :password
 end
 
 class UserWithProtectedAttribute < ActiveRecord::Base
   self.table_name = 'users'
-  attr_encrypted :password, :key => 'a secret key'
+  attr_encrypted :password, :key => SECRET_KEY
   attr_protected :is_admin if ::ActiveRecord::VERSION::STRING < "4.0"
 end
 
 class PersonUsingAlias < ActiveRecord::Base
   self.table_name = 'people'
-  attr_encryptor :email, :key => 'a secret key'
+  attr_encryptor :email, :key => SECRET_KEY
 end
 
 class PrimeMinister < ActiveRecord::Base
-  attr_encrypted :name, :marshal => true, :key => 'SECRET_KEY'
+  attr_encrypted :name, :marshal => true, :key => SECRET_KEY
+end
+
+class Address < ActiveRecord::Base
+  self.attr_encrypted_options[:marshal] = false
+  self.attr_encrypted_options[:encode] = false
+  attr_encrypted :street, encode_iv: false, key: SECRET_KEY
+  attr_encrypted :zipcode, key: SECRET_KEY, mode: Proc.new { |address| address.mode.to_sym }, insecure_mode: true
 end
 
 class ActiveRecordTest < Minitest::Test
@@ -163,6 +169,21 @@ class ActiveRecordTest < Minitest::Test
     hash = { :foo => 'bar' }
     account = Account.create!(:key => hash)
     assert_equal account.key, hash
+  end
+
+  def test_should_create_changed_predicate
+    person = Person.create!(:email => 'test@example.com')
+    assert !person.email_changed?
+    person.email = 'test2@example.com'
+    assert person.email_changed?
+  end
+
+  def test_should_create_was_predicate
+    original_email = 'test@example.com'
+    person = Person.create!(:email => original_email)
+    assert !person.email_was
+    person.email = 'test2@example.com'
+    assert_equal person.email_was, original_email
   end
 
   if ::ActiveRecord::VERSION::STRING > "4.0"
@@ -263,5 +284,20 @@ class ActiveRecordTest < Minitest::Test
     result = pm.reload
     assert_equal pm, result
     assert_equal 'Winston Churchill', pm.name
+  end
+
+  def test_should_save_encrypted_data_as_binary
+    street = '123 Elm'
+    address = Address.new(street: street)
+    address.save!
+    refute_equal address.encrypted_street, street
+    assert_equal Address.first.street, street
+  end
+
+  def test_should_evaluate_proc_based_mode
+    street = '123 Elm'
+    zipcode = '12345'
+    address = Address.new(street: street, zipcode: zipcode, mode: :single_iv_and_salt)
+    assert_nil address.encrypted_zipcode_iv
   end
 end

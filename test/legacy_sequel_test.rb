@@ -1,4 +1,4 @@
-require File.expand_path('../test_helper', __FILE__)
+require_relative 'test_helper'
 
 DB.create_table :legacy_humans do
   primary_key :id
@@ -9,8 +9,12 @@ DB.create_table :legacy_humans do
 end
 
 class LegacyHuman < Sequel::Model(:legacy_humans)
-  attr_encrypted :email, :key => 'a secret key'
-  attr_encrypted :credentials, :key => Proc.new { |human| Encryptor.encrypt(:value => human.salt, :key => 'some private key') }, :marshal => true
+  self.attr_encrypted_options[:insecure_mode] = true
+  self.attr_encrypted_options[:algorithm] = 'aes-256-cbc'
+  self.attr_encrypted_options[:mode] = :single_iv_and_salt
+
+  attr_encrypted :email, :key => 'a secret key', mode: :single_iv_and_salt
+  attr_encrypted :credentials, :key => Proc.new { |human| Encryptor.encrypt(:value => human.salt, :key => 'some private key', insecure_mode: true, algorithm: 'aes-256-cbc') }, :marshal => true, mode: :single_iv_and_salt
 
   def after_initialize(attrs = {})
     self.salt ||= Digest::SHA1.hexdigest((Time.now.to_i * rand(5)).to_s)

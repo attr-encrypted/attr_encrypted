@@ -16,10 +16,9 @@ if defined?(ActiveRecord::Base)
             alias_method_chain :reload, :attr_encrypted
 
             attr_encrypted_options[:encode] = true
+
             class << self
-              alias_method :attr_encryptor, :attr_encrypted
               alias_method_chain :method_missing, :attr_encrypted
-              alias_method :undefine_attribute_methods, :reset_column_information if ::ActiveRecord::VERSION::STRING < "3"
             end
 
             def perform_attribute_assignment(method, new_attributes, *args)
@@ -30,7 +29,7 @@ if defined?(ActiveRecord::Base)
             end
             private :perform_attribute_assignment
 
-            if ::ActiveRecord::VERSION::STRING < "3.0" || ::ActiveRecord::VERSION::STRING > "3.1"
+            if ::ActiveRecord::VERSION::STRING > "3.1"
               def assign_attributes_with_attr_encrypted(*args)
                 perform_attribute_assignment :assign_attributes_without_attr_encrypted, *args
               end
@@ -49,17 +48,29 @@ if defined?(ActiveRecord::Base)
           # <tt>attr_encrypted</tt> method
           def attr_encrypted(*attrs)
             super
-            attrs.reject { |attr| attr.is_a?(Hash) }.each { |attr| alias_method "#{attr}_before_type_cast", attr }
+            options = attrs.extract_options!
+            attr = attrs.pop
+            options.merge! encrypted_attributes[attr]
+
+            define_method("#{attr}_changed?") do
+              send(attr) != decrypt(attr, send("#{options[:attribute]}_was"))
+            end
+
+            define_method("#{attr}_was") do
+              decrypt(attr, send("#{options[:attribute]}_was")) if send("#{attr}_changed?")
+            end
+
+            alias_method "#{attr}_before_type_cast", attr
           end
 
           def attribute_instance_methods_as_symbols
             # We add accessor methods of the db columns to the list of instance
             # methods returned to let ActiveRecord define the accessor methods
             # for the db columns
-            
+
             # Use with_connection so the connection doesn't stay pinned to the thread.
             connected = ::ActiveRecord::Base.connection_pool.with_connection(&:active?) rescue false
-            
+
             if connected && table_exists?
               columns_hash.keys.inject(super) {|instance_methods, column_name| instance_methods.concat [column_name.to_sym, :"#{column_name}="]}
             else
@@ -78,7 +89,7 @@ if defined?(ActiveRecord::Base)
           # Example
           #
           #   class User < ActiveRecord::Base
-          #     attr_encrypted :email, :key => 'secret key'
+          #     attr_encrypted :email, key: 'secret key'
           #   end
           #
           #   User.find_by_email_and_password('test@example.com', 'testing')
@@ -88,8 +99,9 @@ if defined?(ActiveRecord::Base)
             if match = /^(find|scoped)_(all_by|by)_([_a-zA-Z]\w*)$/.match(method.to_s)
               attribute_names = match.captures.last.split('_and_')
               attribute_names.each_with_index do |attribute, index|
-                if attr_encrypted?(attribute)
+                if attr_encrypted?(attribute) && encrypted_attributes[attribute.to_sym][:mode] == :single_iv_and_salt
                   args[index] = send("encrypt_#{attribute}", args[index])
+                  warn "DEPRECATION WARNING: This feature will be removed in the next major release."
                   attribute_names[index] = encrypted_attributes[attribute.to_sym][:attribute]
                 end
               end

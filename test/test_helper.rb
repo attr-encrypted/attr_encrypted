@@ -1,16 +1,19 @@
 require 'simplecov'
 require 'simplecov-rcov'
+require "codeclimate-test-reporter"
 
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
-  SimpleCov::Formatter::HTMLFormatter,
-  SimpleCov::Formatter::RcovFormatter,
-]
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
+  [
+    SimpleCov::Formatter::HTMLFormatter,
+    SimpleCov::Formatter::RcovFormatter,
+    CodeClimate::TestReporter::Formatter
+  ]
+)
 
 SimpleCov.start do
   add_filter 'test'
 end
 
-require "codeclimate-test-reporter"
 CodeClimate::TestReporter.start
 
 require 'minitest/autorun'
@@ -41,4 +44,8 @@ end
 # This plugin re-enables it.
 Sequel::Model.plugin :after_initialize
 
-SECRET_KEY = 4.times.map { Digest::SHA256.hexdigest((Time.now.to_i * rand(5)).to_s) }.join
+SECRET_KEY = SecureRandom.random_bytes(32)
+
+def base64_encoding_regex
+  /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{4})$/
+end

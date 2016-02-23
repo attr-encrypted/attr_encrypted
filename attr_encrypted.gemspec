@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.description = 'Generates attr_accessors that encrypt and decrypt attributes transparently'
 
   s.authors   = ['Sean Huber', 'S. Brent Faulkner', 'William Monk', 'Stephen Aghaulor']
-  s.email    = ['shuber@huberry.com', 'sbfaulkner@gmail.com', 'billy.monk@gmail.com', 'saghaulor@gmail.com']
+  s.email    = ['seah@shuber.io', 'sbfaulkner@gmail.com', 'billy.monk@gmail.com', 'saghaulor@gmail.com']
   s.homepage = 'http://github.com/attr-encrypted/attr_encrypted'
 
   s.has_rdoc = false
@@ -26,9 +26,9 @@ Gem::Specification.new do |s|
   s.files      = Dir['{bin,lib}/**/*'] + %w(MIT-LICENSE Rakefile README.rdoc)
   s.test_files = Dir['test/**/*']
 
-  s.required_ruby_version = '>= 1.9.3'
+  s.required_ruby_version = '>= 2.0.0'
 
-  s.add_dependency('encryptor', ['>= 1.3.0'])
+  s.add_dependency('encryptor', ['~> 2.0.0'])
   # support for testing with specific active record version
   activerecord_version = if ENV.key?('ACTIVERECORD')
     "~> #{ENV['ACTIVERECORD']}"
@@ -50,4 +50,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('simplecov')
   s.add_development_dependency('simplecov-rcov')
+  s.add_development_dependency("codeclimate-test-reporter")
+
 end
