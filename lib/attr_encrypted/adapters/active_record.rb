@@ -53,11 +53,17 @@ if defined?(ActiveRecord::Base)
             options.merge! encrypted_attributes[attr]
 
             define_method("#{attr}_changed?") do
-              send(attr) != decrypt(attr, send("#{options[:attribute]}_was"))
+              if send("#{options[:attribute]}_changed?")
+                send(attr) != send("#{attr}_was")
+              end
             end
 
             define_method("#{attr}_was") do
-              decrypt(attr, send("#{options[:attribute]}_was")) if send("#{attr}_changed?")
+              iv_and_salt = { iv: send("#{options[:attribute]}_iv_was"), salt: send("#{options[:attribute]}_salt_was"), operation: :decrypting }
+              encrypted_attributes[attr].merge!(iv_and_salt)
+              evaluated_options = evaluated_attr_encrypted_options_for(attr)
+              [:iv, :salt, :operation].each { |key| encrypted_attributes[attr].delete(key) }
+              self.class.decrypt(attr, send("#{options[:attribute]}_was"), evaluated_options)
             end
 
             alias_method "#{attr}_before_type_cast", attr

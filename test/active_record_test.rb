@@ -177,7 +177,11 @@ class ActiveRecordTest < Minitest::Test
 
   def test_should_create_changed_predicate
     person = Person.create!(email: 'test@example.com')
-    assert !person.email_changed?
+    refute person.email_changed?
+    person.email = 'test@example.com'
+    refute person.email_changed?
+    person.email = nil
+    assert person.email_changed?
     person.email = 'test2@example.com'
     assert person.email_changed?
   end
@@ -185,9 +189,9 @@ class ActiveRecordTest < Minitest::Test
   def test_should_create_was_predicate
     original_email = 'test@example.com'
     person = Person.create!(email: original_email)
-    assert !person.email_was
+    assert_equal original_email, person.email_was
     person.email = 'test2@example.com'
-    assert_equal person.email_was, original_email
+    assert_equal original_email, person.email_was
   end
 
   if ::ActiveRecord::VERSION::STRING > "4.0"
