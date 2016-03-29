@@ -1,5 +1,10 @@
 # attr_encrypted #
 
+## 3.0.0 ##
+* Changed: Updated gemspec to use Encryptor v3.0.0. (@saghaulor)
+* Changed: Updated README with instructions related to moving from v2.0.0 to v3.0.0. (@saghaulor)
+* Fixed: ActiveModel::Dirty methods in the ActiveRecord adapter. (@saghaulor)
+
 ## 2.0.0 ##
 * Added: Now using Encryptor v2.0.0 (@saghaulor)
 * Added: Options are copied to the instance. (@saghaulor)
