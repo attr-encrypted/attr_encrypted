@@ -10,6 +10,7 @@ def create_tables
         t.string   :password
         t.string   :encrypted_credentials
         t.binary   :salt
+        t.binary   :key_iv
         t.string   :encrypted_email_salt
         t.string   :encrypted_credentials_salt
         t.string   :encrypted_email_iv
@@ -23,10 +24,12 @@ def create_tables
       create_table :users do |t|
         t.string :login
         t.string :encrypted_password
+        t.string :encrypted_password_iv
         t.boolean :is_admin
       end
       create_table :prime_ministers do |t|
         t.string :encrypted_name
+        t.string :encrypted_name_iv
       end
       create_table :addresses do |t|
         t.binary :encrypted_street
@@ -55,16 +58,17 @@ end
 
 class Person < ActiveRecord::Base
   self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
-  attr_encrypted :email, :key => SECRET_KEY
-  attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => SECRET_KEY, iv: SecureRandom.random_bytes(12)) }, :marshal => true
+  attr_encrypted :email, key: SECRET_KEY
+  attr_encrypted :credentials, key: Proc.new { |user| Encryptor.encrypt(value: user.salt, key: SECRET_KEY, iv: user.key_iv) }, marshal: true
 
   after_initialize :initialize_salt_and_credentials
 
   protected
 
   def initialize_salt_and_credentials
+    self.key_iv ||= SecureRandom.random_bytes(12)
     self.salt ||= Digest::SHA256.hexdigest((Time.now.to_i * rand(1000)).to_s)[0..15]
-    self.credentials ||= { :username => 'example', :password => 'test' }
+    self.credentials ||= { username: 'example', password: 'test' }
   end
 end
 
