@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 2.0.0'
 
-  s.add_dependency('encryptor', ['~> 2.0.0'])
+  s.add_dependency('encryptor', ['~> 3.0.0'])
   # support for testing with specific active record version
   activerecord_version = if ENV.key?('ACTIVERECORD')
     "~> #{ENV['ACTIVERECORD']}"
@@ -55,6 +55,9 @@ Gem::Specification.new do |s|
   s.cert_chain  = ['certs/saghaulor.pem']
   s.signing_key = File.expand_path("~/.ssh/gem-private_key.pem") if $0 =~ /gem\z/
 
-  s.post_install_message = "\n\n\nWARNING: Several insecure default options and features have been deprecated in attr_encrypted v2.0.0. Please see the README for more details.\n\n\n"
+  s.post_install_message = "\n\n\nWARNING: Several insecure default options and features were deprecated in attr_encrypted v2.0.0.\n
+Additionally, there was a bug in Encryptor v2.0.0 that insecurely encrypted data when using an AES-*-GCM algorithm.\n
+This bug was fixed but introduced breaking changes between v2.x and v3.x.\n
+Please see the README for more information regarding upgrading to attr_encrypted v3.0.0.\n\n\n"
 
 end
