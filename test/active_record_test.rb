@@ -1,10 +1,10 @@
 require_relative 'test_helper'
 
-ActiveRecord::Base.establish_connection :adapter => 'sqlite3', :database => ':memory:'
+ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
 
 def create_tables
   silence_stream(STDOUT) do
-    ActiveRecord::Schema.define(:version => 1) do
+    ActiveRecord::Schema.define(version: 1) do
       create_table :people do |t|
         t.string   :encrypted_email
         t.string   :password
@@ -77,34 +77,34 @@ class PersonWithValidation < Person
 end
 
 class PersonWithProcMode < Person
-  attr_encrypted :email,       :key => SECRET_KEY, :mode => Proc.new { :per_attribute_iv_and_salt }
-  attr_encrypted :credentials, :key => SECRET_KEY, :mode => Proc.new { :single_iv_and_salt }, insecure_mode: true
+  attr_encrypted :email,       key: SECRET_KEY, mode: Proc.new { :per_attribute_iv_and_salt }
+  attr_encrypted :credentials, key: SECRET_KEY, mode: Proc.new { :single_iv_and_salt }, insecure_mode: true
 end
 
 class Account < ActiveRecord::Base
   attr_accessor :key
-  attr_encrypted :password, :key => Proc.new {|account| account.key}
+  attr_encrypted :password, key: Proc.new {|account| account.key}
 end
 
 class PersonWithSerialization < ActiveRecord::Base
   self.table_name = 'people'
-  attr_encrypted :email, :key => SECRET_KEY
+  attr_encrypted :email, key: SECRET_KEY
   serialize :password
 end
 
 class UserWithProtectedAttribute < ActiveRecord::Base
   self.table_name = 'users'
-  attr_encrypted :password, :key => SECRET_KEY
+  attr_encrypted :password, key: SECRET_KEY
   attr_protected :is_admin if ::ActiveRecord::VERSION::STRING < "4.0"
 end
 
 class PersonUsingAlias < ActiveRecord::Base
   self.table_name = 'people'
-  attr_encryptor :email, :key => SECRET_KEY
+  attr_encryptor :email, key: SECRET_KEY
 end
 
 class PrimeMinister < ActiveRecord::Base
-  attr_encrypted :name, :marshal => true, :key => SECRET_KEY
+  attr_encrypted :name, marshal: true, key: SECRET_KEY
 end
 
 class Address < ActiveRecord::Base
@@ -119,11 +119,11 @@ class ActiveRecordTest < Minitest::Test
   def setup
     ActiveRecord::Base.connection.tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }
     create_tables
-    Account.create!(:key => SECRET_KEY, :password => "password")
+    Account.create!(key: SECRET_KEY, password: "password")
   end
 
   def test_should_encrypt_email
-    @person = Person.create :email => 'test@example.com'
+    @person = Person.create(email: 'test@example.com')
     refute_nil @person.encrypted_email
     refute_equal @person.email, @person.encrypted_email
     assert_equal @person.email, Person.first.email
@@ -147,36 +147,36 @@ class ActiveRecordTest < Minitest::Test
   end
 
   def test_should_encrypt_decrypt_with_iv
-    @person = Person.create :email => 'test@example.com'
+    @person = Person.create(email: 'test@example.com')
     @person2 = Person.find(@person.id)
     refute_nil @person2.encrypted_email_iv
     assert_equal 'test@example.com', @person2.email
   end
 
   def test_should_ensure_attributes_can_be_deserialized
-    @person = PersonWithSerialization.new :email => 'test@example.com', :password => %w(an array of strings)
+    @person = PersonWithSerialization.new(email: 'test@example.com', password: %w(an array of strings))
     @person.save
     assert_equal @person.password, %w(an array of strings)
   end
 
   def test_should_create_an_account_regardless_of_arguments_order
-    Account.create!(:key => SECRET_KEY, :password => "password")
-    Account.create!(:password => "password" , :key => SECRET_KEY)
+    Account.create!(key: SECRET_KEY, password: "password")
+    Account.create!(password: "password" , key: SECRET_KEY)
   end
 
   def test_should_set_attributes_regardless_of_arguments_order
     # minitest does not implement `assert_nothing_raised` https://github.com/seattlerb/minitest/issues/112
-    Account.new.attributes = { :password => "password" , :key => SECRET_KEY }
+    Account.new.attributes = { password: "password", key: SECRET_KEY }
   end
 
   def test_should_preserve_hash_key_type
-    hash = { :foo => 'bar' }
-    account = Account.create!(:key => hash)
+    hash = { foo: 'bar' }
+    account = Account.create!(key: hash)
     assert_equal account.key, hash
   end
 
   def test_should_create_changed_predicate
-    person = Person.create!(:email => 'test@example.com')
+    person = Person.create!(email: 'test@example.com')
     assert !person.email_changed?
     person.email = 'test2@example.com'
     assert person.email_changed?
@@ -184,7 +184,7 @@ class ActiveRecordTest < Minitest::Test
 
   def test_should_create_was_predicate
     original_email = 'test@example.com'
-    person = Person.create!(:email => original_email)
+    person = Person.create!(email: original_email)
     assert !person.email_was
     person.email = 'test2@example.com'
     assert_equal person.email_was, original_email
@@ -192,48 +192,48 @@ class ActiveRecordTest < Minitest::Test
 
   if ::ActiveRecord::VERSION::STRING > "4.0"
     def test_should_assign_attributes
-      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
-      @user.attributes = ActionController::Parameters.new(:login => 'modified', :is_admin => true).permit(:login)
+      @user = UserWithProtectedAttribute.new(login: 'login', is_admin: false)
+      @user.attributes = ActionController::Parameters.new(login: 'modified', is_admin: true).permit(:login)
       assert_equal 'modified', @user.login
     end
 
     def test_should_not_assign_protected_attributes
-      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
-      @user.attributes = ActionController::Parameters.new(:login => 'modified', :is_admin => true).permit(:login)
+      @user = UserWithProtectedAttribute.new(login: 'login', is_admin: false)
+      @user.attributes = ActionController::Parameters.new(login: 'modified', is_admin: true).permit(:login)
       assert !@user.is_admin?
     end
 
     def test_should_raise_exception_if_not_permitted
-      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+      @user = UserWithProtectedAttribute.new(login: 'login', is_admin: false)
       assert_raises ActiveModel::ForbiddenAttributesError do
-        @user.attributes = ActionController::Parameters.new(:login => 'modified', :is_admin => true)
+        @user.attributes = ActionController::Parameters.new(login: 'modified', is_admin: true)
       end
     end
 
     def test_should_raise_exception_on_init_if_not_permitted
       assert_raises ActiveModel::ForbiddenAttributesError do
-        @user = UserWithProtectedAttribute.new ActionController::Parameters.new(:login => 'modified', :is_admin => true)
+        @user = UserWithProtectedAttribute.new ActionController::Parameters.new(login: 'modified', is_admin: true)
       end
     end
   else
     def test_should_assign_attributes
-      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
-      @user.attributes = {:login => 'modified', :is_admin => true}
+      @user = UserWithProtectedAttribute.new(login: 'login', is_admin: false)
+      @user.attributes = { login: 'modified', is_admin: true }
       assert_equal 'modified', @user.login
     end
 
     def test_should_not_assign_protected_attributes
-      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
-      @user.attributes = {:login => 'modified', :is_admin => true}
+      @user = UserWithProtectedAttribute.new(login: 'login', is_admin: false)
+      @user.attributes = { login: 'modified', is_admin: true }
       assert !@user.is_admin?
     end
 
     def test_should_assign_protected_attributes
-      @user = UserWithProtectedAttribute.new :login => 'login', :is_admin => false
+      @user = UserWithProtectedAttribute.new(login: 'login', is_admin: false)
       if ::ActiveRecord::VERSION::STRING > "3.1"
-        @user.send :assign_attributes, {:login => 'modified', :is_admin => true}, :without_protection => true
+        @user.send(:assign_attributes, { login: 'modified', is_admin: true }, without_protection: true)
       else
-        @user.send :attributes=, {:login => 'modified', :is_admin => true}, false
+        @user.send(:attributes=, { login: 'modified', is_admin: true }, false)
       end
       assert @user.is_admin?
     end
@@ -245,7 +245,7 @@ class ActiveRecordTest < Minitest::Test
   end
 
   def test_should_allow_proc_based_mode
-    @person = PersonWithProcMode.create :email => 'test@example.com', :credentials => 'password123'
+    @person = PersonWithProcMode.create(email: 'test@example.com', credentials: 'password123')
 
     # Email is :per_attribute_iv_and_salt
     assert_equal @person.class.encrypted_attributes[:email][:mode].class, Proc
@@ -279,21 +279,21 @@ class ActiveRecordTest < Minitest::Test
 
   # See https://github.com/attr-encrypted/attr_encrypted/issues/68
   def test_should_invalidate_virtual_attributes_on_reload
-    pm = PrimeMinister.new(:name => 'Winston Churchill')
-    pm.save!
-    assert_equal 'Winston Churchill', pm.name
-    pm.name = 'Neville Chamberlain'
-    assert_equal 'Neville Chamberlain', pm.name
+    old_pm_name = 'Winston Churchill'
+    new_pm_name = 'Neville Chamberlain'
+    pm = PrimeMinister.create!(name: old_pm_name)
+    assert_equal old_pm_name, pm.name
+    pm.name = new_pm_name
+    assert_equal new_pm_name, pm.name
 
     result = pm.reload
     assert_equal pm, result
-    assert_equal 'Winston Churchill', pm.name
+    assert_equal old_pm_name, pm.name
   end
 
   def test_should_save_encrypted_data_as_binary
     street = '123 Elm'
-    address = Address.new(street: street)
-    address.save!
+    address = Address.create!(street: street)
     refute_equal address.encrypted_street, street
     assert_equal Address.first.street, street
   end
