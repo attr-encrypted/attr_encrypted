@@ -11,7 +11,7 @@ It works with ANY class, however, you get a few extra features when you're using
 Add attr_encrypted to your gemfile:
 
 ```ruby
-  gem "attr_encrypted", "~> 2.0.0"
+  gem "attr_encrypted", "~> 3.0.0"
 ```
 
 Then install the gem:
@@ -37,22 +37,22 @@ If you're using a PORO, you have to do a little bit more work by extending the c
     extend AttrEncrypted
     attr_accessor :name
     attr_encrypted :ssn, key: 'This is a key that is 256 bits!!'
-  
+
     def load
       # loads the stored data
     end
-  
+
     def save
       # saves the :name and :encrypted_ssn attributes somewhere (e.g. filesystem, database, etc)
     end
   end
-  
+
   user = User.new
   user.ssn = '123-45-6789'
   user.ssn # returns the unencrypted object ie. '123-45-6789'
   user.encrypted_ssn # returns the encrypted version of :ssn
   user.save
-  
+
   user = User.load
   user.ssn # decrypts :encrypted_ssn and returns '123-45-6789'
 ```
@@ -242,7 +242,7 @@ Lets suppose you'd like to use this custom encryptor class:
     def self.silly_encrypt(options)
       (options[:value] + options[:secret_key]).reverse
     end
-  
+
     def self.silly_decrypt(options)
       options[:value].reverse.gsub(/#{options[:secret_key]}$/, '')
     end
@@ -374,12 +374,12 @@ Backwards compatibility is supported by providing a special option that is passe
 The `:insecure_mode` option will allow encryptor to ignore the new security requirements. It is strongly advised that if you use this older insecure behavior that you migrate to the newer more secure behavior.
 
 
-## Upgrading from attr_encrypted v1.x to v2.x
+## Upgrading from attr_encrypted v1.x to v3.x
 
 Modify your gemfile to include the new version of attr_encrypted:
 
 ```ruby
-  gem attr_encrypted, "~> 2.0.0"
+  gem attr_encrypted, "~> 3.0.0"
 ```
 
 The update attr_encrypted:
@@ -389,6 +389,30 @@ The update attr_encrypted:
 ```
 
 Then modify your models using attr\_encrypted to account for the changes in default options. Specifically, pass in the `:mode` and `:algorithm` options that you were using if you had not previously done so. If your key is insufficient length relative to the algorithm that you use, you should also pass in `insecure_mode: true`; this will prevent Encryptor from raising an exception regarding insufficient key length. Please see the Deprecations sections for more details including an example of how to specify your model with default options from attr_encrypted v1.x.
+
+## Upgrading from attr_encrypted v2.x to v3.x
+
+A bug was discovered in Encryptor v2.0.0 that inccorectly set the IV when using an AES-\*-GCM algorithm. Unfornately fixing this major security issue results in the inability to decrypt records encrypted using an AES-*-GCM algorithm from Encryptor v2.0.0. Please see [Upgrading to Encryptor v3.0.0](https://github.com/attr-encrypted/encryptor#upgrading-from-v200-to-v300) for more info.
+
+It is strongly advised that you re-encrypt your data encrypted with Encryptor v2.0.0. However, you'll have to take special care to re-encrypt. To decrypt data encrypted with Encryptor v2.0.0 using an AES-\*-GCM algorithm you can use the `:v2_gcm_iv` option.
+
+It is recommended that you implement a strategy to insure that you do not mix the encryption implementations of Encryptor. One way to do this is to re-encrypt everything while your application is offline.Another way is to add a column that keeps track of what implementation was used. The path that you choose will depend on your situtation. Below is an example of how you might go about re-encrypting your data.
+
+```ruby
+  class User
+    attr_encrypted :ssn, key: :encryption_key, v2_gcm_iv: :is_decrypting?(:ssn)
+
+    def is_decrypting?(attribute)
+      encrypted_atributes[attribute][operation] == :decrypting
+    end
+  end
+
+  User.all.each do |user|
+    old_ssn = user.ssn
+    user.ssn= old_ssn
+    user.save
+  end
+```
 
 ## Things to consider before using attr_encrypted
 
