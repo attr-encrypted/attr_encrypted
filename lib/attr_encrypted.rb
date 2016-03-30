@@ -350,7 +350,7 @@ module AttrEncrypted
       def evaluated_attr_encrypted_options_for(attribute)
         evaluated_options = Hash.new
         attribute_option_value = encrypted_attributes[attribute.to_sym][:attribute]
-        self.class.encrypted_attributes[attribute.to_sym].map do |option, value|
+        encrypted_attributes[attribute.to_sym].map do |option, value|
           evaluated_options[option] = evaluate_attr_encrypted_option(value)
         end
 
@@ -383,7 +383,7 @@ module AttrEncrypted
       def load_iv_for_attribute(attribute, options)
         encrypted_attribute_name = options[:attribute]
         encode_iv = options[:encode_iv]
-        iv = send("#{encrypted_attribute_name}_iv")
+        iv = options[:iv] || send("#{encrypted_attribute_name}_iv")
         if options[:operation] == :encrypting
           begin
             iv = generate_iv(options[:algorithm])
@@ -407,7 +407,7 @@ module AttrEncrypted
       def load_salt_for_attribute(attribute, options)
         encrypted_attribute_name = options[:attribute]
         encode_salt = options[:encode_salt]
-        salt = send("#{encrypted_attribute_name}_salt")
+        salt = options[:salt] || send("#{encrypted_attribute_name}_salt")
         if (salt == nil)
           salt = SecureRandom.random_bytes
           salt = prefix_and_encode_salt(salt, encode_salt) if encode_salt
