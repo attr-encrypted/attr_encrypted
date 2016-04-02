@@ -59,8 +59,10 @@ if defined?(ActiveRecord::Base)
             end
 
             define_method("#{attr}_was") do
-              iv_and_salt = { iv: send("#{options[:attribute]}_iv_was"), salt: send("#{options[:attribute]}_salt_was"), operation: :decrypting }
-              encrypted_attributes[attr].merge!(iv_and_salt)
+              attr_was_options = { operation: :decrypting }
+              attr_was_options[:iv]= send("#{options[:attribute]}_iv_was") if respond_to?("#{options[:attribute]}_iv_was")
+              attr_was_options[:salt]= send("#{options[:attribute]}_salt_was") if respond_to?("#{options[:attribute]}_salt_was")
+              encrypted_attributes[attr].merge!(attr_was_options)
               evaluated_options = evaluated_attr_encrypted_options_for(attr)
               [:iv, :salt, :operation].each { |key| encrypted_attributes[attr].delete(key) }
               self.class.decrypt(attr, send("#{options[:attribute]}_was"), evaluated_options)
