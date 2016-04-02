@@ -1,5 +1,8 @@
 # attr_encrypted #
 
+## 3.0.1 ##
+* Fixed: attr_was method no longer calls undefined methods. (@saghaulor)
+
 ## 3.0.0 ##
 * Changed: Updated gemspec to use Encryptor v3.0.0. (@saghaulor)
 * Changed: Updated README with instructions related to moving from v2.0.0 to v3.0.0. (@saghaulor)
