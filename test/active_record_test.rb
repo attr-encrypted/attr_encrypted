@@ -192,6 +192,12 @@ class ActiveRecordTest < Minitest::Test
     assert_equal original_email, person.email_was
     person.email = 'test2@example.com'
     assert_equal original_email, person.email_was
+    old_pm_name = "Winston Churchill"
+    pm = PrimeMinister.create!(name: old_pm_name)
+    assert_equal old_pm_name, pm.name_was
+    old_zipcode = "90210"
+    address = Address.create!(zipcode: old_zipcode, mode: "single_iv_and_salt")
+    assert_equal old_zipcode, address.zipcode_was
   end
 
   if ::ActiveRecord::VERSION::STRING > "4.0"
