@@ -15,6 +15,7 @@ def create_tables
         t.string   :encrypted_credentials_salt
         t.string   :encrypted_email_iv
         t.string   :encrypted_credentials_iv
+        t.string   :encrypted_birth_date
       end
       create_table :accounts do |t|
         t.string :encrypted_password
@@ -114,6 +115,11 @@ class Address < ActiveRecord::Base
   attr_encrypted :zipcode, key: SECRET_KEY, mode: Proc.new { |address| address.mode.to_sym }, insecure_mode: true
 end
 
+class PersonWithDateBirthDate < ActiveRecord::Base
+  self.table_name = 'people'
+  attr_encrypted :birth_date, :marshal => true, :class => Date, :key => 'any key that is long enough to appease'
+end
+
 class ActiveRecordTest < Minitest::Test
 
   def setup
@@ -151,6 +157,35 @@ class ActiveRecordTest < Minitest::Test
     @person2 = Person.find(@person.id)
     refute_nil @person2.encrypted_email_iv
     assert_equal 'test@example.com', @person2.email
+  end
+
+  def test_multiparameter_attributes_on_date
+    date = Date.new(1983, 9, 17)
+
+    [
+      # single parameter
+      { :birth_date => date },
+      # multiparameter
+      { 'birth_date(1i)' => date.year.to_s, 'birth_date(2i)' => date.month.to_s, 'birth_date(3i)' => date.day.to_s },
+    ].each do |attributes|
+      [:create!, :new].each do |method|
+        # test creation
+        person = PersonWithDateBirthDate.public_send(method, attributes)
+        assert_equal date, person.birth_date
+
+        # test assignment
+        person.birth_date = person.birth_date
+        assert_equal date, person.birth_date
+
+        # test saving
+        person.save!
+        assert_equal date, person.birth_date
+
+        # test reload
+        person.reload
+        assert_equal date, person.birth_date
+      end
+    end
   end
 
   def test_should_ensure_attributes_can_be_deserialized
