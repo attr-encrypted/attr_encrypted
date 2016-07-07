@@ -403,7 +403,7 @@ It is recommended that you implement a strategy to insure that you do not mix th
     attr_encrypted :ssn, key: :encryption_key, v2_gcm_iv: :is_decrypting?(:ssn)
 
     def is_decrypting?(attribute)
-      encrypted_atributes[attribute][operation] == :decrypting
+      encrypted_attributes[attribute][:operation] == :decrypting
     end
   end
 
