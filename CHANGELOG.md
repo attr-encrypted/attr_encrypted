@@ -1,5 +1,8 @@
 # attr_encrypted #
 
+## 3.0.2 ##
+* Changed: Removed alias_method_chain for compatibility with Rails v5.x (@grosser)
+
 ## 3.0.1 ##
 * Fixed: attr_was method no longer calls undefined methods. (@saghaulor)
 
