@@ -3,31 +3,29 @@ require File.expand_path('../test_helper', __FILE__)
 ActiveRecord::Base.establish_connection :adapter => 'sqlite3', :database => ':memory:'
 
 def create_tables
-  silence_stream(STDOUT) do
-    ActiveRecord::Schema.define(:version => 1) do
-      create_table :people do |t|
-        t.string   :encrypted_email
-        t.string   :password
-        t.string   :encrypted_credentials
-        t.binary   :salt
-        t.string   :encrypted_email_salt
-        t.string   :encrypted_credentials_salt
-        t.string   :encrypted_email_iv
-        t.string   :encrypted_credentials_iv
-      end
-      create_table :accounts do |t|
-        t.string :encrypted_password
-        t.string :encrypted_password_iv
-        t.string :encrypted_password_salt
-      end
-      create_table :users do |t|
-        t.string :login
-        t.string :encrypted_password
-        t.boolean :is_admin
-      end
-      create_table :prime_ministers do |t|
-        t.string :encrypted_name
-      end
+  ActiveRecord::Schema.define(version: 1) do
+    create_table :people do |t|
+      t.string   :encrypted_email
+      t.string   :password
+      t.string   :encrypted_credentials
+      t.binary   :salt
+      t.string   :encrypted_email_salt
+      t.string   :encrypted_credentials_salt
+      t.string   :encrypted_email_iv
+      t.string   :encrypted_credentials_iv
+    end
+    create_table :accounts do |t|
+      t.string :encrypted_password
+      t.string :encrypted_password_iv
+      t.string :encrypted_password_salt
+    end
+    create_table :users do |t|
+      t.string :login
+      t.string :encrypted_password
+      t.boolean :is_admin
+    end
+    create_table :prime_ministers do |t|
+      t.string :encrypted_name
     end
   end
 end
