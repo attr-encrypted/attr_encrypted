@@ -3,40 +3,38 @@ require_relative 'test_helper'
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
 
 def create_tables
-  silence_stream(STDOUT) do
-    ActiveRecord::Schema.define(version: 1) do
-      create_table :people do |t|
-        t.string   :encrypted_email
-        t.string   :password
-        t.string   :encrypted_credentials
-        t.binary   :salt
-        t.binary   :key_iv
-        t.string   :encrypted_email_salt
-        t.string   :encrypted_credentials_salt
-        t.string   :encrypted_email_iv
-        t.string   :encrypted_credentials_iv
-      end
-      create_table :accounts do |t|
-        t.string :encrypted_password
-        t.string :encrypted_password_iv
-        t.string :encrypted_password_salt
-      end
-      create_table :users do |t|
-        t.string :login
-        t.string :encrypted_password
-        t.string :encrypted_password_iv
-        t.boolean :is_admin
-      end
-      create_table :prime_ministers do |t|
-        t.string :encrypted_name
-        t.string :encrypted_name_iv
-      end
-      create_table :addresses do |t|
-        t.binary :encrypted_street
-        t.binary :encrypted_street_iv
-        t.binary :encrypted_zipcode
-        t.string :mode
-      end
+  ActiveRecord::Schema.define(version: 1) do
+    create_table :people do |t|
+      t.string   :encrypted_email
+      t.string   :password
+      t.string   :encrypted_credentials
+      t.binary   :salt
+      t.binary   :key_iv
+      t.string   :encrypted_email_salt
+      t.string   :encrypted_credentials_salt
+      t.string   :encrypted_email_iv
+      t.string   :encrypted_credentials_iv
+    end
+    create_table :accounts do |t|
+      t.string :encrypted_password
+      t.string :encrypted_password_iv
+      t.string :encrypted_password_salt
+    end
+    create_table :users do |t|
+      t.string :login
+      t.string :encrypted_password
+      t.string :encrypted_password_iv
+      t.boolean :is_admin
+    end
+    create_table :prime_ministers do |t|
+      t.string :encrypted_name
+      t.string :encrypted_name_iv
+    end
+    create_table :addresses do |t|
+      t.binary :encrypted_street
+      t.binary :encrypted_street_iv
+      t.binary :encrypted_zipcode
+      t.string :mode
     end
   end
 end

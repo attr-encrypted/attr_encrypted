@@ -4,14 +4,12 @@ require_relative 'test_helper'
 ActiveRecord::Base.establish_connection :adapter => 'sqlite3', :database => ':memory:'
 
 def create_people_table
-  silence_stream(STDOUT) do
-    ActiveRecord::Schema.define(:version => 1) do
-      create_table :legacy_people do |t|
-        t.string   :encrypted_email
-        t.string   :password
-        t.string   :encrypted_credentials
-        t.string   :salt
-      end
+  ActiveRecord::Schema.define(:version => 1) do
+    create_table :legacy_people do |t|
+      t.string   :encrypted_email
+      t.string   :password
+      t.string   :encrypted_credentials
+      t.string   :salt
     end
   end
 end
