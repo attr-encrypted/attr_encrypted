@@ -2,6 +2,8 @@
 
 ## 3.0.2 ##
 * Changed: Removed alias_method_chain for compatibility with Rails v5.x (@grosser)
+* Changed: Updated Travis build matrix to include Rails 5. (@saghaulor) (@connorshea)
+* Changed: Removed `.silence_stream` from tests as it has been removed from Rails 5. (@sblackstone)
 
 ## 3.0.1 ##
 * Fixed: attr_was method no longer calls undefined methods. (@saghaulor)
