@@ -73,20 +73,18 @@ class LegacyCompatibilityTest < Minitest::Test
   private
 
   def create_tables
-    silence_stream(STDOUT) do
-      ActiveRecord::Schema.define(:version => 1) do
-        create_table :legacy_nonmarshalling_pets do |t|
-          t.string :name
-          t.string :encrypted_nickname
-          t.string :encrypted_birthdate
-          t.string :salt
-        end
-        create_table :legacy_marshalling_pets do |t|
-          t.string :name
-          t.string :encrypted_nickname
-          t.string :encrypted_birthdate
-          t.string :salt
-        end
+    ActiveRecord::Schema.define(:version => 1) do
+      create_table :legacy_nonmarshalling_pets do |t|
+        t.string :name
+        t.string :encrypted_nickname
+        t.string :encrypted_birthdate
+        t.string :salt
+      end
+      create_table :legacy_marshalling_pets do |t|
+        t.string :name
+        t.string :encrypted_nickname
+        t.string :encrypted_birthdate
+        t.string :salt
       end
     end
   end
