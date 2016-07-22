@@ -53,21 +53,31 @@ if defined?(ActiveRecord::Base)
             attr = attrs.pop
             options.merge! encrypted_attributes[attr]
 
-            define_method("#{attr}_changed?") do
-              if send("#{options[:attribute]}_changed?")
-                send(attr) != send("#{attr}_was")
+            define_method("#{attr}_was") do
+              attribute_was(attr)
+            end
+
+            if ::ActiveRecord::VERSION::STRING >= "4.1"
+              define_method("#{attr}_changed?") do |options = {}|
+                attribute_changed?(attr, options)
+              end
+            else
+              define_method("#{attr}_changed?") do
+                  attribute_changed?(attr)
               end
             end
 
-            define_method("#{attr}_was") do
-              attr_was_options = { operation: :decrypting }
-              attr_was_options[:iv]= send("#{options[:attribute]}_iv_was") if respond_to?("#{options[:attribute]}_iv_was")
-              attr_was_options[:salt]= send("#{options[:attribute]}_salt_was") if respond_to?("#{options[:attribute]}_salt_was")
-              encrypted_attributes[attr].merge!(attr_was_options)
-              evaluated_options = evaluated_attr_encrypted_options_for(attr)
-              [:iv, :salt, :operation].each { |key| encrypted_attributes[attr].delete(key) }
-              self.class.decrypt(attr, send("#{options[:attribute]}_was"), evaluated_options)
+            define_method("#{attr}_change") do
+              attribute_change(attr)
             end
+
+            define_method("#{attr}_with_dirtiness=") do |value|
+              attribute_will_change!(attr) if value != __send__(attr)
+              __send__("#{attr}_without_dirtiness=", value)
+            end
+
+            alias_method "#{attr}_without_dirtiness=", "#{attr}="
+            alias_method "#{attr}=", "#{attr}_with_dirtiness="
 
             alias_method "#{attr}_before_type_cast", attr
           end
