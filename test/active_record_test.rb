@@ -19,6 +19,7 @@ def create_tables
       t.string :encrypted_password
       t.string :encrypted_password_iv
       t.string :encrypted_password_salt
+      t.binary :key
     end
     create_table :users do |t|
       t.string :login
@@ -80,8 +81,20 @@ class PersonWithProcMode < Person
 end
 
 class Account < ActiveRecord::Base
-  attr_accessor :key
-  attr_encrypted :password, key: Proc.new {|account| account.key}
+  ACCOUNT_ENCRYPTION_KEY = SecureRandom.base64(32)
+  attr_encrypted :password, key: :password_encryption_key
+
+  def encrypting?(attr)
+    encrypted_attributes[attr][:operation] == :encrypting
+  end
+
+  def password_encryption_key
+    if encrypting?(:password)
+      self.key = ACCOUNT_ENCRYPTION_KEY
+    else
+      self.key
+    end
+  end
 end
 
 class PersonWithSerialization < ActiveRecord::Base
@@ -117,7 +130,6 @@ class ActiveRecordTest < Minitest::Test
   def setup
     ActiveRecord::Base.connection.tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }
     create_tables
-    Account.create!(key: SECRET_KEY, password: "password")
   end
 
   def test_should_encrypt_email
@@ -167,12 +179,6 @@ class ActiveRecordTest < Minitest::Test
     Account.new.attributes = { password: "password", key: SECRET_KEY }
   end
 
-  def test_should_preserve_hash_key_type
-    hash = { foo: 'bar' }
-    account = Account.create!(key: hash)
-    assert_equal account.key, hash
-  end
-
   def test_should_create_changed_predicate
     person = Person.create!(email: 'test@example.com')
     refute person.email_changed?
@@ -196,6 +202,23 @@ class ActiveRecordTest < Minitest::Test
     old_zipcode = "90210"
     address = Address.create!(zipcode: old_zipcode, mode: "single_iv_and_salt")
     assert_equal old_zipcode, address.zipcode_was
+  end
+
+  def test_attribute_was_works_when_options_for_old_encrypted_value_are_different_than_options_for_new_encrypted_value
+    pw = 'password'
+    crypto_key = SecureRandom.base64(32)
+    old_iv = SecureRandom.random_bytes(12)
+    account = Account.create
+    encrypted_value = Encryptor.encrypt(value: pw, iv: old_iv, key: crypto_key)
+    Account.where(id: account.id).update_all(key: crypto_key, encrypted_password_iv: [old_iv].pack('m'), encrypted_password: [encrypted_value].pack('m'))
+    account = Account.find(account.id)
+    assert_equal pw, account.password
+    account.password = pw.reverse
+    assert_equal pw, account.password_was
+    account.save
+    account.reload
+    assert_equal Account::ACCOUNT_ENCRYPTION_KEY, account.key
+    assert_equal pw.reverse, account.password
   end
 
   if ::ActiveRecord::VERSION::STRING > "4.0"
