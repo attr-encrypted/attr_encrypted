@@ -1,5 +1,8 @@
 # attr_encrypted #
 
+## 3.0.3 ##
+* Fixed: attr_was would decrypt the attribute upon every call. This is inefficient and introduces problems when the options change between decrypting an old value and encrypting a new value; for example, when rotating the encryption key. As such, the new approach caches the decrypted value of the old encrypted value such that the old options are no longer needed. (@johnny-lai) (@saghaulor)
+
 ## 3.0.2 ##
 * Changed: Removed alias_method_chain for compatibility with Rails v5.x (@grosser)
 * Changed: Updated Travis build matrix to include Rails 5. (@saghaulor) (@connorshea)
