@@ -11,7 +11,7 @@ SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
 )
 
 SimpleCov.start do
-  add_filter 'test'
+  add_filter 'bundle|test|vendor'
 end
 
 CodeClimate::TestReporter.start
