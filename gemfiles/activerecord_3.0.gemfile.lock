@@ -1,0 +1,141 @@
+PATH
+  remote: ../
+  specs:
+    attr_encrypted (3.0.3)
+      encryptor (~> 3.0.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    abstract (1.0.0)
+    actionpack (3.0.20)
+      activemodel (= 3.0.20)
+      activesupport (= 3.0.20)
+      builder (~> 2.1.2)
+      erubis (~> 2.6.6)
+      i18n (~> 0.5.0)
+      rack (~> 1.2.5)
+      rack-mount (~> 0.6.14)
+      rack-test (~> 0.5.7)
+      tzinfo (~> 0.3.23)
+    activemodel (3.0.20)
+      activesupport (= 3.0.20)
+      builder (~> 2.1.2)
+      i18n (~> 0.5.0)
+    activerecord (3.0.20)
+      activemodel (= 3.0.20)
+      activesupport (= 3.0.20)
+      arel (~> 2.0.10)
+      tzinfo (~> 0.3.23)
+    activesupport (3.0.20)
+    addressable (2.4.0)
+    appraisal (2.1.0)
+      bundler
+      rake
+      thor (>= 0.14.0)
+    arel (2.0.10)
+    bcrypt (3.1.11)
+    bcrypt-ruby (3.1.5)
+      bcrypt (>= 3.1.3)
+    builder (2.1.2)
+    codeclimate-test-reporter (0.6.0)
+      simplecov (>= 0.7.1, < 1.0.0)
+    data_objects (0.10.17)
+      addressable (~> 2.1)
+    datamapper (1.2.0)
+      dm-aggregates (~> 1.2.0)
+      dm-constraints (~> 1.2.0)
+      dm-core (~> 1.2.0)
+      dm-migrations (~> 1.2.0)
+      dm-serializer (~> 1.2.0)
+      dm-timestamps (~> 1.2.0)
+      dm-transactions (~> 1.2.0)
+      dm-types (~> 1.2.0)
+      dm-validations (~> 1.2.0)
+    dm-aggregates (1.2.0)
+      dm-core (~> 1.2.0)
+    dm-constraints (1.2.0)
+      dm-core (~> 1.2.0)
+    dm-core (1.2.1)
+      addressable (~> 2.3)
+    dm-do-adapter (1.2.0)
+      data_objects (~> 0.10.6)
+      dm-core (~> 1.2.0)
+    dm-migrations (1.2.0)
+      dm-core (~> 1.2.0)
+    dm-serializer (1.2.2)
+      dm-core (~> 1.2.0)
+      fastercsv (~> 1.5)
+      json (~> 1.6)
+      json_pure (~> 1.6)
+      multi_json (~> 1.0)
+    dm-sqlite-adapter (1.2.0)
+      dm-do-adapter (~> 1.2.0)
+      do_sqlite3 (~> 0.10.6)
+    dm-timestamps (1.2.0)
+      dm-core (~> 1.2.0)
+    dm-transactions (1.2.0)
+      dm-core (~> 1.2.0)
+    dm-types (1.2.2)
+      bcrypt-ruby (~> 3.0)
+      dm-core (~> 1.2.0)
+      fastercsv (~> 1.5)
+      json (~> 1.6)
+      multi_json (~> 1.0)
+      stringex (~> 1.4)
+      uuidtools (~> 2.1)
+    dm-validations (1.2.0)
+      dm-core (~> 1.2.0)
+    do_sqlite3 (0.10.17)
+      data_objects (= 0.10.17)
+    docile (1.1.5)
+    encryptor (3.0.0)
+    erubis (2.6.6)
+      abstract (>= 1.0.0)
+    fastercsv (1.5.5)
+    i18n (0.5.4)
+    json (1.8.3)
+    json_pure (1.8.3)
+    minitest (5.9.0)
+    multi_json (1.12.1)
+    rack (1.2.8)
+    rack-mount (0.6.14)
+      rack (>= 1.0.0)
+    rack-test (0.5.7)
+      rack (>= 1.0)
+    rake (11.2.2)
+    sequel (4.36.0)
+    simplecov (0.12.0)
+      docile (~> 1.1.0)
+      json (>= 1.8, < 3)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.0)
+    simplecov-rcov (0.2.3)
+      simplecov (>= 0.4.1)
+    sqlite3 (1.3.11)
+    stringex (1.5.1)
+    thor (0.19.1)
+    tzinfo (0.3.51)
+    uuidtools (2.1.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  actionpack (~> 3.0.0)
+  activerecord (~> 3.0.0)
+  appraisal
+  attr_encrypted!
+  bundler
+  codeclimate-test-reporter
+  datamapper
+  dm-sqlite-adapter
+  minitest
+  rake
+  sequel
+  simplecov
+  simplecov-rcov
+  sqlite3
+
+BUNDLED WITH
+   1.12.5
