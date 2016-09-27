@@ -296,7 +296,7 @@ You're probably going to be storing your encrypted attributes somehow (e.g. file
   end
 ```
 
-The default encoding is `m` (base64). You can change this by setting `encode: 'some encoding'`. See [`Arrary#pack`](http://ruby-doc.org/core-2.3.0/Array.html#method-i-pack) for more encoding options.
+The default encoding is `m` (base64). You can change this by setting `encode: 'some encoding'`. See [`Array#pack`](http://ruby-doc.org/core-2.3.0/Array.html#method-i-pack) for more encoding options.
 
 
 ### The `:marshal`, `:dump_method`, and `:load_method` options
