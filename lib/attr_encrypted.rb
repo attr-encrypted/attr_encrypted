@@ -322,6 +322,7 @@ module AttrEncrypted
     #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
     def decrypt(attribute, encrypted_value)
       encrypted_attributes[attribute.to_sym][:operation] = :decrypting
+      encrypted_attributes[attribute.to_sym][:value_present] = (encrypted_value && !encrypted_value.empty?)
       self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
     end
 
@@ -342,6 +343,7 @@ module AttrEncrypted
     #  @user.encrypt(:email, 'test@example.com')
     def encrypt(attribute, value)
       encrypted_attributes[attribute.to_sym][:operation] = :encrypting
+      encrypted_attributes[attribute.to_sym][:value_present] = (value && !value.empty?)
       self.class.encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
     end
 
@@ -365,12 +367,14 @@ module AttrEncrypted
         evaluated_options[:attribute] = attribute_option_value
 
         evaluated_options.tap do |options|
-          unless options[:mode] == :single_iv_and_salt
-            load_iv_for_attribute(attribute, options)
-          end
+          if options[:if] && !options[:unless] && options[:value_present] || options[:allow_empty_value]
+            unless options[:mode] == :single_iv_and_salt
+              load_iv_for_attribute(attribute, options)
+            end
 
-          if options[:mode] == :per_attribute_iv_and_salt
-            load_salt_for_attribute(attribute, options)
+            if options[:mode] == :per_attribute_iv_and_salt
+              load_salt_for_attribute(attribute, options)
+            end
           end
         end
       end
@@ -416,7 +420,7 @@ module AttrEncrypted
         encrypted_attribute_name = options[:attribute]
         encode_salt = options[:encode_salt]
         salt = options[:salt] || send("#{encrypted_attribute_name}_salt")
-        if (salt == nil)
+        if options[:operation] == :encrypting
           salt = SecureRandom.random_bytes
           salt = prefix_and_encode_salt(salt, encode_salt) if encode_salt
           send("#{encrypted_attribute_name}_salt=", salt)

@@ -23,10 +23,10 @@ class User
   attr_encrypted :with_encoding, :key => SECRET_KEY, :encode => true
   attr_encrypted :with_custom_encoding, :key => SECRET_KEY, :encode => 'm'
   attr_encrypted :with_marshaling, :key => SECRET_KEY, :marshal => true
-  attr_encrypted :with_true_if, :key => SECRET_KEY, :if => true
-  attr_encrypted :with_false_if, :key => SECRET_KEY, :if => false
-  attr_encrypted :with_true_unless, :key => SECRET_KEY, :unless => true
-  attr_encrypted :with_false_unless, :key => SECRET_KEY, :unless => false
+  attr_encrypted :with_true_if, :key => SECRET_KEY, :if => true, mode: :per_attribute_iv_and_salt
+  attr_encrypted :with_false_if, :key => SECRET_KEY, :if => false, mode: :per_attribute_iv_and_salt
+  attr_encrypted :with_true_unless, :key => SECRET_KEY, :unless => true, mode: :per_attribute_iv_and_salt
+  attr_encrypted :with_false_unless, :key => SECRET_KEY, :unless => false, mode: :per_attribute_iv_and_salt
   attr_encrypted :with_if_changed, :key => SECRET_KEY, :if => :should_encrypt
   attr_encrypted :with_allow_empty_value, key: SECRET_KEY, allow_empty_value: true, marshal: true
 
@@ -151,9 +151,14 @@ class AttrEncryptedTest < Minitest::Test
   def test_should_decrypt_email_when_reading
     @user = User.new
     assert_nil @user.email
-    iv = @user.encrypted_email_iv.unpack('m').first
-    salt = @user.encrypted_email_salt[1..-1].unpack('m').first
+    options = @user.encrypted_attributes[:email]
+    iv = @user.send(:generate_iv, options[:algorithm])
+    encoded_iv = [iv].pack(options[:encode_iv])
+    salt = SecureRandom.random_bytes
+    encoded_salt = @user.send(:prefix_and_encode_salt, salt, options[:encode_salt])
     @user.encrypted_email = User.encrypt_email('test@example.com', iv: iv, salt: salt)
+    @user.encrypted_email_iv = encoded_iv
+    @user.encrypted_email_salt = encoded_salt
     assert_equal 'test@example.com', @user.email
   end
 
@@ -402,5 +407,59 @@ class AttrEncryptedTest < Minitest::Test
     original_iv = user.encrypted_email_iv
     user.email = 'revised_value@test.com'
     refute_equal original_iv, user.encrypted_email_iv
+  end
+
+  def test_should_not_generate_iv_for_attribute_when_if_option_is_false
+    user = User.new
+    user.with_false_if = 'derp'
+    assert_nil user.encrypted_with_false_if_iv
+  end
+
+  def test_should_generate_iv_for_attribute_when_if_option_is_true
+    user = User.new
+    user.with_true_if = 'derp'
+    refute_nil user.encrypted_with_true_if_iv
+  end
+
+  def test_should_not_generate_salt_for_attribute_when_if_option_is_false
+    user = User.new
+    user.with_false_if = 'derp'
+    assert_nil user.encrypted_with_false_if_salt
+  end
+
+  def test_should_generate_salt_for_attribute_when_if_option_is_true
+    user = User.new
+    user.with_true_if = 'derp'
+    refute_nil user.encrypted_with_true_if_salt
+  end
+
+  def test_should_generate_iv_for_attribute_when_unless_option_is_false
+    user = User.new
+    user.with_false_unless = 'derp'
+    refute_nil user.encrypted_with_false_unless_iv
+  end
+
+  def test_should_not_generate_iv_for_attribute_when_unless_option_is_true
+    user = User.new
+    user.with_true_unless = 'derp'
+    assert_nil user.encrypted_with_true_unless_iv
+  end
+
+  def test_should_generate_salt_for_attribute_when_unless_option_is_false
+    user = User.new
+    user.with_false_unless = 'derp'
+    refute_nil user.encrypted_with_false_unless_salt
+  end
+
+  def test_should_not_generate_salt_for_attribute_when_unless_option_is_true
+    user = User.new
+    user.with_true_unless = 'derp'
+    assert_nil user.encrypted_with_true_unless_salt
+  end
+
+  def test_should_not_by_default_generate_iv_when_attribute_is_empty
+    user = User.new
+    user.with_true_if = nil
+    assert_nil user.encrypted_with_true_if_iv
   end
 end
