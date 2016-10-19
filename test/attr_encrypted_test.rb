@@ -28,6 +28,7 @@ class User
   attr_encrypted :with_true_unless, :key => SECRET_KEY, :unless => true
   attr_encrypted :with_false_unless, :key => SECRET_KEY, :unless => false
   attr_encrypted :with_if_changed, :key => SECRET_KEY, :if => :should_encrypt
+  attr_encrypted :with_allow_empty_value, key: SECRET_KEY, allow_empty_value: true, marshal: true
 
   attr_encryptor :aliased, :key => SECRET_KEY
 
@@ -114,7 +115,7 @@ class AttrEncryptedTest < Minitest::Test
     assert_nil User.encrypt_email(nil, iv: @iv)
   end
 
-  def test_should_not_encrypt_empty_string
+  def test_should_not_encrypt_empty_string_by_default
     assert_equal '', User.encrypt_email('', iv: @iv)
   end
 
@@ -280,6 +281,18 @@ class AttrEncryptedTest < Minitest::Test
     @user.with_true_unless = 'testing'
     refute_nil @user.encrypted_with_true_unless
     assert_equal 'testing', @user.encrypted_with_true_unless
+  end
+
+  def test_should_encrypt_empty_with_truthy_allow_empty_value_option
+    @user = User.new
+    assert_nil @user.encrypted_with_allow_empty_value
+    @user.with_allow_empty_value = ''
+    refute_nil @user.encrypted_with_allow_empty_value
+    assert_equal '', @user.with_allow_empty_value
+    @user = User.new
+    @user.with_allow_empty_value = nil
+    refute_nil @user.encrypted_with_allow_empty_value
+    assert_equal nil, @user.with_allow_empty_value
   end
 
   def test_should_work_with_aliased_attr_encryptor
