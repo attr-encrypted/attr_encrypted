@@ -145,6 +145,7 @@ The following are the default options used by `attr_encrypted`:
   decrypt_method:    'decrypt',
   mode:              :per_attribute_iv,
   algorithm:         'aes-256-gcm',
+  allow_empty_value: false
 ```
 
 All of the aforementioned options are explained in depth below.
@@ -310,6 +311,16 @@ You may want to encrypt objects other than strings (e.g. hashes, arrays, etc). I
 ```
 
 You may also optionally specify `:marshaler`, `:dump_method`, and `:load_method` if you want to use something other than the default `Marshal` object.
+
+### The `:allow_empty_value` option
+
+You may want to encrypt empty strings or nil so as to not reveal which records are populated and which records are not.
+
+```ruby
+  class User
+    attr_encrypted :credentials, key: 'some secret key', marshal: true, allow_empty_value: true
+  end
+```
 
 
 ## ORMs
