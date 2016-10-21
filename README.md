@@ -196,7 +196,7 @@ If you don't like the `encrypted_#{attribute}` naming convention then you can sp
   end
 ```
 
-This would generate the following attributes: `secret_email_crypted`, `secret_credit_card_crypted`, and `secret_ssn_crypted`.
+This would generate the following attribute: `secret_email_crypted`.
 
 
 ### The `:key` option
