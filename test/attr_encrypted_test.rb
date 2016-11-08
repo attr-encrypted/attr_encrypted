@@ -41,6 +41,7 @@ class User
     self.should_encrypt = true
   end
 
+  private
   def secret_key
     SECRET_KEY
   end
