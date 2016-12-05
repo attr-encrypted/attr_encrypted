@@ -30,10 +30,15 @@ if defined?(ActiveRecord::Base)
             end
             private :perform_attribute_assignment
 
-            if ::ActiveRecord::VERSION::STRING > "3.1"
+            if ::ActiveRecord::VERSION::STRING > "3.1" && ::ActiveRecord::VERSION::STRING < "4.0"
               alias_method :assign_attributes_without_attr_encrypted, :assign_attributes
               def assign_attributes(*args)
                 perform_attribute_assignment :assign_attributes_without_attr_encrypted, *args
+              end
+            elsif ::ActiveRecord::VERSION::STRING >= "4.0"
+              alias_method :assign_attributes_without_attr_encrypted, :assign_attributes
+              def assign_attributes(*args)
+                perform_attribute_assignment :assign_attributes_without_attr_encrypted, args[0] # ignore whitelist attributes in favour of Rails 4 new strong parameters
               end
             end
 
