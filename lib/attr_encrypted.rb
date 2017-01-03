@@ -159,6 +159,7 @@ module AttrEncrypted
       end
 
       define_method("#{attribute}=") do |value|
+        send("before_encrypt_#{attribute}", value) if respond_to?("before_encrypt_#{attribute}")
         send("#{encrypted_attribute_name}=", encrypt(attribute, value))
         instance_variable_set("@#{attribute}", value)
       end
