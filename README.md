@@ -173,6 +173,17 @@ You can simply define some default options like so:
 
 This should help keep your classes clean and DRY.
 
+There is a hook to add behavior reflecting or taking action based on the unencrypted value befor encryption occurs by setting a before_encrypt option, such as for storing a hash of the encrypted data,
+or calculating the IV and/or salt deterministially based on the unencrypted value, should you need to.  You may pass a proc or method name as the value to the before_encrypt option, or pass true and it will attempt to call a different method for each attribute name:
+
+  class User
+    attr_encrypted :email, before_encrypt: ->(email) { puts "Encrypting #{email} now!" }
+    attr_encrypted :ssn, before_encrypt: :check_valid_ssn
+    attr_encrypted :credit_card, before_encrypt: true  # will call method :before_encrypt_credit_card with unencrypted credit
+                                                       # card value if object responds to before_encrypt_credit_card, else nothing.
+  end
+
+
 ### The `:attribute` option
 
 You can simply pass the name of the encrypted attribute as the `:attribute` option:

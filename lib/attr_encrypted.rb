@@ -101,6 +101,8 @@ module AttrEncrypted
   #                         A <tt>:per_attribute_iv</default> mode derives a unique IV per attribute; salt is not used.
   #                         Defaults to <tt>:per_attribute_iv</tt>.
   #
+  #   before_encrypt:       Sets a Proc, or method, to be called before encryption occurs to allow reflection on value.
+  #
   #   allow_empty_value:    Attributes which have nil or empty string values will not be encrypted unless this option
   #                         has a truthy value.
   #
@@ -159,7 +161,7 @@ module AttrEncrypted
       end
 
       define_method("#{attribute}=") do |value|
-        send("before_encrypt_#{attribute}", value) if respond_to?("before_encrypt_#{attribute}")
+        handle_before_encrypt_options(value, options)
         send("#{encrypted_attribute_name}=", encrypt(attribute, value))
         instance_variable_set("@#{attribute}", value)
       end
@@ -440,6 +442,18 @@ module AttrEncrypted
       def decode_salt_if_encoded(salt, encoding)
         prefix = '_'
         salt.slice(0).eql?(prefix) ? salt.slice(1..-1).unpack(encoding).first : salt
+      end
+
+      def handle_before_encrypt_options(value, options)
+        if options[:before_encrypt]
+          if options[:before_encrypt].kind_of?(Proc)
+            options[:before_encrypt].call(value)
+          elsif respond_to?(options[:before_encrypt].to_s)
+            send(options[:before_encrypt])
+          elsif respond_to?("before_encrypt_#{attribute}")
+            send("before_encrypt_#{attribute}", value)
+          end
+        end
       end
   end
 
