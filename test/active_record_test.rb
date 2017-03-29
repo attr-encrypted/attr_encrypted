@@ -4,6 +4,7 @@ ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:'
 
 def create_tables
   ActiveRecord::Schema.define(version: 1) do
+    self.verbose = false
     create_table :people do |t|
       t.string   :encrypted_email
       t.string   :password
