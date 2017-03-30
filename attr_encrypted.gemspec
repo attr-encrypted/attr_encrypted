@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.authors   = ['Sean Huber', 'S. Brent Faulkner', 'William Monk', 'Stephen Aghaulor']
   s.email    = ['seah@shuber.io', 'sbfaulkner@gmail.com', 'billy.monk@gmail.com', 'saghaulor@gmail.com']
   s.homepage = 'http://github.com/attr-encrypted/attr_encrypted'
+  s.license = 'MIT'
 
   s.has_rdoc = false
   s.rdoc_options = ['--line-numbers', '--inline-source', '--main', 'README.rdoc']
