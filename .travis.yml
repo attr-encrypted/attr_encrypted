@@ -6,6 +6,7 @@ rvm:
   - 2.1
   - 2.2.2
   - 2.3.0
+  - 2.4.0
   - rbx
 env:
   - ACTIVERECORD=3.0.0
@@ -21,6 +22,16 @@ matrix:
       env: ACTIVERECORD=5.0.0
     - rvm: 2.1
       env: ACTIVERECORD=5.0.0
+    - rvm: 2.4.0
+      env: ACTIVERECORD=3.0.0
+    - rvm: 2.4.0
+      env: ACTIVERECORD=3.1.0
+    - rvm: 2.4.0
+      env: ACTIVERECORD=3.2.0
+    - rvm: 2.4.0
+      env: ACTIVERECORD=4.0.0
+    - rvm: 2.4.0
+      env: ACTIVERECORD=4.1.0
     - rvm: rbx
       env: ACTIVERECORD=5.0.0
   allow_failures:

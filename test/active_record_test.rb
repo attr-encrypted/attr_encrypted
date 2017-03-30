@@ -4,6 +4,7 @@ ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:'
 
 def create_tables
   ActiveRecord::Schema.define(version: 1) do
+    self.verbose = false
     create_table :people do |t|
       t.string   :encrypted_email
       t.string   :password
@@ -19,7 +20,7 @@ def create_tables
       t.string :encrypted_password
       t.string :encrypted_password_iv
       t.string :encrypted_password_salt
-      t.binary :key
+      t.string :key
     end
     create_table :users do |t|
       t.string :login
@@ -81,7 +82,7 @@ class PersonWithProcMode < Person
 end
 
 class Account < ActiveRecord::Base
-  ACCOUNT_ENCRYPTION_KEY = SecureRandom.base64(32)
+  ACCOUNT_ENCRYPTION_KEY = SecureRandom.urlsafe_base64(24)
   attr_encrypted :password, key: :password_encryption_key
 
   def encrypting?(attr)
@@ -206,7 +207,7 @@ class ActiveRecordTest < Minitest::Test
 
   def test_attribute_was_works_when_options_for_old_encrypted_value_are_different_than_options_for_new_encrypted_value
     pw = 'password'
-    crypto_key = SecureRandom.base64(32)
+    crypto_key = SecureRandom.urlsafe_base64(24)
     old_iv = SecureRandom.random_bytes(12)
     account = Account.create
     encrypted_value = Encryptor.encrypt(value: pw, iv: old_iv, key: crypto_key)
