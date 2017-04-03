@@ -2,7 +2,6 @@ sudo: false
 language: ruby
 cache: bundler
 rvm:
-  - 2.0
   - 2.1
   - 2.2.2
   - 2.3.0
@@ -18,8 +17,6 @@ env:
   - ACTIVERECORD=5.0.0
 matrix:
   exclude:
-    - rvm: 2.0
-      env: ACTIVERECORD=5.0.0
     - rvm: 2.1
       env: ACTIVERECORD=5.0.0
     - rvm: 2.4.0
