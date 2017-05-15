@@ -7,6 +7,7 @@ desc 'Test the attr_encrypted gem.'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
   t.pattern = 'test/**/*_test.rb'
+  t.warning = false
   t.verbose = true
 end
 

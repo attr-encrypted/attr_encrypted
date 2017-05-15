@@ -48,7 +48,7 @@ end
 class LegacyActiveRecordTest < Minitest::Test
 
   def setup
-    ActiveRecord::Base.connection.tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }
+    drop_all_tables
     create_people_table
   end
 

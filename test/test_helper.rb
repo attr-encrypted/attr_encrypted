@@ -20,6 +20,7 @@ require 'active_record'
 require 'data_mapper'
 require 'sequel'
 require 'mocha/test_unit'
+ActiveSupport::Deprecation.behavior = :raise
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $:.unshift(File.dirname(__FILE__))
@@ -39,3 +40,12 @@ Sequel::Model.plugin :after_initialize
 
 SECRET_KEY = 4.times.map { Digest::SHA256.hexdigest((Time.now.to_i * rand(5)).to_s) }.join
 
+def base64_encoding_regex
+  /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{4})$/
+end
+
+def drop_all_tables
+  connection = ActiveRecord::Base.connection
+  tables = (ActiveRecord::VERSION::MAJOR >= 5 ? connection.data_sources : connection.tables)
+  tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }
+end
