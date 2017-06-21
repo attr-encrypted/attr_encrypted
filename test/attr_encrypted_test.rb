@@ -298,7 +298,7 @@ class AttrEncryptedTest < Minitest::Test
     @user = User.new
     @user.with_allow_empty_value = nil
     refute_nil @user.encrypted_with_allow_empty_value
-    assert_equal nil, @user.with_allow_empty_value
+    assert_nil @user.with_allow_empty_value
   end
 
   def test_should_work_with_aliased_attr_encryptor

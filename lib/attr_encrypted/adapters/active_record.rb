@@ -51,6 +51,7 @@ if defined?(ActiveRecord::Base)
             super
             options = attrs.extract_options!
             attr = attrs.pop
+            attribute attr if ::ActiveRecord::VERSION::STRING >= "5.1.0"
             options.merge! encrypted_attributes[attr]
 
             define_method("#{attr}_was") do
