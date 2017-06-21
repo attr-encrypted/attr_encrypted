@@ -189,6 +189,12 @@ class AttrEncryptedTest < Minitest::Test
     refute_nil @user.encrypted_with_marshaling
   end
 
+  def test_should_encrypt_with_marshaling_even_complex_objects
+    @user = User.new
+    @user.with_marshaling = BigDecimal(123)
+    refute_nil @user.encrypted_with_marshaling
+  end
+
   def test_should_use_custom_encryptor_and_crypt_method_names_and_arguments
     assert_equal SillyEncryptor.silly_encrypt(:value => 'testing', :some_arg => 'test'), User.encrypt_credit_card('testing')
   end
