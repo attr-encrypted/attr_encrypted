@@ -114,14 +114,14 @@ class ActiveRecordTest < Minitest::Test
     @person = Person.create :email => 'test@example.com'
     refute_nil @person.encrypted_email
     refute_equal @person.email, @person.encrypted_email
-    assert_equal @person.email, Person.find(:first).email
+    assert_equal @person.email, Person.first.email
   end
 
   def test_should_marshal_and_encrypt_credentials
     @person = Person.create
     refute_nil @person.encrypted_credentials
     refute_equal @person.credentials, @person.encrypted_credentials
-    assert_equal @person.credentials, Person.find(:first).credentials
+    assert_equal @person.credentials, Person.first.credentials
   end
 
   def test_should_encode_by_default
@@ -261,7 +261,7 @@ class ActiveRecordTest < Minitest::Test
 
     refute_nil user.encrypted_email
     refute_equal user.email, user.encrypted_email
-    assert_equal user.email, PersonUsingAlias.find(:first).email
+    assert_equal user.email, PersonUsingAlias.first.email
   end
 
   # See https://github.com/attr-encrypted/attr_encrypted/issues/68
