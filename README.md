@@ -72,7 +72,7 @@ The `attr_encrypted` class method is also aliased as `attr_encryptor` to conform
 
 ### attr_encrypted with database persistence
 
-By default, `attr_encrypted` uses the `:per_attribute_iv` encryption mode. This mode requires a column to store your cipher text and a column to store your IV.
+By default, `attr_encrypted` uses the `:per_attribute_iv` encryption mode. This mode requires a column to store your cipher text and a column to store your IV (initialization vector).
 
 Create or modify the table that your model uses to add a column with the `encrypted_` prefix (which can be modified, see below), e.g. `encrypted_ssn` via a migration like the following:
 
