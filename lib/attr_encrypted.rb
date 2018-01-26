@@ -1,7 +1,14 @@
 require 'encryptor'
 
+module CheckEmpty
+  def self.not_empty?(value)
+    !value.nil? && !(value.is_a?(String) && value.empty?)
+  end
+end
+
 # Adds attr_accessors that encrypt and decrypt an object's attributes
 module AttrEncrypted
+  extend CheckEmpty
   autoload :Version, 'attr_encrypted/version'
 
   def self.extended(base) # :nodoc:
@@ -232,7 +239,7 @@ module AttrEncrypted
   #   email = User.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
   def decrypt(attribute, encrypted_value, options = {})
     options = encrypted_attributes[attribute.to_sym].merge(options)
-    if options[:if] && !options[:unless] && not_empty?(encrypted_value)
+    if options[:if] && !options[:unless] && CheckEmpty.not_empty?(encrypted_value)
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
       value = options[:encryptor].send(options[:decrypt_method], options.merge!(value: encrypted_value))
       if options[:marshal]
@@ -258,7 +265,7 @@ module AttrEncrypted
   #   encrypted_email = User.encrypt(:email, 'test@example.com')
   def encrypt(attribute, value, options = {})
     options = encrypted_attributes[attribute.to_sym].merge(options)
-    if options[:if] && !options[:unless] && (options[:allow_empty_value] || not_empty?(value))
+    if options[:if] && !options[:unless] && (options[:allow_empty_value] || CheckEmpty.not_empty?(value))
       value = options[:marshal] ? options[:marshaler].send(options[:dump_method], value) : value.to_s
       encrypted_value = options[:encryptor].send(options[:encrypt_method], options.merge!(value: value))
       encrypted_value = [encrypted_value].pack(options[:encode]) if options[:encode]
@@ -266,10 +273,6 @@ module AttrEncrypted
     else
       value
     end
-  end
-
-  def not_empty?(value)
-    !value.nil? && !(value.is_a?(String) && value.empty?)
   end
 
   # Contains a hash of encrypted attributes with virtual attribute names as keys
@@ -305,6 +308,7 @@ module AttrEncrypted
   end
 
   module InstanceMethods
+    extend CheckEmpty
     # Decrypts a value for the attribute specified using options evaluated in the current object's scope
     #
     # Example
@@ -343,7 +347,7 @@ module AttrEncrypted
     #  @user.encrypt(:email, 'test@example.com')
     def encrypt(attribute, value)
       encrypted_attributes[attribute.to_sym][:operation] = :encrypting
-      encrypted_attributes[attribute.to_sym][:value_present] = (value && !value.empty?)
+      encrypted_attributes[attribute.to_sym][:value_present] = (value && CheckEmpty.not_empty?(value))
       self.class.encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
     end
 
