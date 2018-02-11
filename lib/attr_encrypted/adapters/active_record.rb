@@ -88,14 +88,15 @@ if defined?(ActiveRecord::Base)
             # methods returned to let ActiveRecord define the accessor methods
             # for the db columns
 
-            # Use with_connection so the connection doesn't stay pinned to the thread.
-            connected = ::ActiveRecord::Base.connection_pool.with_connection(&:active?) rescue false
-
-            if connected && table_exists?
+            if connected? && table_exists?
               columns_hash.keys.inject(super) {|instance_methods, column_name| instance_methods.concat [column_name.to_sym, :"#{column_name}="]}
             else
               super
             end
+          end
+
+          def attribute_instance_methods_as_symbols_available?
+            connected? && table_exists?
           end
 
           # Allows you to use dynamic methods like <tt>find_by_email</tt> or <tt>scoped_by_email</tt> for

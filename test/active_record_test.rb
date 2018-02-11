@@ -41,9 +41,6 @@ def create_tables
   end
 end
 
-# The table needs to exist before defining the class
-create_tables
-
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
 
 if ::ActiveRecord::VERSION::STRING > "4.0"
@@ -333,7 +330,9 @@ class ActiveRecordTest < Minitest::Test
   def test_should_evaluate_proc_based_mode
     street = '123 Elm'
     zipcode = '12345'
-    address = Address.new(street: street, zipcode: zipcode, mode: :single_iv_and_salt)
-    assert_nil address.encrypted_zipcode_iv
+    address = Address.create(street: street, zipcode: zipcode, mode: :single_iv_and_salt)
+    address.reload
+    refute_equal address.encrypted_zipcode, zipcode
+    assert_equal address.zipcode, zipcode
   end
 end
