@@ -420,6 +420,9 @@ class AttrEncryptedTest < Minitest::Test
     user = User.new
     user.with_true_if = 'derp'
     refute_nil user.encrypted_with_true_if_iv
+
+    user.with_true_if = Object.new
+    refute_nil user.encrypted_with_true_if_iv
   end
 
   def test_should_not_generate_salt_for_attribute_when_if_option_is_false
