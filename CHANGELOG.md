@@ -1,5 +1,16 @@
 # attr_encrypted #
 
+## 3.1.0 ##
+* Added: Abitilty to encrypt empty values. (@tamird)
+* Added: MIT license
+* Added: MRI 2.5.x support (@saghaulor)
+* Fixed: No long generate IV and salt if value is empty, unless :allow_empty_value options is passed. (@saghaulor)
+* Fixed: Only generate IV and salt when :if and :unless options evaluate such that encryption should be performed. (@saghaulor)
+* Fixed: Private methods are correctly evaluated as options. (@saghaulor)
+* Fixed: Mark virtual attributes for Rails 5.x compatibility (@grosser)
+* Fixed: Only check empty on strings, allows for encrypting non-string type objects
+* Fixed: Fixed how accessors for db columns are defined in the ActiveRecord adapter, preventing premature definition. (@nagachika)
+
 ## 3.0.3 ##
 * Fixed: attr_was would decrypt the attribute upon every call. This is inefficient and introduces problems when the options change between decrypting an old value and encrypting a new value; for example, when rotating the encryption key. As such, the new approach caches the decrypted value of the old encrypted value such that the old options are no longer needed. (@johnny-lai) (@saghaulor)
 
