@@ -44,6 +44,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('sequel')
   if RUBY_VERSION < '2.1.0'
     s.add_development_dependency('nokogiri', '< 1.7.0')
+    s.add_development_dependency('public_suffix', '< 3.0.0')
   end
   if defined?(RUBY_ENGINE) && RUBY_ENGINE.to_sym == :jruby
     s.add_development_dependency('activerecord-jdbcsqlite3-adapter')
