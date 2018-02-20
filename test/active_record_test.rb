@@ -335,4 +335,9 @@ class ActiveRecordTest < Minitest::Test
     refute_equal address.encrypted_zipcode, zipcode
     assert_equal address.zipcode, zipcode
   end
+
+  def test_should_read_attribute_without_encrypted_column_present
+    address = Address.create!(street: '123 Elm')
+    assert_nil Address.where(id: address.id).select(:id).first.street
+  end
 end

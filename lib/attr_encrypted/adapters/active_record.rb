@@ -4,6 +4,7 @@ if defined?(ActiveRecord::Base)
       module ActiveRecord
         def self.extended(base) # :nodoc:
           base.class_eval do
+            include InstanceMethods
 
             # https://github.com/attr-encrypted/attr_encrypted/issues/68
             alias_method :reload_without_attr_encrypted, :reload
@@ -129,6 +130,19 @@ if defined?(ActiveRecord::Base)
               method = "#{match.captures[0]}_#{match.captures[1]}_#{attribute_names.join('_and_')}".to_sym
             end
             method_missing_without_attr_encrypted(method, *args, &block)
+          end
+
+          module InstanceMethods
+            def read_encrypted_attribute(attribute)
+              encrypted_attribute_name = encrypted_attributes[attribute.to_sym][:attribute].to_s
+
+              # If the class does have the encrypted attribute, but this record doesn't (partial SELECT),
+              # return early as fetching the encrypted attribute will fail
+              return if self.class.column_names.include?(encrypted_attribute_name) &&
+                !attributes.include?(encrypted_attribute_name)
+
+              super
+            end
           end
       end
     end
