@@ -466,4 +466,43 @@ class AttrEncryptedTest < Minitest::Test
     user.with_true_if = nil
     assert_nil user.encrypted_with_true_if_iv
   end
+
+  def test_should_not_generate_iv_if_same_value_when_option_is_false
+    user = User.new
+    User.encrypted_attributes[:email][:update_unchanged] = false
+    assert_nil user.encrypted_email_iv
+    user.email = 'thing@thing.com'
+    refute_nil(old_value = user.encrypted_email_iv)
+    user.email = 'thing@thing.com'
+    assert_equal old_value, user.encrypted_email_iv
+  end
+
+  def test_should_generate_iv_if_same_value_when_option_is_true
+    user = User.new
+    User.encrypted_attributes[:email][:update_unchanged] = true
+    assert_nil user.encrypted_email_iv
+    user.email = 'thing@thing.com'
+    refute_nil(old_value = user.encrypted_email_iv)
+    user.email = 'thing@thing.com'
+    refute_equal old_value, user.encrypted_email_iv
+  end
+
+  def test_should_not_update_iv_if_same_value_when_option_is_false
+    user = User.new(email: 'thing@thing.com')
+    User.encrypted_attributes[:email][:update_unchanged] = false
+    old_encrypted_email_iv = user.encrypted_email_iv
+    refute_nil old_encrypted_email_iv
+    user.email = 'thing@thing.com'
+    assert_equal old_encrypted_email_iv, user.encrypted_email_iv
+  end
+
+  def test_should_not_update_iv_if_same_value_when_option_is_true
+    user = User.new(email: 'thing@thing.com')
+    User.encrypted_attributes[:email][:update_unchanged] = true
+    old_encrypted_email_iv = user.encrypted_email_iv
+    refute_nil old_encrypted_email_iv
+    user.email = 'thing@thing.com'
+    refute_nil user.encrypted_email_iv
+    refute_equal old_encrypted_email_iv, user.encrypted_email_iv
+  end
 end

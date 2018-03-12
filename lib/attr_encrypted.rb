@@ -104,6 +104,9 @@ module AttrEncrypted
   #   allow_empty_value:    Attributes which have nil or empty string values will not be encrypted unless this option
   #                         has a truthy value.
   #
+  #   update_unchanged:     Attributes which have unchanged values will be encrypted again on each update.
+  #                         Defaults to true.
+  #
   # You can specify your own default options
   #
   #   class User
@@ -162,8 +165,10 @@ module AttrEncrypted
       end
 
       define_method("#{attribute}=") do |value|
-        send("#{encrypted_attribute_name}=", encrypt(attribute, value))
-        instance_variable_set("@#{attribute}", value)
+        if should_update_encrypted_attribute?(attribute, value)
+          send("#{encrypted_attribute_name}=", encrypt(attribute, value))
+          instance_variable_set("@#{attribute}", value)
+        end
       end
 
       define_method("#{attribute}?") do
@@ -204,6 +209,7 @@ module AttrEncrypted
       mode:              :per_attribute_iv,
       algorithm:         'aes-256-gcm',
       allow_empty_value: false,
+      update_unchanged:  true
     }
   end
 
@@ -358,6 +364,16 @@ module AttrEncrypted
     end
 
     protected
+
+      # Determine if unchanged attribute needs to be updated again
+      def should_update_encrypted_attribute?(attribute, value)
+        if encrypted_attributes[attribute.to_sym][:update_unchanged]
+          return true
+        else
+          old_value = instance_variable_get("@#{attribute}")
+          return old_value.nil? || old_value != value
+        end
+      end
 
       # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
       def evaluated_attr_encrypted_options_for(attribute)
