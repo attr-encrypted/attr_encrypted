@@ -61,6 +61,7 @@ matrix:
       env: ACTIVERECORD=5.2.0
   allow_failures:
     - rvm: rbx
+    - env: ACTIVERECORD=5.2.0
   fast_finish: true
 addons:
   code_climate:
