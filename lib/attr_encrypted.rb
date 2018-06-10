@@ -242,7 +242,7 @@ module AttrEncrypted
         value = options[:marshaler].send(options[:load_method], value)
       elsif defined?(Encoding)
         encoding = Encoding.default_internal || Encoding.default_external
-        value = value.force_encoding(encoding.name)
+        value = value.dup.force_encoding(encoding.name)
       end
       value
     else
