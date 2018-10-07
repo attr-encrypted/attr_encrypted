@@ -466,4 +466,14 @@ class AttrEncryptedTest < Minitest::Test
     user.with_true_if = nil
     assert_nil user.encrypted_with_true_if_iv
   end
+
+  def test_encrypted_attributes_state_is_not_shared
+    user = User.new
+    user.ssn = '123456789'
+
+    another_user = User.new
+
+    assert_equal :encrypting, user.encrypted_attributes[:ssn][:operation]
+    assert_nil another_user.encrypted_attributes[:ssn][:operation]
+  end
 end
