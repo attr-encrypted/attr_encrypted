@@ -478,4 +478,13 @@ class AttrEncryptedTest < Minitest::Test
     assert_equal :encrypting, user.encrypted_attributes[:ssn][:operation]
     assert_nil another_user.encrypted_attributes[:ssn][:operation]
   end
+
+  def test_should_not_by_default_generate_key_when_attribute_is_empty
+    user = User.new
+    calls = 0
+    user.stub(:secret_key, lambda { calls += 1; SECRET_KEY }) do
+      user.ssn
+    end
+    assert_equal 0, calls
+  end
 end
