@@ -29,6 +29,7 @@ class User
   attr_encrypted :with_false_unless, :key => SECRET_KEY, :unless => false, mode: :per_attribute_iv_and_salt
   attr_encrypted :with_if_changed, :key => SECRET_KEY, :if => :should_encrypt
   attr_encrypted :with_allow_empty_value, key: SECRET_KEY, allow_empty_value: true, marshal: true
+  attr_encrypted :with_unchanged_false, key: SECRET_KEY, update_unchanged: false
 
   attr_encryptor :aliased, :key => SECRET_KEY
 
@@ -465,5 +466,52 @@ class AttrEncryptedTest < Minitest::Test
     user = User.new
     user.with_true_if = nil
     assert_nil user.encrypted_with_true_if_iv
+  end
+
+  def test_should_not_generate_iv_if_same_value_when_option_is_false
+    user = User.new
+    assert_nil user.encrypted_with_unchanged_false_iv
+    user.with_unchanged_false = 'thing@thing.com'
+    old_value = user.encrypted_with_unchanged_false_iv
+    refute_nil(old_value)
+    user.with_unchanged_false = 'thing@thing.com'
+    assert_equal old_value, user.encrypted_with_unchanged_false_iv
+  end
+
+  def test_should_generate_iv_if_same_value_when_option_is_true
+    user = User.new
+    assert_nil user.encrypted_email_iv
+    user.email = 'thing@thing.com'
+    refute_nil(old_value = user.encrypted_email_iv)
+    user.email = 'thing@thing.com'
+    refute_equal old_value, user.encrypted_email_iv
+  end
+
+  def test_should_not_update_iv_if_same_value_when_option_is_false
+    user = User.new
+    user.with_unchanged_false = 'thing@thing.com'
+    old_encrypted_with_unchanged_false_iv = user.encrypted_with_unchanged_false_iv
+    refute_nil old_encrypted_with_unchanged_false_iv
+    user.with_unchanged_false = 'thing@thing.com'
+    assert_equal old_encrypted_with_unchanged_false_iv, user.encrypted_with_unchanged_false_iv
+  end
+
+  def test_should_not_update_iv_if_same_value_when_option_is_true
+    user = User.new(email: 'thing@thing.com')
+    old_encrypted_email_iv = user.encrypted_email_iv
+    refute_nil old_encrypted_email_iv
+    user.email = 'thing@thing.com'
+    refute_nil user.encrypted_email_iv
+    refute_equal old_encrypted_email_iv, user.encrypted_email_iv
+  end
+
+  def test_encrypted_attributes_state_is_not_shared
+    user = User.new
+    user.ssn = '123456789'
+
+    another_user = User.new
+
+    assert_equal :encrypting, user.encrypted_attributes[:ssn][:operation]
+    assert_nil another_user.encrypted_attributes[:ssn][:operation]
   end
 end

@@ -145,7 +145,8 @@ The following are the default options used by `attr_encrypted`:
   decrypt_method:    'decrypt',
   mode:              :per_attribute_iv,
   algorithm:         'aes-256-gcm',
-  allow_empty_value: false
+  allow_empty_value: false,
+  update_unchanged:  true
 ```
 
 All of the aforementioned options are explained in depth below.
@@ -319,6 +320,16 @@ You may want to encrypt empty strings or nil so as to not reveal which records a
 ```ruby
   class User
     attr_encrypted :credentials, key: 'some secret key', marshal: true, allow_empty_value: true
+  end
+```
+
+### The `:update_unchanged` option
+
+You may want to only update changed attributes each time the record is saved.
+
+```ruby
+  class User
+    attr_encrypted :email, key: 'some secret key', marshal: true, update_unchanged: false
   end
 ```
 
