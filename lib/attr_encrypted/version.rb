@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module AttrEncrypted
   # Contains information about this gem's version
   module Version

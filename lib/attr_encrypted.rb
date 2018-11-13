@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'encryptor'
 
 # Adds attr_accessors that encrypt and decrypt an object's attributes
