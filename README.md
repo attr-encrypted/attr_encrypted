@@ -87,6 +87,12 @@ Create or modify the table that your model uses to add a column with the `encryp
 
 You can use a string or binary column type. (See the encode option section below for more info)
 
+If you use the same key for each record, add a unique index on the IV. Repeated IVs with AES-GCM (the default algorithm) allow an attacker to recover the key.
+
+```ruby
+  add_index :users, :encrypted_ssn_iv, unique: true
+```
+
 ### Specifying the encrypted attribute name
 
 By default, the encrypted attribute name is `encrypted_#{attribute}` (e.g. `attr_encrypted :email` would create an attribute named `encrypted_email`). So, if you're storing the encrypted attribute in the database, you need to make sure the `encrypted_#{attribute}` field exists in your table. You have a couple of options if you want to name your attribute or db column something else, see below for more details.
