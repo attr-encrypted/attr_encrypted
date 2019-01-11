@@ -114,6 +114,11 @@ class PersonUsingAlias < ActiveRecord::Base
   attr_encryptor :email, key: SECRET_KEY
 end
 
+class PersonWithListedAttributes < ActiveRecord::Base
+  self.table_name = 'people'
+  attr_encrypted :email, :credentials
+end
+
 class PrimeMinister < ActiveRecord::Base
   attr_encrypted :name, marshal: true, key: SECRET_KEY
 end
@@ -219,6 +224,12 @@ class ActiveRecordTest < Minitest::Test
     account.reload
     assert_equal Account::ACCOUNT_ENCRYPTION_KEY, account.key
     assert_equal pw.reverse, account.password
+  end
+
+  def test_should_handle_multiple_attributes_as_a_list
+    person = PersonWithListedAttributes.new
+    assert person.respond_to?(:email_changed?)
+    assert person.respond_to?(:credentials_changed?)
   end
 
   if ::ActiveRecord::VERSION::STRING > "4.0"
