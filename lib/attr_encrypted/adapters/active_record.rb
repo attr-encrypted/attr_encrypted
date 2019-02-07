@@ -66,7 +66,7 @@ if defined?(ActiveRecord::Base)
               end
             else
               define_method("#{attr}_changed?") do
-                  attribute_changed?(attr)
+                attribute_changed?(attr)
               end
             end
 
@@ -75,6 +75,20 @@ if defined?(ActiveRecord::Base)
             end
 
             define_method("#{attr}_with_dirtiness=") do |value|
+              ##
+              # In ActiveRecord 5.2+, due to changes to the way virtual
+              # attributes are handled, @attributes[attr].value is nil which
+              # breaks attribute_was. Setting it here returns us to the expected
+              # behavior.
+              if ::ActiveRecord::VERSION::STRING >= "5.2"
+                # This is needed support attribute_was before a record has
+                # been saved
+                set_attribute_was(attr, __send__(attr)) if value != __send__(attr)
+                # This is needed to support attribute_was after a record has
+                # been saved
+                @attributes.write_from_user(attr.to_s, value) if value != __send__(attr)
+              end
+              ##
               attribute_will_change!(attr) if value != __send__(attr)
               __send__("#{attr}_without_dirtiness=", value)
             end

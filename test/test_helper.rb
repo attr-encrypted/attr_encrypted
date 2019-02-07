@@ -2,7 +2,8 @@
 
 require 'simplecov'
 require 'simplecov-rcov'
-require "codeclimate-test-reporter"
+require 'codeclimate-test-reporter'
+require 'pry-byebug'
 
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
   [

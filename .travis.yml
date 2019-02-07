@@ -18,16 +18,21 @@ env:
   - ACTIVERECORD=4.2.0
   - ACTIVERECORD=5.0.0
   - ACTIVERECORD=5.1.1
+  - ACTIVERECORD=5.2.0
 matrix:
   exclude:
     - rvm: 2.0
       env: ACTIVERECORD=5.0.0
     - rvm: 2.0
       env: ACTIVERECORD=5.1.1
+    - rvm: 2.0
+      env: ACTIVERECORD=5.2.0
     - rvm: 2.1
       env: ACTIVERECORD=5.0.0
     - rvm: 2.1
       env: ACTIVERECORD=5.1.1
+    - rvm: 2.1
+      env: ACTIVERECORD=5.2.0
     - rvm: 2.4.0
       env: ACTIVERECORD=3.0.0
     - rvm: 2.4.0
@@ -52,6 +57,8 @@ matrix:
       env: ACTIVERECORD=5.0.0
     - rvm: rbx
       env: ACTIVERECORD=5.1.1
+    - rvm: rbx
+      env: ACTIVERECORD=5.2.0
   allow_failures:
     - rvm: rbx
   fast_finish: true
