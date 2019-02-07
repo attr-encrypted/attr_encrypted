@@ -89,7 +89,9 @@ if defined?(ActiveRecord::Base)
               # In ActiveRecord 5.2+, @attributes[attr].value is nil which
               # breaks attribute_was. Setting it here returns us to the expected
               # behavior.
-              set_attribute_was(attr, __send__(attr))
+              if ::ActiveRecord::VERSION::STRING >= "5.2"
+                set_attribute_was(attr, __send__(attr))
+              end
               ##
               attribute_will_change!(attr) if value != __send__(attr)
               __send__("#{attr}_without_dirtiness=", value)
