@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 require_relative 'test_helper'
 
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
@@ -126,7 +125,6 @@ class Address < ActiveRecord::Base
 end
 
 class ActiveRecordTest < Minitest::Test
-
   def setup
     drop_all_tables
     create_tables
@@ -179,28 +177,21 @@ class ActiveRecordTest < Minitest::Test
     Account.new.attributes = { password: "password", key: SECRET_KEY }
   end
 
-  def test_should_create_changed_predicate
-    person = Person.create!(email: 'test@example.com')
-    refute person.email_changed?
-    person.email = 'test@example.com'
-    refute person.email_changed?
-    person.email = nil
-    assert person.email_changed?
-    person.email = 'test2@example.com'
-    assert person.email_changed?
-  end
-
   def test_should_create_was_predicate
     original_email = 'test@example.com'
     person = Person.create!(email: original_email)
-    assert_equal original_email, person.email_was
+    assert_equal nil, person.email_was
     person.email = 'test2@example.com'
     assert_equal original_email, person.email_was
     old_pm_name = "Winston Churchill"
     pm = PrimeMinister.create!(name: old_pm_name)
+    assert_equal nil, pm.name_was
+    pm.name = "New Name"
     assert_equal old_pm_name, pm.name_was
     old_zipcode = "90210"
     address = Address.create!(zipcode: old_zipcode, mode: "single_iv_and_salt")
+    assert_equal nil, address.zipcode_was
+    address.zipcode = "12345"
     assert_equal old_zipcode, address.zipcode_was
   end
 
@@ -219,6 +210,44 @@ class ActiveRecordTest < Minitest::Test
     account.reload
     assert_equal Account::ACCOUNT_ENCRYPTION_KEY, account.key
     assert_equal pw.reverse, account.password
+  end
+
+  if ::ActiveRecord::VERSION::STRING >= "5.2"
+    def test_should_create_will_save_change_to_predicate
+      person = Person.create!(email: 'test@example.com')
+      refute person.will_save_change_to_email?
+      person.email = 'test@example.com'
+      refute person.will_save_change_to_email?
+      person.email = nil
+      assert person.will_save_change_to_email?
+      person.email = 'test2@example.com'
+      assert person.will_save_change_to_email?
+    end
+
+    def test_should_create_saved_change_to_predicate
+      person = Person.create!(email: 'test@example.com')
+      assert person.saved_change_to_email?
+      person.reload
+      person.email = 'test@example.com'
+      refute person.saved_change_to_email?
+      person.email = nil
+      refute person.saved_change_to_email?
+      person.email = 'test2@example.com'
+      refute person.saved_change_to_email?
+    end
+  end
+
+  if ::ActiveRecord::VERSION::STRING < "5.2"
+    def test_should_create_changed_predicate
+      person = Person.create!(email: 'test@example.com')
+      refute person.email_changed?
+      person.email = 'test@example.com'
+      refute person.email_changed?
+      person.email = nil
+      assert person.email_changed?
+      person.email = 'test2@example.com'
+      assert person.email_changed?
+    end
   end
 
   if ::ActiveRecord::VERSION::STRING > "4.0"

@@ -53,14 +53,18 @@ if defined?(ActiveRecord::Base)
             super
             options = attrs.extract_options!
             attr = attrs.pop
-            attribute attr if ::ActiveRecord::VERSION::STRING >= "5.1.0"
+            attribute attr if ::ActiveRecord::VERSION::STRING >= "5.1"
             options.merge! encrypted_attributes[attr]
 
             define_method("#{attr}_was") do
               attribute_was(attr)
             end
 
-            if ::ActiveRecord::VERSION::STRING >= "4.1"
+            if ::ActiveRecord::VERSION::STRING >= "5.2"
+              define_method("saved_change_to_#{attr}?") do |options = {}|
+                saved_change_to_attribute?(attr, options)
+              end
+            elsif ::ActiveRecord::VERSION::STRING >= "4.1"
               define_method("#{attr}_changed?") do |options = {}|
                 attribute_changed?(attr, options)
               end
@@ -70,11 +74,23 @@ if defined?(ActiveRecord::Base)
               end
             end
 
-            define_method("#{attr}_change") do
-              attribute_change(attr)
+            if ::ActiveRecord::VERSION::STRING >= "5.2"
+              define_method("saved_change_to_#{attr}") do
+                saved_change_to_attribute(attr)
+              end
+            else
+              define_method("#{attr}_change") do
+                attribute_change(attr)
+              end
             end
 
             define_method("#{attr}_with_dirtiness=") do |value|
+              ##
+              # In ActiveRecord 5.2+, @attributes[attr].value is nil which
+              # breaks attribute_was. Setting it here returns us to the expected
+              # behavior.
+              set_attribute_was(attr, __send__(attr))
+              ##
               attribute_will_change!(attr) if value != __send__(attr)
               __send__("#{attr}_without_dirtiness=", value)
             end
