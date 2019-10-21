@@ -374,6 +374,12 @@ class AttrEncryptedTest < Minitest::Test
     assert_nil thing.encrypted_email_salt
   end
 
+  def test_should_decrypt_and_encode_frozen_strings
+    email = 'hello@example.com'.encode(Encoding::EUC_JP).freeze
+    @user = User.new(email: email)
+    assert_equal email, @user.decrypt(:email, @user.encrypted_email)
+  end
+
   def test_should_decrypt_second_record
     @user1 = User.new
     @user1.email = 'test@example.com'

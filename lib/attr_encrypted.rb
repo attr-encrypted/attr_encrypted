@@ -241,12 +241,13 @@ module AttrEncrypted
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
       value = options[:encryptor].send(options[:decrypt_method], options.merge!(value: encrypted_value))
       if options[:marshal]
-        value = options[:marshaler].send(options[:load_method], value)
+        options[:marshaler].send(options[:load_method], value)
       elsif defined?(Encoding)
         encoding = Encoding.default_internal || Encoding.default_external
-        value = value.force_encoding(encoding.name)
+        value.encode(encoding.name).freeze
+      else
+        value
       end
-      value
     else
       encrypted_value
     end
