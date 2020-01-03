@@ -1,6 +1,6 @@
 require_relative 'test_helper'
 
-ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
+ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: 'test.db')
 
 def create_tables
   ActiveRecord::Schema.define(version: 1) do
@@ -41,6 +41,17 @@ def create_tables
   end
 end
 
+def drop_tables
+  ActiveRecord::Schema.define(version: 1) do
+    self.verbose = false
+    drop_table :people, if_exists: true
+    drop_table :accounts, if_exists: true
+    drop_table :users, if_exists: true
+    drop_table :prime_ministers, if_exists: true
+    drop_table :addresses, if_exists: true
+  end
+end
+
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
 
 if ::ActiveRecord::VERSION::STRING > "4.0"
@@ -53,7 +64,12 @@ if ::ActiveRecord::VERSION::STRING > "4.0"
   require 'action_controller/metal/strong_parameters'
 end
 
-class Person < ActiveRecord::Base
+class ActiveRecordTest < Minitest::Test
+
+  drop_tables
+  create_tables
+
+  class Person < ActiveRecord::Base
   self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
   attr_encrypted :email, key: SECRET_KEY
   attr_encrypted :credentials, key: Proc.new { |user| Encryptor.encrypt(value: user.salt, key: SECRET_KEY, iv: user.key_iv) }, marshal: true
@@ -67,67 +83,60 @@ class Person < ActiveRecord::Base
     self.salt ||= Digest::SHA256.hexdigest((Time.now.to_i * rand(1000)).to_s)[0..15]
     self.credentials ||= { username: 'example', password: 'test' }
   end
-end
-
-class PersonWithValidation < Person
-  validates_presence_of :email
-end
-
-class PersonWithProcMode < Person
-  attr_encrypted :email,       key: SECRET_KEY, mode: Proc.new { :per_attribute_iv_and_salt }
-  attr_encrypted :credentials, key: SECRET_KEY, mode: Proc.new { :single_iv_and_salt }, insecure_mode: true
-end
-
-class Account < ActiveRecord::Base
-  ACCOUNT_ENCRYPTION_KEY = SecureRandom.urlsafe_base64(24)
-  attr_encrypted :password, key: :password_encryption_key
-
-  def encrypting?(attr)
-    encrypted_attributes[attr][:operation] == :encrypting
   end
 
-  def password_encryption_key
-    if encrypting?(:password)
-      self.key = ACCOUNT_ENCRYPTION_KEY
-    else
-      self.key
+  class PersonWithValidation < Person
+    validates_presence_of :email
+  end
+
+  class PersonWithProcMode < Person
+    attr_encrypted :email,       key: SECRET_KEY, mode: Proc.new { :per_attribute_iv_and_salt }
+    attr_encrypted :credentials, key: SECRET_KEY, mode: Proc.new { :single_iv_and_salt }, insecure_mode: true
+  end
+
+  class Account < ActiveRecord::Base
+    ACCOUNT_ENCRYPTION_KEY = SecureRandom.urlsafe_base64(24)
+    attr_encrypted :password, key: :password_encryption_key
+
+    def encrypting?(attr)
+      encrypted_attributes[attr][:operation] == :encrypting
+    end
+
+    def password_encryption_key
+      if encrypting?(:password)
+        self.key = ACCOUNT_ENCRYPTION_KEY
+      else
+        self.key
+      end
     end
   end
-end
 
-class PersonWithSerialization < ActiveRecord::Base
-  self.table_name = 'people'
-  attr_encrypted :email, key: SECRET_KEY
-  serialize :password
-end
+  class PersonWithSerialization < ActiveRecord::Base
+    self.table_name = 'people'
+    attr_encrypted :email, key: SECRET_KEY
+    serialize :password
+  end
 
-class UserWithProtectedAttribute < ActiveRecord::Base
-  self.table_name = 'users'
-  attr_encrypted :password, key: SECRET_KEY
-  attr_protected :is_admin if ::ActiveRecord::VERSION::STRING < "4.0"
-end
+  class UserWithProtectedAttribute < ActiveRecord::Base
+    self.table_name = 'users'
+    attr_encrypted :password, key: SECRET_KEY
+    attr_protected :is_admin if ::ActiveRecord::VERSION::STRING < "4.0"
+  end
 
-class PersonUsingAlias < ActiveRecord::Base
-  self.table_name = 'people'
-  attr_encryptor :email, key: SECRET_KEY
-end
+  class PersonUsingAlias < ActiveRecord::Base
+    self.table_name = 'people'
+    attr_encryptor :email, key: SECRET_KEY
+  end
 
-class PrimeMinister < ActiveRecord::Base
-  attr_encrypted :name, marshal: true, key: SECRET_KEY
-end
+  class PrimeMinister < ActiveRecord::Base
+    attr_encrypted :name, marshal: true, key: SECRET_KEY
+  end
 
-class Address < ActiveRecord::Base
-  self.attr_encrypted_options[:marshal] = false
-  self.attr_encrypted_options[:encode] = false
-  attr_encrypted :street, encode_iv: false, key: SECRET_KEY
-  attr_encrypted :zipcode, key: SECRET_KEY, mode: Proc.new { |address| address.mode.to_sym }, insecure_mode: true
-end
-
-class ActiveRecordTest < Minitest::Test
-
-  def setup
-    drop_all_tables
-    create_tables
+  class Address < ActiveRecord::Base
+    self.attr_encrypted_options[:marshal] = false
+    self.attr_encrypted_options[:encode] = false
+    attr_encrypted :street, encode_iv: false, key: SECRET_KEY
+    attr_encrypted :zipcode, key: SECRET_KEY, mode: Proc.new { |address| address.mode.to_sym }, insecure_mode: true
   end
 
   def test_should_encrypt_email
