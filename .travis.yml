@@ -2,12 +2,10 @@ sudo: false
 language: ruby
 cache: bundler
 rvm:
-  - 2.0
-  - 2.1
-  - 2.2.2
-  - 2.3.0
   - 2.4.0
   - 2.5.0
+  - 2.6.0
+  - 2.7.0
   - rbx
 env:
   - ACTIVERECORD=3.0.0
