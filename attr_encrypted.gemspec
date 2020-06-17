@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.description = 'Generates attr_accessors that encrypt and decrypt attributes transparently'
 
   s.authors   = ['Wade Winningham']
-  s.email    = ['wade@updrift.com']
+  s.email    = ['wwinningham@powerhrg.com']
   s.homepage = 'https://github.com/powerhome/attr_encrypted'
   s.license = 'MIT'
 
