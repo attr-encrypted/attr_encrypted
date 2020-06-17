@@ -7,16 +7,16 @@ require 'attr_encrypted/version'
 require 'date'
 
 Gem::Specification.new do |s|
-  s.name    = 'attr_encrypted'
+  s.name    = 'powerhome-attr_encrypted'
   s.version = AttrEncrypted::Version.string
   s.date    = Date.today
 
-  s.summary     = 'Encrypt and decrypt attributes'
+  s.summary     = "Power's version of the attr_encrypted gem"
   s.description = 'Generates attr_accessors that encrypt and decrypt attributes transparently'
 
-  s.authors   = ['Sean Huber', 'S. Brent Faulkner', 'William Monk', 'Stephen Aghaulor']
-  s.email    = ['seah@shuber.io', 'sbfaulkner@gmail.com', 'billy.monk@gmail.com', 'saghaulor@gmail.com']
-  s.homepage = 'http://github.com/attr-encrypted/attr_encrypted'
+  s.authors   = ['Wade Winningham']
+  s.email    = ['wade@updrift.com']
+  s.homepage = 'https://github.com/powerhome/attr_encrypted'
   s.license = 'MIT'
 
   s.require_paths = ['lib']
