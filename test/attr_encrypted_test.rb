@@ -82,6 +82,36 @@ class AttrEncryptedTest < Minitest::Test
     @iv = SecureRandom.random_bytes(12)
   end
 
+  def test_should_encrypt_thread_safely
+    user = User.new
+
+    class << user.encrypted_attributes[:email]
+      def []=(key, new_value)
+        super
+        if key == :value_present
+          # pausing when value present is set to allow other threads pick from here
+          # this would be the same as swiching threads just before the last line of InstanceMethods.encrypt
+          Fiber.yield
+        end
+      end
+    end
+
+    fiber1 = Fiber.new do
+      user.email = "hello"
+    end
+
+    fiber2 = Fiber.new do
+      user.email = ""
+    end
+
+    fiber1.resume # start first thread
+    fiber2.resume # start second thread
+    fiber2.resume # finishes first thread
+    fiber1.resume # finishes first thread
+
+    # nothing should be raised
+  end
+
   def test_should_store_email_in_encrypted_attributes
     assert User.encrypted_attributes.include?(:email)
   end
