@@ -9,13 +9,16 @@ def create_tables
     self.verbose = false
     create_table :people do |t|
       t.string   :encrypted_email
+      t.string   :encrypted_name
       t.string   :password
       t.string   :encrypted_credentials
       t.binary   :salt
       t.binary   :key_iv
       t.string   :encrypted_email_salt
+      t.string   :encrypted_name_salt
       t.string   :encrypted_credentials_salt
       t.string   :encrypted_email_iv
+      t.string   :encrypted_name_iv
       t.string   :encrypted_credentials_iv
     end
     create_table :accounts do |t|
@@ -57,7 +60,7 @@ end
 
 class Person < ActiveRecord::Base
   self.attr_encrypted_options[:mode] = :per_attribute_iv_and_salt
-  attr_encrypted :email, key: SECRET_KEY
+  attr_encrypted :email, :name, key: SECRET_KEY
   attr_encrypted :credentials, key: Proc.new { |user| Encryptor.encrypt(value: user.salt, key: SECRET_KEY, iv: user.key_iv) }, marshal: true
 
   after_initialize :initialize_salt_and_credentials
@@ -336,5 +339,15 @@ class ActiveRecordTest < Minitest::Test
     address.reload
     refute_equal address.encrypted_zipcode, zipcode
     assert_equal address.zipcode, zipcode
+  end
+
+  def test_additional_methods_defined_for_all_attributes
+    assert Person.method_defined?(:email_was)
+    assert Person.method_defined?(:email_changed?)
+    assert Person.method_defined?(:email_change)
+
+    assert Person.method_defined?(:name_was)
+    assert Person.method_defined?(:name_changed?)
+    assert Person.method_defined?(:name_change)
   end
 end
