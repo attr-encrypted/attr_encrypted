@@ -3,7 +3,7 @@
 # -*- encoding: utf-8 -*-
 require_relative 'test_helper'
 
-ActiveRecord::Base.establish_connection :adapter => 'sqlite3', :database => ':memory:'
+ActiveRecord::Base.establish_connection :adapter => 'sqlite3', :database => 'test.db'
 
 def create_people_table
   ActiveRecord::Schema.define(:version => 1) do
@@ -16,7 +16,14 @@ def create_people_table
   end
 end
 
+def drop_tables
+  ActiveRecord::Schema.define(:version => 1) do
+    drop_table :legacy_people, if_exists: true
+  end
+end
+
 # The table needs to exist before defining the class
+drop_tables
 create_people_table
 
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
@@ -50,11 +57,6 @@ class LegacyPersonWithValidation < LegacyPerson
 end
 
 class LegacyActiveRecordTest < Minitest::Test
-
-  def setup
-    drop_all_tables
-    create_people_table
-  end
 
   def test_should_decrypt_with_correct_encoding
     if defined?(Encoding)
