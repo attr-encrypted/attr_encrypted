@@ -11,6 +11,7 @@ module AttrEncrypted
       include InstanceMethods
       attr_writer :attr_encrypted_options
       @attr_encrypted_options, @encrypted_attributes = {}, {}
+      @attr_encrypted_semaphore = Mutex.new
     end
   end
 
@@ -291,6 +292,10 @@ module AttrEncrypted
     @encrypted_attributes ||= superclass.encrypted_attributes.dup
   end
 
+  def attr_encrypted_semaphore
+    @attr_encrypted_semaphore ||= superclass.attr_encrypted_semaphore
+  end
+
   # Forwards calls to :encrypt_#{attribute} or :decrypt_#{attribute} to the corresponding encrypt or decrypt method
   # if attribute was configured with attr_encrypted
   #
@@ -326,9 +331,11 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
     def decrypt(attribute, encrypted_value)
-      encrypted_attributes[attribute.to_sym][:operation] = :decrypting
-      encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(encrypted_value)
-      self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      attr_encrypted_semaphore.synchronize do
+        encrypted_attributes[attribute.to_sym][:operation] = :decrypting
+        encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(encrypted_value)
+        self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      end
     end
 
     # Encrypts a value for the attribute specified using options evaluated in the current object's scope
@@ -347,9 +354,11 @@ module AttrEncrypted
     #  @user = User.new('some-secret-key')
     #  @user.encrypt(:email, 'test@example.com')
     def encrypt(attribute, value)
-      encrypted_attributes[attribute.to_sym][:operation] = :encrypting
-      encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(value)
-      self.class.encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
+      attr_encrypted_semaphore.synchronize do
+        encrypted_attributes[attribute.to_sym][:operation] = :encrypting
+        encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(value)
+        self.class.encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
+      end
     end
 
     # Copies the class level hash of encrypted attributes with virtual attribute names as keys
@@ -364,6 +373,13 @@ module AttrEncrypted
     end
 
     protected
+
+      def attr_encrypted_semaphore
+        return @attr_encrypted_semaphore unless @attr_encrypted_semaphore.nil?
+        self.class.attr_encrypted_semaphore.synchronize do
+          @attr_encrypted_semaphore ||= Mutex.new
+        end
+      end
 
       # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
       def evaluated_attr_encrypted_options_for(attribute)
