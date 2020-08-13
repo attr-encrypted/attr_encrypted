@@ -32,7 +32,7 @@ if defined?(ActiveRecord::Base)
             end
             private :perform_attribute_assignment
 
-            if ::ActiveRecord::VERSION::STRING > "3.1"
+            if Gem::Version.new(::ActiveRecord::VERSION::STRING) > Gem::Version.new("3.1")
               alias_method :assign_attributes_without_attr_encrypted, :assign_attributes
               def assign_attributes(*args)
                 perform_attribute_assignment :assign_attributes_without_attr_encrypted, *args
@@ -53,14 +53,14 @@ if defined?(ActiveRecord::Base)
             super
             options = attrs.extract_options!
             attr = attrs.pop
-            attribute attr if ::ActiveRecord::VERSION::STRING >= "5.1.0"
+            attribute attr if Gem::Version.new(::ActiveRecord::VERSION::STRING) >= Gem::Version.new("5.1.0")
             options.merge! encrypted_attributes[attr]
 
             define_method("#{attr}_was") do
               attribute_was(attr)
             end
 
-            if ::ActiveRecord::VERSION::STRING >= "4.1"
+            if Gem::Version.new(::ActiveRecord::VERSION::STRING) >= Gem::Version.new("4.1")
               define_method("#{attr}_changed?") do |options = {}|
                 attribute_changed?(attr, options)
               end

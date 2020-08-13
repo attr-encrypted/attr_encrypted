@@ -45,7 +45,7 @@ end
 
 ActiveRecord::MissingAttributeError = ActiveModel::MissingAttributeError unless defined?(ActiveRecord::MissingAttributeError)
 
-if ::ActiveRecord::VERSION::STRING > "4.0"
+if Gem::Version.new(::ActiveRecord::VERSION::STRING) > Gem::Version.new("4.0")
   module Rack
     module Test
       class UploadedFile; end
@@ -106,7 +106,7 @@ end
 class UserWithProtectedAttribute < ActiveRecord::Base
   self.table_name = 'users'
   attr_encrypted :password, key: SECRET_KEY
-  attr_protected :is_admin if ::ActiveRecord::VERSION::STRING < "4.0"
+  attr_protected :is_admin if Gem::Version.new(::ActiveRecord::VERSION::STRING) < Gem::Version.new("4.0")
 end
 
 class PersonUsingAlias < ActiveRecord::Base
@@ -221,7 +221,7 @@ class ActiveRecordTest < Minitest::Test
     assert_equal pw.reverse, account.password
   end
 
-  if ::ActiveRecord::VERSION::STRING > "4.0"
+  if Gem::Version.new(::ActiveRecord::VERSION::STRING) > Gem::Version.new("4.0")
     def test_should_assign_attributes
       @user = UserWithProtectedAttribute.new(login: 'login', is_admin: false)
       @user.attributes = ActionController::Parameters.new(login: 'modified', is_admin: true).permit(:login)
@@ -261,7 +261,7 @@ class ActiveRecordTest < Minitest::Test
 
     def test_should_assign_protected_attributes
       @user = UserWithProtectedAttribute.new(login: 'login', is_admin: false)
-      if ::ActiveRecord::VERSION::STRING > "3.1"
+      if Gem::Version.new(::ActiveRecord::VERSION::STRING) > Gem::Version.new("3.1")
         @user.send(:assign_attributes, { login: 'modified', is_admin: true }, without_protection: true)
       else
         @user.send(:attributes=, { login: 'modified', is_admin: true }, false)
@@ -291,7 +291,7 @@ class ActiveRecordTest < Minitest::Test
     assert_nil @person.encrypted_credentials_iv
   end
 
-  if ::ActiveRecord::VERSION::STRING > "3.1"
+  if Gem::Version.new(::ActiveRecord::VERSION::STRING) > Gem::Version.new("3.1")
     def test_should_allow_assign_attributes_with_nil
       @person = Person.new
       assert_nil(@person.assign_attributes nil)
