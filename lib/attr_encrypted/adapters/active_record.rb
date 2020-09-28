@@ -61,7 +61,7 @@ if defined?(ActiveRecord::Base)
             end
 
             define_method("#{attr}_changed?") do |options = {}|
-              attribute_changed?(attr, options)
+              attribute_changed?(attr, **options)
             end
 
             define_method("#{attr}_change") do
