@@ -60,6 +60,12 @@ if defined?(ActiveRecord::Base)
               attribute_was(attr)
             end
 
+            if ::ActiveRecord::VERSION::STRING >= "5.1"
+              define_method("saved_change_to_#{attr}?") do |options = {}|
+                saved_change_to_attribute?(attr, options)
+              end
+            end
+
             if ::ActiveRecord::VERSION::STRING >= "4.1"
               define_method("#{attr}_changed?") do |options = {}|
                 attribute_changed?(attr, options)
