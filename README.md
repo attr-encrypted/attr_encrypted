@@ -409,7 +409,7 @@ Then modify your models using attr\_encrypted to account for the changes in defa
 
 ## Upgrading from attr_encrypted v2.x to v3.x
 
-A bug was discovered in Encryptor v2.0.0 that inccorectly set the IV when using an AES-\*-GCM algorithm. Unfornately fixing this major security issue results in the inability to decrypt records encrypted using an AES-*-GCM algorithm from Encryptor v2.0.0. Please see [Upgrading to Encryptor v3.0.0](https://github.com/attr-encrypted/encryptor#upgrading-from-v200-to-v300) for more info.
+A bug was discovered in Encryptor v2.0.0 that incorrectly set the IV when using an AES-\*-GCM algorithm. Unfornately fixing this major security issue results in the inability to decrypt records encrypted using an AES-*-GCM algorithm from Encryptor v2.0.0. Please see [Upgrading to Encryptor v3.0.0](https://github.com/attr-encrypted/encryptor#upgrading-from-v200-to-v300) for more info.
 
 It is strongly advised that you re-encrypt your data encrypted with Encryptor v2.0.0. However, you'll have to take special care to re-encrypt. To decrypt data encrypted with Encryptor v2.0.0 using an AES-\*-GCM algorithm you can use the `:v2_gcm_iv` option.
 
