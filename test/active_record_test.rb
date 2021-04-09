@@ -270,9 +270,12 @@ class ActiveRecordTest < Minitest::Test
     end
   end
 
-  def test_should_allow_assignment_of_nil_attributes
+  # Default active record behavior is to raise error when assignment nil
+  def test_should_raise_error_when_assigning_nil_to_attributes
     @person = Person.new
-    assert_nil(@person.attributes = nil)
+    assert_raises ArgumentError do
+      @person.attributes = nil
+    end
   end
 
   def test_should_allow_proc_based_mode
@@ -292,9 +295,11 @@ class ActiveRecordTest < Minitest::Test
   end
 
   if ::ActiveRecord::VERSION::STRING > "3.1"
-    def test_should_allow_assign_attributes_with_nil
+    def test_should_raise_error_when_assign_attributes_with_nil
       @person = Person.new
-      assert_nil(@person.assign_attributes nil)
+      assert_raises ArgumentError do
+        @person.assign_attributes nil
+      end
     end
   end
 

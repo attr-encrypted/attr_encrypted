@@ -25,7 +25,9 @@ if defined?(ActiveRecord::Base)
             end
 
             def perform_attribute_assignment(method, new_attributes, *args)
-              return if new_attributes.blank?
+              if !new_attributes.respond_to?(:stringify_keys)
+                raise ArgumentError, "When assigning attributes, you must pass a hash as an argument, #{new_attributes.class} passed."
+              end
 
               send method, new_attributes.reject { |k, _|  self.class.encrypted_attributes.key?(k.to_sym) }, *args
               send method, new_attributes.reject { |k, _| !self.class.encrypted_attributes.key?(k.to_sym) }, *args
