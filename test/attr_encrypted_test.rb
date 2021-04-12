@@ -381,7 +381,7 @@ class AttrEncryptedTest < Minitest::Test
     @user2 = User.new
     @user2.email = 'test@example.com'
 
-    assert_equal 'test@example.com', @user1.decrypt(:email, @user1.encrypted_email)
+    assert_equal 'test@example.com', @user1.attr_encrypted_decrypt(:email, @user1.encrypted_email)
   end
 
   def test_should_specify_the_default_algorithm
