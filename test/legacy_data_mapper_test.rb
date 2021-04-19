@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'test_helper'
+return unless defined?(DataMapper)
 
 DataMapper.setup(:default, 'sqlite3::memory:')
 

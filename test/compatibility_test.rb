@@ -2,6 +2,7 @@
 
 # -*- encoding: utf-8 -*-
 require_relative 'test_helper'
+return unless defined?(ActiveRecord)
 
 # Test to ensure that existing representations in database do not break on
 # migrating to new versions of this gem. This ensures that future versions of

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'test_helper'
+return unless defined?(Sequel)
 
 DB.create_table :humans do
   primary_key :id
