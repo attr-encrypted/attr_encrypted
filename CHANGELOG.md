@@ -1,5 +1,10 @@
 # attr_encrypted #
 
+## 3.2.0 ##
+* Added: Support Rails upto 6.2 and Ruby upto 3.0 (@mvastola)
+* Added: `appraisal` gem to organize testing with different versions of dependencies (@mvastola)
+* Changed: Outdated version dependencies in `gemspec` (@mvastola)
+
 ## 3.1.0 ##
 * Added: Abitilty to encrypt empty values. (@tamird)
 * Added: MIT license
