@@ -1,109 +1,158 @@
-sudo: false
+---
+os: linux
+dist: xenial
 language: ruby
 cache: bundler
+script: bundle exec rake test
 rvm:
-  - 2.0
-  - 2.1
-  - 2.2
-  - 2.3
-  - 2.4
-  - 2.5
-  - 2.6
-  - 2.7
-  - 3.0
-  - rbx
-env:
-  - ACTIVERECORD=3.0.x
-  - ACTIVERECORD=3.1.x
-  - ACTIVERECORD=3.2.x
-  - ACTIVERECORD=4.0.x
-  - ACTIVERECORD=4.1.x
-  - ACTIVERECORD=4.2.x
-  - ACTIVERECORD=5.0.x
-  - ACTIVERECORD=5.1.x
-  - ACTIVERECORD=5.2.x
-  - ACTIVERECORD=6.0.x
-  - ACTIVERECORD=6.1.x
-  - ACTIVERECORD=6.2.x
-matrix:
-  exclude:
-    - rvm: 2.0
-      env: ACTIVERECORD=5.0.x
-    - rvm: 2.0
-      env: ACTIVERECORD=5.1.x
-    - rvm: 2.0
-      env: ACTIVERECORD=5.2.x
-    - rvm: 2.0
-      env: ACTIVERECORD=6.0.x
-    - rvm: 2.0
-      env: ACTIVERECORD=6.1.x
-    - rvm: 2.0
-      env: ACTIVERECORD=6.2.x
-    - rvm: 2.1
-      env: ACTIVERECORD=5.0.x
-    - rvm: 2.1
-      env: ACTIVERECORD=5.1.x
-    - rvm: 2.0
-      env: ACTIVERECORD=5.2.x
-    - rvm: 2.1
-      env: ACTIVERECORD=6.0.x
-    - rvm: 2.1
-      env: ACTIVERECORD=6.1.x
-    - rvm: 2.1
-      env: ACTIVERECORD=6.2.x
-    - rvm: 2.1
-      env: ACTIVERECORD=6.0.x
-    - rvm: 2.2
-      env: ACTIVERECORD=6.1.x
-    - rvm: 2.2
-      env: ACTIVERECORD=6.2.x
-    - rvm: 2.2
-      env: ACTIVERECORD=6.0.x
-    - rvm: 2.3
-      env: ACTIVERECORD=6.1.x
-    - rvm: 2.3
-      env: ACTIVERECORD=6.2.x
-    - rvm: 2.3
-      env: ACTIVERECORD=3.0.x
-    - rvm: 2.4
-      env: ACTIVERECORD=3.1.x
-    - rvm: 2.4
-      env: ACTIVERECORD=3.2.x
-    - rvm: 2.4
-      env: ACTIVERECORD=4.0.x
-    - rvm: 2.4
-      env: ACTIVERECORD=4.1.x
-    - rvm: 2.4
-      env: ACTIVERECORD=6.0.x
-    - rvm: 2.4
-      env: ACTIVERECORD=6.1.x
-    - rvm: 2.4
-      env: ACTIVERECORD=6.2.x
-    - rvm: 2.5
-      env: ACTIVERECORD=3.0.x
-    - rvm: 2.5
-      env: ACTIVERECORD=3.1.x
-    - rvm: 2.5
-      env: ACTIVERECORD=3.2.x
-    - rvm: 2.5
-      env: ACTIVERECORD=4.0.x
-    - rvm: 2.5
-      env: ACTIVERECORD=4.1.x
-    - rvm: rbx
-      env: ACTIVERECORD=5.0.x
-    - rvm: rbx
-      env: ACTIVERECORD=5.1.x
-    - rvm: rbx
-      env: ACTIVERECORD=5.2.x
-    - rvm: rbx
-      env: ACTIVERECORD=6.0.x
-    - rvm: rbx
-      env: ACTIVERECORD=6.1.x
-    - rvm: rbx
-      env: ACTIVERECORD=6.2.x
+- 2.0
+- 2.1
+- 2.2
+- 2.3
+- 2.4
+- 2.5
+- 2.6
+- 2.7
+- 3.0
+- head
+- rbx
+gemfile:
+- gemfiles/rails_3.0.gemfile
+- gemfiles/rails_3.1.gemfile
+- gemfiles/rails_3.2.gemfile
+- gemfiles/rails_4.0.gemfile
+- gemfiles/rails_4.1.gemfile
+- gemfiles/rails_4.2.gemfile
+- gemfiles/rails_5.0.gemfile
+- gemfiles/rails_5.1.gemfile
+- gemfiles/rails_5.2.gemfile
+- gemfiles/rails_6.0.gemfile
+- gemfiles/rails_6.1.gemfile
+- gemfiles/rails_7_edge.gemfile
+- gemfiles/datamapper.gemfile
+- gemfiles/sequel.gemfile
+jobs:
   allow_failures:
-    - rvm: rbx
-  fast_finish: true
-addons:
-  code_climate:
-    repo_token: a90435ed4954dd6e9f3697a20c5bc3754f67d94703f870e8fc7b00f69f5b2d06
+  - rvm: head
+  - gemfile: gemfiles/rails_7_edge.gemfile
+  - rvm: rbx
+  - gemfile: gemfiles/rails_4.2.gemfile
+    rvm: '2.0'
+  - gemfile: gemfiles/rails_4.2.gemfile
+    rvm: '2.1'
+  - gemfile: gemfiles/rails_4.2.gemfile
+    rvm: '2.2'
+  - gemfile: gemfiles/rails_4.2.gemfile
+    rvm: '2.3'
+  - gemfile: gemfiles/rails_4.2.gemfile
+    rvm: '2.4'
+  fast_finish: false
+  exclude:
+  - gemfile: gemfiles/rails_3.0.gemfile
+    rvm: '2.4'
+  - gemfile: gemfiles/rails_3.0.gemfile
+    rvm: '2.5'
+  - gemfile: gemfiles/rails_3.0.gemfile
+    rvm: '2.6'
+  - gemfile: gemfiles/rails_3.0.gemfile
+    rvm: '2.7'
+  - gemfile: gemfiles/rails_3.0.gemfile
+    rvm: '3.0'
+  - gemfile: gemfiles/rails_3.0.gemfile
+    rvm: head
+  - gemfile: gemfiles/rails_3.1.gemfile
+    rvm: '2.4'
+  - gemfile: gemfiles/rails_3.1.gemfile
+    rvm: '2.5'
+  - gemfile: gemfiles/rails_3.1.gemfile
+    rvm: '2.6'
+  - gemfile: gemfiles/rails_3.1.gemfile
+    rvm: '2.7'
+  - gemfile: gemfiles/rails_3.1.gemfile
+    rvm: '3.0'
+  - gemfile: gemfiles/rails_3.1.gemfile
+    rvm: head
+  - gemfile: gemfiles/rails_3.2.gemfile
+    rvm: '2.4'
+  - gemfile: gemfiles/rails_3.2.gemfile
+    rvm: '2.5'
+  - gemfile: gemfiles/rails_3.2.gemfile
+    rvm: '2.6'
+  - gemfile: gemfiles/rails_3.2.gemfile
+    rvm: '2.7'
+  - gemfile: gemfiles/rails_3.2.gemfile
+    rvm: '3.0'
+  - gemfile: gemfiles/rails_3.2.gemfile
+    rvm: head
+  - gemfile: gemfiles/rails_4.0.gemfile
+    rvm: '2.4'
+  - gemfile: gemfiles/rails_4.0.gemfile
+    rvm: '2.5'
+  - gemfile: gemfiles/rails_4.0.gemfile
+    rvm: '2.6'
+  - gemfile: gemfiles/rails_4.0.gemfile
+    rvm: '2.7'
+  - gemfile: gemfiles/rails_4.0.gemfile
+    rvm: '3.0'
+  - gemfile: gemfiles/rails_4.0.gemfile
+    rvm: head
+  - gemfile: gemfiles/rails_4.1.gemfile
+    rvm: '2.4'
+  - gemfile: gemfiles/rails_4.1.gemfile
+    rvm: '2.5'
+  - gemfile: gemfiles/rails_4.1.gemfile
+    rvm: '2.6'
+  - gemfile: gemfiles/rails_4.1.gemfile
+    rvm: '2.7'
+  - gemfile: gemfiles/rails_4.1.gemfile
+    rvm: '3.0'
+  - gemfile: gemfiles/rails_4.1.gemfile
+    rvm: head
+  - gemfile: gemfiles/rails_5.0.gemfile
+    rvm: '2.0'
+  - gemfile: gemfiles/rails_5.0.gemfile
+    rvm: '2.1'
+  - gemfile: gemfiles/rails_5.1.gemfile
+    rvm: '2.0'
+  - gemfile: gemfiles/rails_5.1.gemfile
+    rvm: '2.1'
+  - gemfile: gemfiles/rails_5.2.gemfile
+    rvm: '2.0'
+  - gemfile: gemfiles/rails_5.2.gemfile
+    rvm: '2.1'
+  - gemfile: gemfiles/rails_5.2.gemfile
+    rvm: '2.2'
+  - gemfile: gemfiles/rails_5.2.gemfile
+    rvm: '2.3'
+  - gemfile: gemfiles/rails_5.2.gemfile
+    rvm: '2.4'
+  - gemfile: gemfiles/rails_6.0.gemfile
+    rvm: '2.0'
+  - gemfile: gemfiles/rails_6.0.gemfile
+    rvm: '2.1'
+  - gemfile: gemfiles/rails_6.0.gemfile
+    rvm: '2.2'
+  - gemfile: gemfiles/rails_6.0.gemfile
+    rvm: '2.3'
+  - gemfile: gemfiles/rails_6.0.gemfile
+    rvm: '2.4'
+  - gemfile: gemfiles/rails_6.1.gemfile
+    rvm: '2.0'
+  - gemfile: gemfiles/rails_6.1.gemfile
+    rvm: '2.1'
+  - gemfile: gemfiles/rails_6.1.gemfile
+    rvm: '2.2'
+  - gemfile: gemfiles/rails_6.1.gemfile
+    rvm: '2.3'
+  - gemfile: gemfiles/rails_6.1.gemfile
+    rvm: '2.4'
+  - gemfile: gemfiles/rails_7_edge.gemfile
+    rvm: '2.0'
+  - gemfile: gemfiles/rails_7_edge.gemfile
+    rvm: '2.1'
+  - gemfile: gemfiles/rails_7_edge.gemfile
+    rvm: '2.2'
+  - gemfile: gemfiles/rails_7_edge.gemfile
+    rvm: '2.3'
+  - gemfile: gemfiles/rails_7_edge.gemfile
+    rvm: '2.4'

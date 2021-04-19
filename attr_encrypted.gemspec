@@ -35,24 +35,10 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 2.0.0'
 
-  s.add_dependency               'encryptor',    '~> 3.0.0'
-  s.add_development_dependency   'activerecord', '>= 2.0.0'
-  s.add_development_dependency   'actionpack',   '>= 2.0.0'
-  s.add_development_dependency   'datamapper'
-  s.add_development_dependency   'rake'
-  s.add_development_dependency   'minitest'
-  s.add_development_dependency   'sequel'
-  if RUBY_VERSION < '2.1.0'
-    s.add_development_dependency 'nokogiri'
-    s.add_development_dependency 'public_suffix', '< 3.0.0'
-  end
-  if defined?(RUBY_ENGINE) && RUBY_ENGINE.to_sym == :jruby
-    s.add_development_dependency 'activerecord-jdbcsqlite3-adapter'
-    s.add_development_dependency 'jdbc-sqlite3', '< 3.8.7' # 3.8.7 is nice and broke
-  else
-    s.add_development_dependency 'sqlite3'
-  end
-  s.add_development_dependency 'dm-sqlite-adapter'
+  s.add_dependency             'encryptor',    '~> 3.0.0'
+  s.add_development_dependency 'appraisal'
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'minitest'
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'simplecov-rcov'
   s.add_development_dependency 'codeclimate-test-reporter', '<= 0.6.0'

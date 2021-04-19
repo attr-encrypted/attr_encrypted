@@ -5,3 +5,4 @@ pkg
 Gemfile.lock
 coverage
 /.idea
+/gemfiles/*.gemfile.lock

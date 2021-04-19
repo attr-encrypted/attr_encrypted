@@ -3,6 +3,7 @@
 require 'rake/testtask'
 require 'rdoc/task'
 require "bundler/gem_tasks"
+require 'wwtd/tasks'
 
 desc 'Test the attr_encrypted gem.'
 Rake::TestTask.new(:test) do |t|
@@ -22,4 +23,7 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
 end
 
 desc 'Default: run unit tests.'
-task :default => :test
+if !ENV["APPRAISAL_INITIALIZED"] && !ENV["TRAVIS"]
+  task :default => :appraisal
+end
+#task :default => :test
