@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
   s.add_development_dependency('sequel')
+  s.add_development_dependency('pry-byebug')
   if RUBY_VERSION < '2.1.0'
     s.add_development_dependency('nokogiri', '< 1.7.0')
     s.add_development_dependency('public_suffix', '< 3.0.0')
@@ -49,7 +50,7 @@ Gem::Specification.new do |s|
     s.add_development_dependency('activerecord-jdbcsqlite3-adapter')
     s.add_development_dependency('jdbc-sqlite3', '< 3.8.7') # 3.8.7 is nice and broke
   else
-    s.add_development_dependency('sqlite3')
+    s.add_development_dependency('sqlite3', '~> 1.3.0', '>= 1.3.6')
   end
   s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('simplecov')

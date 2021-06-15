@@ -124,7 +124,6 @@ class Address < ActiveRecord::Base
 end
 
 class ActiveRecordTest < Minitest::Test
-
   def setup
     drop_all_tables
     create_tables
@@ -217,6 +216,32 @@ class ActiveRecordTest < Minitest::Test
     account.reload
     assert_equal Account::ACCOUNT_ENCRYPTION_KEY, account.key
     assert_equal pw.reverse, account.password
+  end
+
+  # ActiveRecord 5.2 specific methods
+  if ::ActiveRecord::VERSION::STRING >= "5.2"
+    def test_should_create_will_save_change_to_predicate
+      person = Person.create!(email: 'test@example.com')
+      refute person.will_save_change_to_email?
+      person.email = 'test@example.com'
+      refute person.will_save_change_to_email?
+      person.email = 'test2@example.com'
+      assert person.will_save_change_to_email?
+    end
+
+    def test_should_create_saved_change_to_predicate
+      person = Person.create!(email: 'test@example.com')
+      assert person.saved_change_to_email?
+      person.reload
+      person.email = 'test@example.com'
+      refute person.saved_change_to_email?
+      person.email = nil
+      refute person.saved_change_to_email?
+      person.email = 'test2@example.com'
+      refute person.saved_change_to_email?
+      person.save
+      assert person.saved_change_to_email?
+    end
   end
 
   if ::ActiveRecord::VERSION::STRING > "4.0"
