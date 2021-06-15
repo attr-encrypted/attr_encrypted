@@ -6,6 +6,11 @@ Generates attr_accessors that transparently encrypt and decrypt attributes.
 
 It works with ANY class, however, you get a few extra features when you're using it with `ActiveRecord`, `DataMapper`, or `Sequel`.
 
+Forked from [attr-encrypted/attr_encrypted](https://github.com/attr-encrypted/attr_encrypted) with the following fixes:
+
+* Optional update encrypted attributes only when values changed  (#1)
+* Fix concurrency problem  (#2)
+* Support ActiveRecord 5.2  (#3)
 
 ## Installation
 
