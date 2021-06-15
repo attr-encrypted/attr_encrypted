@@ -1,5 +1,6 @@
 # attr_encrypted
-[![Build Status](https://secure.travis-ci.org/attr-encrypted/attr_encrypted.svg)](https://travis-ci.org/attr-encrypted/attr_encrypted) [![Test Coverage](https://codeclimate.com/github/attr-encrypted/attr_encrypted/badges/coverage.svg)](https://codeclimate.com/github/attr-encrypted/attr_encrypted/coverage) [![Code Climate](https://codeclimate.com/github/attr-encrypted/attr_encrypted/badges/gpa.svg)](https://codeclimate.com/github/attr-encrypted/attr_encrypted) [![Gem Version](https://badge.fury.io/rb/attr_encrypted.svg)](https://badge.fury.io/rb/attr_encrypted) [![security](https://hakiri.io/github/attr-encrypted/attr_encrypted/master.svg)](https://hakiri.io/github/attr-encrypted/attr_encrypted/master)
+
+[![Build Status](https://github.com/KentaaNL/attr_encrypted/actions/workflows/test.yml/badge.svg)](https://github.com/KentaaNL/attr_encrypted/actions)
 
 Generates attr_accessors that transparently encrypt and decrypt attributes.
 
@@ -11,7 +12,7 @@ It works with ANY class, however, you get a few extra features when you're using
 Add attr_encrypted to your gemfile:
 
 ```ruby
-  gem "attr_encrypted", "~> 3.0.0"
+  gem "attr_encrypted", github: "KentaaNL/attr_encrypted"
 ```
 
 Then install the gem:
