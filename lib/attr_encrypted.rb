@@ -236,7 +236,7 @@ module AttrEncrypted
   #
   #   email = User.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
   def decrypt(attribute, encrypted_value, options = {})
-    options = encrypted_attributes[attribute.to_sym].merge(options)
+    options = encrypted_attributes[attribute.to_sym].merge(options).compact
     if options[:if] && !options[:unless] && not_empty?(encrypted_value)
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
       value = options[:encryptor].send(options[:decrypt_method], options.merge!(value: encrypted_value))
@@ -328,7 +328,41 @@ module AttrEncrypted
     def decrypt(attribute, encrypted_value)
       encrypted_attributes[attribute.to_sym][:operation] = :decrypting
       encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(encrypted_value)
-      self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      begin
+        self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      rescue OpenSSL::Cipher::CipherError => e
+        # When decryption fails with `key:` and the attribute is
+        # configured to attempt a key rotation, let's try to decrypt
+        # with the `old_key:` then rotate the value using the
+        # `rotation_handler:`
+        options = evaluated_attr_encrypted_options_for(attribute)
+        raise e if nil == options[:old_key] || nil == options[:rotation_handler]
+
+        # but even this may fail if the column's data is encrypted with
+        # neither of these keys, or is corrupted in some way. We need to
+        # catch this scenario and optionally give the host application
+        # the ability to handle unrecoverable data
+        begin
+          value = self.class.decrypt(
+            attribute,
+            encrypted_value,
+            options.merge(
+              key: options[:old_key],
+              iv: options[:old_iv]
+            )
+          )
+
+          handler = options[:rotation_handler]
+          handler.new(self, attribute, value, encrypted_value, options).call
+
+          value
+        rescue OpenSSL::Cipher::CipherError => e
+          raise e unless options[:rotation_error_handler].present?
+
+          error_handler = options[:rotation_error_handler]
+          error_handler.new(self, attribute, e, encrypted_value, options).call
+        end
+      end
     end
 
     # Encrypts a value for the attribute specified using options evaluated in the current object's scope
