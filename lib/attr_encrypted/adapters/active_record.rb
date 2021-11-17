@@ -26,8 +26,8 @@ if defined?(ActiveRecord::Base)
             def perform_attribute_assignment(method, new_attributes, *args)
               return if new_attributes.blank?
 
-              send method, new_attributes.reject { |k, _|  self.class.encrypted_attributes.key?(k.to_sym) }, *args
-              send method, new_attributes.reject { |k, _| !self.class.encrypted_attributes.key?(k.to_sym) }, *args
+              send method, new_attributes.reject { |k, _|  self.class.encrypted_attributes.key?(k.to_sym) } #, *args
+              send method, new_attributes.reject { |k, _| !self.class.encrypted_attributes.key?(k.to_sym) } #, *args
             end
             private :perform_attribute_assignment
 
@@ -69,10 +69,10 @@ if defined?(ActiveRecord::Base)
             # We add accessor methods of the db columns to the list of instance
             # methods returned to let ActiveRecord define the accessor methods
             # for the db columns
-            
+
             # Use with_connection so the connection doesn't stay pinned to the thread.
             connected = ::ActiveRecord::Base.connection_pool.with_connection(&:active?) rescue false
-            
+
             if connected && table_exists?
               columns_hash.keys.inject(super) {|instance_methods, column_name| instance_methods.concat [column_name.to_sym, :"#{column_name}="]}
             else
@@ -85,7 +85,7 @@ if defined?(ActiveRecord::Base)
           #
           # NOTE: This only works when the <tt>:key</tt> option is specified as a string (see the README)
           #
-          # This is useful for encrypting fields like email addresses. Your user's email addresses 
+          # This is useful for encrypting fields like email addresses. Your user's email addresses
           # are encrypted in the database, but you can still look up a user by email for logging in
           #
           # Example
