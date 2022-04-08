@@ -50,7 +50,7 @@ Gem::Specification.new do |s|
     s.add_development_dependency('activerecord-jdbcsqlite3-adapter')
     s.add_development_dependency('jdbc-sqlite3', '< 3.8.7') # 3.8.7 is nice and broke
   else
-    s.add_development_dependency('sqlite3', '~> 1.3.0', '>= 1.3.6')
+    s.add_development_dependency('sqlite3', '~> 1.4.0', '>= 1.4')
   end
   s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('simplecov')

@@ -81,7 +81,9 @@ if defined?(ActiveRecord::Base)
               if ::ActiveRecord::VERSION::STRING >= "5.2"
                 # This is needed support attribute_was before a record has
                 # been saved
-                set_attribute_was(attr, __send__(attr)) if value != __send__(attr)
+                if ::ActiveRecord::VERSION::STRING < "6.0"
+                  set_attribute_was(attr, __send__(attr)) if value != __send__(attr)
+                end
                 # This is needed to support attribute_was after a record has
                 # been saved
                 @attributes.write_from_user(attr.to_s, value) if value != __send__(attr)
