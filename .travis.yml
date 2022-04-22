@@ -19,6 +19,7 @@ env:
   - ACTIVERECORD=5.0.0
   - ACTIVERECORD=5.1.1
   - ACTIVERECORD=5.2.0
+  - ACTIVERECORD=6.0.0
 matrix:
   exclude:
     - rvm: 2.0
