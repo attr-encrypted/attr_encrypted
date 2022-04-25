@@ -1,10 +1,13 @@
 # attr_encrypted #
 
+## 1.2.0 ##
+* Added: Support for ActiveRecord 6.0
+
 ## 1.1.0 ##
 * Added: Ability to rotate cipher key and iv (https://github.com/powerhome/attr_encrypted/pull/4)
 
 ## 1.0.1 ##
-* Added: Support for ActiveRecord  5.2
+* Added: Support for ActiveRecord 5.2
 
 ## 1.0.0 ##
 * Forked from upstream (https://github.com/attr-encrypted/attr_encrypted) and rebraned
