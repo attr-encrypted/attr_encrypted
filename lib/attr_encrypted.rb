@@ -10,7 +10,7 @@ module AttrEncrypted
     base.class_eval do
       include InstanceMethods
       attr_writer :attr_encrypted_options
-      @attr_encrypted_options, @attr_encrypted_encrypted_attributes = {}, {}
+      @attr_encrypted_options, @legacy_encrypted_attributes = {}, {}
     end
   end
 
@@ -160,11 +160,19 @@ module AttrEncrypted
       end
 
       define_method(attribute) do
+<<<<<<< HEAD
         instance_variable_get("@#{attribute}") || instance_variable_set("@#{attribute}", attr_encrypted_decrypt(attribute, send(encrypted_attribute_name)))
       end
 
       define_method("#{attribute}=") do |value|
         send("#{encrypted_attribute_name}=", attr_encrypted_encrypt(attribute, value))
+=======
+        instance_variable_get("@#{attribute}") || instance_variable_set("@#{attribute}", legacy_decrypt(attribute, send(encrypted_attribute_name)))
+      end
+
+      define_method("#{attribute}=") do |value|
+        send("#{encrypted_attribute_name}=", legacy_encrypt(attribute, value))
+>>>>>>> 616a4ea (rename methods because of name conflicts with rails 7)
         instance_variable_set("@#{attribute}", value)
       end
 
@@ -173,7 +181,11 @@ module AttrEncrypted
         value.respond_to?(:empty?) ? !value.empty? : !!value
       end
 
+<<<<<<< HEAD
       self.attr_encrypted_encrypted_attributes[attribute.to_sym] = options.merge(attribute: encrypted_attribute_name)
+=======
+      legacy_encrypted_attributes[attribute.to_sym] = options.merge(attribute: encrypted_attribute_name)
+>>>>>>> 616a4ea (rename methods because of name conflicts with rails 7)
     end
   end
 
@@ -223,7 +235,11 @@ module AttrEncrypted
   #   User.attr_encrypted?(:name)  # false
   #   User.attr_encrypted?(:email) # true
   def attr_encrypted?(attribute)
+<<<<<<< HEAD
     attr_encrypted_encrypted_attributes.has_key?(attribute.to_sym)
+=======
+    legacy_encrypted_attributes.has_key?(attribute.to_sym)
+>>>>>>> 616a4ea (rename methods because of name conflicts with rails 7)
   end
 
   # Decrypts a value for the attribute specified
@@ -234,9 +250,15 @@ module AttrEncrypted
   #     attr_encrypted :email
   #   end
   #
+<<<<<<< HEAD
   #   email = User.attr_encrypted_decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
   def attr_encrypted_decrypt(attribute, encrypted_value, options = {})
     options = attr_encrypted_encrypted_attributes[attribute.to_sym].merge(options)
+=======
+  #   email = User.legacy_decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
+  def legacy_decrypt(attribute, encrypted_value, options = {})
+    options = legacy_encrypted_attributes[attribute.to_sym].merge(options)
+>>>>>>> 616a4ea (rename methods because of name conflicts with rails 7)
     if options[:if] && !options[:unless] && not_empty?(encrypted_value)
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
       value = options[:encryptor].send(options[:decrypt_method], options.merge!(value: encrypted_value))
@@ -260,9 +282,15 @@ module AttrEncrypted
   #     attr_encrypted :email
   #   end
   #
+<<<<<<< HEAD
   #   encrypted_email = User.attr_encrypted_encrypt(:email, 'test@example.com')
   def attr_encrypted_encrypt(attribute, value, options = {})
     options = attr_encrypted_encrypted_attributes[attribute.to_sym].merge(options)
+=======
+  #   encrypted_email = User.legacy_encrypt(:email, 'test@example.com')
+  def legacy_encrypt(attribute, value, options = {})
+    options = legacy_encrypted_attributes[attribute.to_sym].merge(options)
+>>>>>>> 616a4ea (rename methods because of name conflicts with rails 7)
     if options[:if] && !options[:unless] && (options[:allow_empty_value] || not_empty?(value))
       value = options[:marshal] ? options[:marshaler].send(options[:dump_method], value) : value.to_s
       encrypted_value = options[:encryptor].send(options[:encrypt_method], options.merge!(value: value))
@@ -286,9 +314,15 @@ module AttrEncrypted
   #     attr_encrypted :email, key: 'my secret key'
   #   end
   #
+<<<<<<< HEAD
   #   User.attr_encrypted_encrypted_attributes # { email: { attribute: 'encrypted_email', key: 'my secret key' } }
   def attr_encrypted_encrypted_attributes
     @attr_encrypted_encrypted_attributes ||= superclass.attr_encrypted_encrypted_attributes.dup
+=======
+  #   User.legacy_encrypted_attributes # { email: { attribute: 'encrypted_email', key: 'my secret key' } }
+  def legacy_encrypted_attributes
+    @legacy_encrypted_attributes ||= superclass.legacy_encrypted_attributes.dup
+>>>>>>> 616a4ea (rename methods because of name conflicts with rails 7)
   end
 
   # Forwards calls to :encrypt_#{attribute} or :decrypt_#{attribute} to the corresponding encrypt or decrypt method
@@ -303,7 +337,11 @@ module AttrEncrypted
   #   User.encrypt_email('SOME_ENCRYPTED_EMAIL_STRING')
   def method_missing(method, *arguments, &block)
     if method.to_s =~ /^((en|de)crypt)_(.+)$/ && attr_encrypted?($3)
+<<<<<<< HEAD
       send("attr_encrypted_#{$1}", $3, *arguments)
+=======
+      send("legacy_#{$1}", $3, *arguments)
+>>>>>>> 616a4ea (rename methods because of name conflicts with rails 7)
     else
       super
     end
@@ -324,11 +362,19 @@ module AttrEncrypted
     #  end
     #
     #  @user = User.new('some-secret-key')
+<<<<<<< HEAD
     #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
     def attr_encrypted_decrypt(attribute, encrypted_value)
       attr_encrypted_encrypted_attributes[attribute.to_sym][:operation] = :decrypting
       attr_encrypted_encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(encrypted_value)
       self.class.attr_encrypted_decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+=======
+    #  @user.legacy_decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
+    def legacy_decrypt(attribute, encrypted_value)
+      legacy_encrypted_attributes[attribute.to_sym][:operation] = :decrypting
+      legacy_encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(encrypted_value)
+      self.class.legacy_decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+>>>>>>> 616a4ea (rename methods because of name conflicts with rails 7)
     end
 
     # Encrypts a value for the attribute specified using options evaluated in the current object's scope
@@ -345,20 +391,35 @@ module AttrEncrypted
     #  end
     #
     #  @user = User.new('some-secret-key')
+<<<<<<< HEAD
     #  @user.attr_encrypted_encrypt(:email, 'test@example.com')
     def attr_encrypted_encrypt(attribute, value)
       attr_encrypted_encrypted_attributes[attribute.to_sym][:operation] = :encrypting
       attr_encrypted_encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(value)
       self.class.attr_encrypted_encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
+=======
+    #  @user.legacy_encrypt(:email, 'test@example.com')
+    def legacy_encrypt(attribute, value)
+      legacy_encrypted_attributes[attribute.to_sym][:operation] = :encrypting
+      legacy_encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(value)
+      self.class.legacy_encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
+>>>>>>> 616a4ea (rename methods because of name conflicts with rails 7)
     end
 
     # Copies the class level hash of encrypted attributes with virtual attribute names as keys
     # and their corresponding options as values to the instance
     #
+<<<<<<< HEAD
     def attr_encrypted_encrypted_attributes
       @attr_encrypted_encrypted_attributes ||= begin
         duplicated= {}
         self.class.attr_encrypted_encrypted_attributes.map { |key, value| duplicated[key] = value.dup }
+=======
+    def legacy_encrypted_attributes
+      @legacy_encrypted_attributes ||= begin
+        duplicated= {}
+        self.class.legacy_encrypted_attributes.map { |key, value| duplicated[key] = value.dup }
+>>>>>>> 616a4ea (rename methods because of name conflicts with rails 7)
         duplicated
       end
     end
@@ -368,7 +429,11 @@ module AttrEncrypted
       # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
       def evaluated_attr_encrypted_options_for(attribute)
         evaluated_options = Hash.new
+<<<<<<< HEAD
         attributes = attr_encrypted_encrypted_attributes[attribute.to_sym]
+=======
+        attributes = legacy_encrypted_attributes[attribute.to_sym]
+>>>>>>> 616a4ea (rename methods because of name conflicts with rails 7)
         attribute_option_value = attributes[:attribute]
 
         [:if, :unless, :value_present, :allow_empty_value].each do |option|
