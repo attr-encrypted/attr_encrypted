@@ -42,6 +42,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
   s.add_development_dependency('sequel')
+  s.add_development_dependency('pry')
   if RUBY_VERSION < '2.1.0'
     s.add_development_dependency('nokogiri', '< 1.7.0')
     s.add_development_dependency('public_suffix', '< 3.0.0')
