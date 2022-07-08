@@ -1,5 +1,9 @@
 # attr_encrypted #
 
+## 3.1.1 ##
+* Added: Support for Ruby 3 syntax
+* Removed: commented out specs that already failed on the public branch
+
 ## 3.1.0 ##
 * Added: Abitilty to encrypt empty values. (@tamird)
 * Added: MIT license
