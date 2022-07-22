@@ -133,8 +133,17 @@ if defined?(ActiveRecord::Base)
     end
   end
 
-  ActiveSupport.on_load(:active_record) do
-    extend AttrEncrypted
-    extend AttrEncrypted::Adapters::ActiveRecord
+  if defined?(ActiveSupport.on_load)
+    ActiveSupport.on_load(:active_record) do
+      extend AttrEncrypted
+      extend AttrEncrypted::Adapters::ActiveRecord
+    end
+  else
+    Rails.configuration.to_prepare do
+      ActiveRecord::Base.class_eval do
+        extend AttrEncrypted
+        extend AttrEncrypted::Adapters::ActiveRecord
+      end
+    end
   end
 end
