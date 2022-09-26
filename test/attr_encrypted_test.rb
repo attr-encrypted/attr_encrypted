@@ -115,16 +115,16 @@ class AttrEncryptedTest < Minitest::Test
   end
 
   def test_should_not_encrypt_nil_value
-    assert_nil User.encrypt_email(nil, iv: @iv)
+    assert_nil User.attr_encrypt_email(nil, iv: @iv)
   end
 
   def test_should_not_encrypt_empty_string_by_default
-    assert_equal '', User.encrypt_email('', iv: @iv)
+    assert_equal '', User.attr_encrypt_email('', iv: @iv)
   end
 
   def test_should_encrypt_email
-    refute_nil User.encrypt_email('test@example.com', iv: @iv)
-    refute_equal 'test@example.com', User.encrypt_email('test@example.com', iv: @iv)
+    refute_nil User.attr_encrypt_email('test@example.com', iv: @iv)
+    refute_equal 'test@example.com', User.attr_encrypt_email('test@example.com', iv: @iv)
   end
 
   def test_should_encrypt_email_when_modifying_the_attr_writer
@@ -134,21 +134,21 @@ class AttrEncryptedTest < Minitest::Test
     refute_nil @user.encrypted_email
     iv = @user.encrypted_email_iv.unpack('m').first
     salt = @user.encrypted_email_salt[1..-1].unpack('m').first
-    assert_equal User.encrypt_email('test@example.com', iv: iv, salt: salt), @user.encrypted_email
+    assert_equal User.attr_encrypt_email('test@example.com', iv: iv, salt: salt), @user.encrypted_email
   end
 
   def test_should_not_decrypt_nil_value
-    assert_nil User.decrypt_email(nil, iv: @iv)
+    assert_nil User.attr_decrypt_email(nil, iv: @iv)
   end
 
   def test_should_not_decrypt_empty_string
-    assert_equal '', User.decrypt_email('', iv: @iv)
+    assert_equal '', User.attr_decrypt_email('', iv: @iv)
   end
 
   def test_should_decrypt_email
-    encrypted_email = User.encrypt_email('test@example.com', iv: @iv)
+    encrypted_email = User.attr_encrypt_email('test@example.com', iv: @iv)
     refute_equal 'test@test.com', encrypted_email
-    assert_equal 'test@example.com', User.decrypt_email(encrypted_email, iv: @iv)
+    assert_equal 'test@example.com', User.attr_decrypt_email(encrypted_email, iv: @iv)
   end
 
   def test_should_decrypt_email_when_reading
@@ -159,30 +159,30 @@ class AttrEncryptedTest < Minitest::Test
     encoded_iv = [iv].pack(options[:encode_iv])
     salt = SecureRandom.random_bytes
     encoded_salt = @user.send(:prefix_and_encode_salt, salt, options[:encode_salt])
-    @user.encrypted_email = User.encrypt_email('test@example.com', iv: iv, salt: salt)
+    @user.encrypted_email = User.attr_encrypt_email('test@example.com', iv: iv, salt: salt)
     @user.encrypted_email_iv = encoded_iv
     @user.encrypted_email_salt = encoded_salt
     assert_equal 'test@example.com', @user.email
   end
 
   def test_should_encrypt_with_encoding
-    assert_equal User.encrypt_with_encoding('test', iv: @iv), [User.encrypt_without_encoding('test', iv: @iv)].pack('m')
+    assert_equal User.attr_encrypt_with_encoding('test', iv: @iv), [User.attr_encrypt_without_encoding('test', iv: @iv)].pack('m')
   end
 
   def test_should_decrypt_with_encoding
-    encrypted = User.encrypt_with_encoding('test', iv: @iv)
-    assert_equal 'test', User.decrypt_with_encoding(encrypted, iv: @iv)
-    assert_equal User.decrypt_with_encoding(encrypted, iv: @iv), User.decrypt_without_encoding(encrypted.unpack('m').first, iv: @iv)
+    encrypted = User.attr_encrypt_with_encoding('test', iv: @iv)
+    assert_equal 'test', User.attr_decrypt_with_encoding(encrypted, iv: @iv)
+    assert_equal User.attr_decrypt_with_encoding(encrypted, iv: @iv), User.attr_decrypt_without_encoding(encrypted.unpack('m').first, iv: @iv)
   end
 
   def test_should_encrypt_with_custom_encoding
-    assert_equal User.encrypt_with_encoding('test', iv: @iv), [User.encrypt_without_encoding('test', iv: @iv)].pack('m')
+    assert_equal User.attr_encrypt_with_encoding('test', iv: @iv), [User.attr_encrypt_without_encoding('test', iv: @iv)].pack('m')
   end
 
   def test_should_decrypt_with_custom_encoding
-    encrypted = User.encrypt_with_encoding('test', iv: @iv)
-    assert_equal 'test', User.decrypt_with_encoding(encrypted, iv: @iv)
-    assert_equal User.decrypt_with_encoding(encrypted, iv: @iv), User.decrypt_without_encoding(encrypted.unpack('m').first, iv: @iv)
+    encrypted = User.attr_encrypt_with_encoding('test', iv: @iv)
+    assert_equal 'test', User.attr_decrypt_with_encoding(encrypted, iv: @iv)
+    assert_equal User.attr_decrypt_with_encoding(encrypted, iv: @iv), User.attr_decrypt_without_encoding(encrypted.unpack('m').first, iv: @iv)
   end
 
   def test_should_encrypt_with_marshaling
@@ -192,7 +192,7 @@ class AttrEncryptedTest < Minitest::Test
   end
 
   def test_should_use_custom_encryptor_and_crypt_method_names_and_arguments
-    assert_equal SillyEncryptor.silly_encrypt(:value => 'testing', :some_arg => 'test'), User.encrypt_credit_card('testing')
+    assert_equal SillyEncryptor.silly_encrypt(:value => 'testing', :some_arg => 'test'), User.attr_encrypt_credit_card('testing')
   end
 
   def test_should_evaluate_a_key_passed_as_a_symbol
@@ -319,9 +319,9 @@ class AttrEncryptedTest < Minitest::Test
   end
 
   def test_should_cast_values_as_strings_before_encrypting
-    string_encrypted_email = User.encrypt_email('3', iv: @iv)
-    assert_equal string_encrypted_email, User.encrypt_email(3, iv: @iv)
-    assert_equal '3', User.decrypt_email(string_encrypted_email, iv: @iv)
+    string_encrypted_email = User.attr_encrypt_email('3', iv: @iv)
+    assert_equal string_encrypted_email, User.attr_encrypt_email(3, iv: @iv)
+    assert_equal '3', User.attr_decrypt_email(string_encrypted_email, iv: @iv)
   end
 
   def test_should_create_query_accessor
@@ -381,7 +381,7 @@ class AttrEncryptedTest < Minitest::Test
     @user2 = User.new
     @user2.email = 'test@example.com'
 
-    assert_equal 'test@example.com', @user1.decrypt(:email, @user1.encrypted_email)
+    assert_equal 'test@example.com', @user1.attr_decrypt(:email, @user1.encrypted_email)
   end
 
   def test_should_specify_the_default_algorithm

@@ -123,7 +123,7 @@ if defined?(ActiveRecord::Base)
               attribute_names = match.captures.last.split('_and_')
               attribute_names.each_with_index do |attribute, index|
                 if attr_encrypted?(attribute) && attr_encrypted_attributes[attribute.to_sym][:mode] == :single_iv_and_salt
-                  args[index] = send("encrypt_#{attribute}", args[index])
+                  args[index] = send("attr_encrypt_#{attribute}", args[index])
                   warn "DEPRECATION WARNING: This feature will be removed in the next major release."
                   attribute_names[index] = attr_encrypted_attributes[attribute.to_sym][:attribute]
                 end

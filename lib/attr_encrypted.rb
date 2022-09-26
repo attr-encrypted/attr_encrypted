@@ -160,11 +160,11 @@ module AttrEncrypted
       end
 
       define_method(attribute) do
-        instance_variable_get("@#{attribute}") || instance_variable_set("@#{attribute}", decrypt(attribute, send(encrypted_attribute_name)))
+        instance_variable_get("@#{attribute}") || instance_variable_set("@#{attribute}", attr_decrypt(attribute, send(encrypted_attribute_name)))
       end
 
       define_method("#{attribute}=") do |value|
-        send("#{encrypted_attribute_name}=", encrypt(attribute, value))
+        send("#{encrypted_attribute_name}=", attr_encrypt(attribute, value))
         instance_variable_set("@#{attribute}", value)
       end
 
@@ -234,8 +234,8 @@ module AttrEncrypted
   #     attr_encrypted :email
   #   end
   #
-  #   email = User.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
-  def decrypt(attribute, encrypted_value, options = {})
+  #   email = User.attr_decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
+  def attr_decrypt(attribute, encrypted_value, options = {})
     options = attr_encrypted_attributes[attribute.to_sym].merge(options)
     if options[:if] && !options[:unless] && not_empty?(encrypted_value)
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
@@ -260,8 +260,8 @@ module AttrEncrypted
   #     attr_encrypted :email
   #   end
   #
-  #   encrypted_email = User.encrypt(:email, 'test@example.com')
-  def encrypt(attribute, value, options = {})
+  #   encrypted_email = User.attr_encrypt(:email, 'test@example.com')
+  def attr_encrypt(attribute, value, options = {})
     options = attr_encrypted_attributes[attribute.to_sym].merge(options)
     if options[:if] && !options[:unless] && (options[:allow_empty_value] || not_empty?(value))
       value = options[:marshal] ? options[:marshaler].send(options[:dump_method], value) : value.to_s
@@ -300,9 +300,9 @@ module AttrEncrypted
   #     attr_encrypted :email, key: 'my secret key'
   #   end
   #
-  #   User.encrypt_email('SOME_ENCRYPTED_EMAIL_STRING')
+  #   User.attr_encrypt_email('SOME_ENCRYPTED_EMAIL_STRING')
   def method_missing(method, *arguments, &block)
-    if method.to_s =~ /^((en|de)crypt)_(.+)$/ && attr_encrypted?($3)
+    if method.to_s =~ /^(attr_(en|de)crypt)_(.+)$/ && attr_encrypted?($3)
       send($1, $3, *arguments)
     else
       super
@@ -324,11 +324,11 @@ module AttrEncrypted
     #  end
     #
     #  @user = User.new('some-secret-key')
-    #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
-    def decrypt(attribute, encrypted_value)
+    #  @user.attr_decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
+    def attr_decrypt(attribute, encrypted_value)
       attr_encrypted_attributes[attribute.to_sym][:operation] = :decrypting
       attr_encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(encrypted_value)
-      self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+      self.class.attr_decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
     end
 
     # Encrypts a value for the attribute specified using options evaluated in the current object's scope
@@ -346,10 +346,10 @@ module AttrEncrypted
     #
     #  @user = User.new('some-secret-key')
     #  @user.encrypt(:email, 'test@example.com')
-    def encrypt(attribute, value)
+    def attr_encrypt(attribute, value)
       attr_encrypted_attributes[attribute.to_sym][:operation] = :encrypting
       attr_encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(value)
-      self.class.encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
+      self.class.attr_encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
     end
 
     # Copies the class level hash of encrypted attributes with virtual attribute names as keys

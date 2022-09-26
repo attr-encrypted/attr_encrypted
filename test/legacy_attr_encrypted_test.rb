@@ -90,16 +90,16 @@ class LegacyAttrEncryptedTest < Minitest::Test
   end
 
   def test_should_not_encrypt_nil_value
-    assert_nil LegacyUser.encrypt_email(nil)
+    assert_nil LegacyUser.attr_encrypt_email(nil)
   end
 
   def test_should_not_encrypt_empty_string
-    assert_equal '', LegacyUser.encrypt_email('')
+    assert_equal '', LegacyUser.attr_encrypt_email('')
   end
 
   def test_should_encrypt_email
-    refute_nil LegacyUser.encrypt_email('test@example.com')
-    refute_equal 'test@example.com', LegacyUser.encrypt_email('test@example.com')
+    refute_nil LegacyUser.attr_encrypt_email('test@example.com')
+    refute_equal 'test@example.com', LegacyUser.attr_encrypt_email('test@example.com')
   end
 
   def test_should_encrypt_email_when_modifying_the_attr_writer
@@ -107,65 +107,65 @@ class LegacyAttrEncryptedTest < Minitest::Test
     assert_nil @user.encrypted_email
     @user.email = 'test@example.com'
     refute_nil @user.encrypted_email
-    assert_equal LegacyUser.encrypt_email('test@example.com'), @user.encrypted_email
+    assert_equal LegacyUser.attr_encrypt_email('test@example.com'), @user.encrypted_email
   end
 
   def test_should_not_decrypt_nil_value
-    assert_nil LegacyUser.decrypt_email(nil)
+    assert_nil LegacyUser.attr_decrypt_email(nil)
   end
 
   def test_should_not_decrypt_empty_string
-    assert_equal '', LegacyUser.decrypt_email('')
+    assert_equal '', LegacyUser.attr_decrypt_email('')
   end
 
   def test_should_decrypt_email
-    encrypted_email = LegacyUser.encrypt_email('test@example.com')
+    encrypted_email = LegacyUser.attr_encrypt_email('test@example.com')
     refute_equal 'test@test.com', encrypted_email
-    assert_equal 'test@example.com', LegacyUser.decrypt_email(encrypted_email)
+    assert_equal 'test@example.com', LegacyUser.attr_decrypt_email(encrypted_email)
   end
 
   def test_should_decrypt_email_when_reading
     @user = LegacyUser.new
     assert_nil @user.email
-    @user.encrypted_email = LegacyUser.encrypt_email('test@example.com')
+    @user.encrypted_email = LegacyUser.attr_encrypt_email('test@example.com')
     assert_equal 'test@example.com', @user.email
   end
 
   def test_should_encrypt_with_encoding
-    assert_equal LegacyUser.encrypt_with_encoding('test'), [LegacyUser.encrypt_without_encoding('test')].pack('m')
+    assert_equal LegacyUser.attr_encrypt_with_encoding('test'), [LegacyUser.attr_encrypt_without_encoding('test')].pack('m')
   end
 
   def test_should_decrypt_with_encoding
-    encrypted = LegacyUser.encrypt_with_encoding('test')
-    assert_equal 'test', LegacyUser.decrypt_with_encoding(encrypted)
-    assert_equal LegacyUser.decrypt_with_encoding(encrypted), LegacyUser.decrypt_without_encoding(encrypted.unpack('m').first)
+    encrypted = LegacyUser.attr_encrypt_with_encoding('test')
+    assert_equal 'test', LegacyUser.attr_decrypt_with_encoding(encrypted)
+    assert_equal LegacyUser.attr_decrypt_with_encoding(encrypted), LegacyUser.attr_decrypt_without_encoding(encrypted.unpack('m').first)
   end
 
   def test_should_decrypt_utf8_with_encoding
-    encrypted = LegacyUser.encrypt_with_encoding("test\xC2\xA0utf-8\xC2\xA0text")
-    assert_equal "test\xC2\xA0utf-8\xC2\xA0text", LegacyUser.decrypt_with_encoding(encrypted)
-    assert_equal LegacyUser.decrypt_with_encoding(encrypted), LegacyUser.decrypt_without_encoding(encrypted.unpack('m').first)
+    encrypted = LegacyUser.attr_encrypt_with_encoding("test\xC2\xA0utf-8\xC2\xA0text")
+    assert_equal "test\xC2\xA0utf-8\xC2\xA0text", LegacyUser.attr_decrypt_with_encoding(encrypted)
+    assert_equal LegacyUser.attr_decrypt_with_encoding(encrypted), LegacyUser.attr_decrypt_without_encoding(encrypted.unpack('m').first)
   end
 
   def test_should_encrypt_with_custom_encoding
-    assert_equal LegacyUser.encrypt_with_custom_encoding('test'), [LegacyUser.encrypt_without_encoding('test')].pack('m')
+    assert_equal LegacyUser.attr_encrypt_with_custom_encoding('test'), [LegacyUser.attr_encrypt_without_encoding('test')].pack('m')
   end
 
   def test_should_decrypt_with_custom_encoding
-    encrypted = LegacyUser.encrypt_with_custom_encoding('test')
-    assert_equal 'test', LegacyUser.decrypt_with_custom_encoding(encrypted)
-    assert_equal LegacyUser.decrypt_with_custom_encoding(encrypted), LegacyUser.decrypt_without_encoding(encrypted.unpack('m').first)
+    encrypted = LegacyUser.attr_encrypt_with_custom_encoding('test')
+    assert_equal 'test', LegacyUser.attr_decrypt_with_custom_encoding(encrypted)
+    assert_equal LegacyUser.attr_decrypt_with_custom_encoding(encrypted), LegacyUser.attr_decrypt_without_encoding(encrypted.unpack('m').first)
   end
 
   def test_should_encrypt_with_marshaling
     @user = LegacyUser.new
     @user.with_marshaling = [1, 2, 3]
     refute_nil @user.encrypted_with_marshaling
-    assert_equal LegacyUser.encrypt_with_marshaling([1, 2, 3]), @user.encrypted_with_marshaling
+    assert_equal LegacyUser.attr_encrypt_with_marshaling([1, 2, 3]), @user.encrypted_with_marshaling
   end
 
   def test_should_decrypt_with_marshaling
-    encrypted = LegacyUser.encrypt_with_marshaling([1, 2, 3])
+    encrypted = LegacyUser.attr_encrypt_with_marshaling([1, 2, 3])
     @user = LegacyUser.new
     assert_nil @user.with_marshaling
     @user.encrypted_with_marshaling = encrypted
@@ -173,7 +173,7 @@ class LegacyAttrEncryptedTest < Minitest::Test
   end
 
   def test_should_use_custom_encryptor_and_crypt_method_names_and_arguments
-    assert_equal LegacySillyEncryptor.silly_encrypt(:value => 'testing', :some_arg => 'test'), LegacyUser.encrypt_credit_card('testing')
+    assert_equal LegacySillyEncryptor.silly_encrypt(:value => 'testing', :some_arg => 'test'), LegacyUser.attr_encrypt_credit_card('testing')
   end
 
   def test_should_evaluate_a_key_passed_as_a_symbol
@@ -283,9 +283,9 @@ class LegacyAttrEncryptedTest < Minitest::Test
   end
 
   def test_should_cast_values_as_strings_before_encrypting
-    string_encrypted_email = LegacyUser.encrypt_email('3')
-    assert_equal string_encrypted_email, LegacyUser.encrypt_email(3)
-    assert_equal '3', LegacyUser.decrypt_email(string_encrypted_email)
+    string_encrypted_email = LegacyUser.attr_encrypt_email('3')
+    assert_equal string_encrypted_email, LegacyUser.attr_encrypt_email(3)
+    assert_equal '3', LegacyUser.attr_decrypt_email(string_encrypted_email)
   end
 
   def test_should_create_query_accessor
