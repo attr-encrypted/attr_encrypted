@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'test_helper'
+return unless defined?(ActiveRecord)
 
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
 
