@@ -1,14 +1,10 @@
-## Maintainer(s) wanted!!!
-
-**If you have an interest in maintaining this project... please see https://github.com/attr-encrypted/attr_encrypted/issues/379**
-
 # attr_encrypted
 
 [![Build Status](https://secure.travis-ci.org/attr-encrypted/attr_encrypted.svg)](https://travis-ci.org/attr-encrypted/attr_encrypted) [![Test Coverage](https://codeclimate.com/github/attr-encrypted/attr_encrypted/badges/coverage.svg)](https://codeclimate.com/github/attr-encrypted/attr_encrypted/coverage) [![Code Climate](https://codeclimate.com/github/attr-encrypted/attr_encrypted/badges/gpa.svg)](https://codeclimate.com/github/attr-encrypted/attr_encrypted) [![Gem Version](https://badge.fury.io/rb/attr_encrypted.svg)](https://badge.fury.io/rb/attr_encrypted) [![security](https://hakiri.io/github/attr-encrypted/attr_encrypted/master.svg)](https://hakiri.io/github/attr-encrypted/attr_encrypted/master)
 
 Generates attr_accessors that transparently encrypt and decrypt attributes.
 
-It works with ANY class, however, you get a few extra features when you're using it with `ActiveRecord`, `DataMapper`, or `Sequel`.
+It works with ANY class, however, you get a few extra features when you're using it with `ActiveRecord` or `Sequel`.
 
 
 ## Installation
@@ -27,7 +23,7 @@ Then install the gem:
 
 ## Usage
 
-If you're using an ORM like `ActiveRecord`, `DataMapper`, or `Sequel`, using attr_encrypted is easy:
+If you're using an ORM like `ActiveRecord` or `Sequel`, using attr_encrypted is easy:
 
 ```ruby
   class User
@@ -106,6 +102,7 @@ By default, the encrypted attribute name is `encrypted_#{attribute}` (e.g. `attr
 ## attr_encrypted options
 
 #### Options are evaluated
+
 All options will be evaluated at the instance level. If you pass in a symbol it will be passed as a message to the instance of your class. If you pass a proc or any object that responds to `:call` it will be called. You can pass in the instance of your class as an argument to the proc. Anything else will be returned. For example:
 
 ##### Symbols representing instance methods
@@ -344,36 +341,11 @@ If you're using this gem with `ActiveRecord`, you get a few extra features:
 
 The `:encode` option is set to true by default.
 
-#### Dynamic `find_by_` and `scoped_by_` methods
-
-Let's say you'd like to encrypt your user's email addresses, but you also need a way for them to login. Simply set up your class like so:
-
-```ruby
-  class User < ActiveRecord::Base
-    attr_encrypted :email, key: 'This is a key that is 256 bits!!'
-    attr_encrypted :password, key: 'some other secret key'
-  end
-```
-
-You can now lookup and login users like so:
-
-```ruby
-  User.find_by_email_and_password('test@example.com', 'testing')
-```
-
-The call to `find_by_email_and_password` is intercepted and modified to `find_by_encrypted_email_and_encrypted_password('ENCRYPTED EMAIL', 'ENCRYPTED PASSWORD')`. The dynamic scope methods like `scoped_by_email_and_password` work the same way.
-
-NOTE: This only works if all records are encrypted with the same encryption key (per attribute).
-
-__NOTE: This feature is deprecated and will be removed in the next major release.__
-
-
-### DataMapper and Sequel
+### Sequel
 
 #### Default options
 
 The `:encode` option is set to true by default.
-
 
 ## Deprecations
 
@@ -425,7 +397,7 @@ It is recommended that you implement a strategy to insure that you do not mix th
     attr_encrypted :ssn, key: :encryption_key, v2_gcm_iv: is_decrypting?(:ssn)
 
     def is_decrypting?(attribute)
-      encrypted_attributes[attribute][:operation] == :decrypting
+      attr_attr_encrypted_attributes[attribute][:operation] == :decrypting
     end
   end
 

@@ -2,21 +2,18 @@
 
 require 'simplecov'
 require 'simplecov-rcov'
-require "codeclimate-test-reporter"
+require 'pry'
 
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
   [
     SimpleCov::Formatter::HTMLFormatter,
-    SimpleCov::Formatter::RcovFormatter,
-    CodeClimate::TestReporter::Formatter
+    SimpleCov::Formatter::RcovFormatter
   ]
 )
 
 SimpleCov.start do
   add_filter 'test'
 end
-
-CodeClimate::TestReporter.start
 
 require 'minitest/autorun'
 
@@ -26,7 +23,6 @@ unless defined?(MiniTest::Test)
 end
 
 require 'active_record'
-require 'data_mapper'
 require 'digest/sha2'
 require 'sequel'
 ActiveSupport::Deprecation.behavior = :raise
@@ -35,11 +31,7 @@ $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $:.unshift(File.dirname(__FILE__))
 require 'attr_encrypted'
 
-DB = if defined?(RUBY_ENGINE) && RUBY_ENGINE.to_sym == :jruby
-  Sequel.jdbc('jdbc:sqlite::memory:')
-else
-  Sequel.sqlite
-end
+DB = Sequel.sqlite
 
 # The :after_initialize hook was removed in Sequel 4.0
 # and had been deprecated for a while before that:
@@ -55,6 +47,6 @@ end
 
 def drop_all_tables
   connection = ActiveRecord::Base.connection
-  tables = (ActiveRecord::VERSION::MAJOR >= 5 ? connection.data_sources : connection.tables)
+  tables = connection.data_sources
   tables.each { |table| ActiveRecord::Base.connection.drop_table(table) }
 end
