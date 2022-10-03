@@ -1,6 +1,8 @@
-## Maintainer(s) wanted!!!
+## MAINTENANCE BRANCH
 
-**If you have an interest in maintaining this project... please see https://github.com/attr-encrypted/attr_encrypted/issues/379**
+This branch exists to retain the state of the `3.x` release. This allows development to occur on `master`, including breaking changes
+towards the new major version `4.x`. This branch only exists for the community to backport any changes needed to support now
+end of life Ruby and Activerecord versions.
 
 # attr_encrypted
 
