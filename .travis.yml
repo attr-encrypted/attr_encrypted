@@ -1,13 +1,14 @@
 language: ruby
 dist: focal
+os: linux
 cache: bundler
 rvm:
   - 2.5.9
   - 2.6.10
   - 2.7.6
-  - 3.0.4
-  - 3.1.2
 env:
+  - ACTIVERECORD=5.0.0
+  - ACTIVERECORD=5.1.1
   - ACTIVERECORD=5.2.8
   - ACTIVERECORD=6.0.6
   - ACTIVERECORD=6.1.7
