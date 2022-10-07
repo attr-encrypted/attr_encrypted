@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'pry'
 require 'simplecov'
 require 'simplecov-rcov'
 
