@@ -4,9 +4,9 @@ cache: bundler
 rvm:
   - 2.5.9
   - 2.6.10
-  - 2.7
-  - 3.0
-  - 3.1
+  - 2.7.6
+  - 3.0.4
+  - 3.1.2
 env:
   - ACTIVERECORD=5.2.8
   - ACTIVERECORD=6.0.6
