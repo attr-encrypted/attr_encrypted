@@ -1,12 +1,20 @@
-#!/usr/bin/env sh -e
+#!/usr/bin/env bash
 
-for RUBY in 1.9.3 2.0.0 2.1 2.2
+set -e
+
+for RUBY in 2.5.9 2.6.10 2.7.6 3.0.4 3.1.2
 do
-  for RAILS in 2.3.8 3.0.0 3.1.0 3.2.0 4.0.0 4.1.0 4.2.0
+  for ACTIVERECORD in 5.2.8 6.0.6 6.1.7
   do
-    if [[ $RUBY -gt 1.9.3 && $RAILS -lt 4.0.0 ]]; then
-      continue
-    fi
-    RBENV_VERSION=$RUBY ACTIVERECORD=$RAILS bundle && bundle exec rake
+    echo ">>> Testing with Ruby ${RUBY} and ActiveRecord ${ACTIVERECORD}."
+    export RBENV_VERSION=$RUBY
+    export ACTIVERECORD=$ACTIVERECORD
+
+    rbenv install $RUBY --skip-existing
+    bundle install
+    bundle check
+    bundle exec rake test
+    rm Gemfile.lock
+    echo ">>> Finished testing with Ruby ${RUBY} and ActiveRecord ${ACTIVERECORD}."
   done
 done
