@@ -1,5 +1,4 @@
 language: ruby
-os: focal
 dist: bionic
 cache: bundler
 rvm:
