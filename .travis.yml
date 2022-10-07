@@ -1,5 +1,5 @@
-sudo: false
 language: ruby
+dist: focal
 cache: bundler
 rvm:
   - 2.0
