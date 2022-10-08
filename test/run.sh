@@ -2,9 +2,9 @@
 
 set -e
 
-for RUBY in 2.5.9 2.6.10 2.7.6 3.0.4 3.1.2
+for RUBY in 2.6.10 2.7.6
 do
-  for ACTIVERECORD in 5.2.8 6.0.6 6.1.7
+  for ACTIVERECORD in 5.1.1 5.2.8
   do
     echo ">>> Testing with Ruby ${RUBY} and ActiveRecord ${ACTIVERECORD}."
     export RBENV_VERSION=$RUBY

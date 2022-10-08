@@ -6,6 +6,7 @@ rvm:
   - 2.6.10
   - 2.7.6
 env:
+  - ACTIVERECORD=5.1.1
   - ACTIVERECORD=5.2.8
 jobs:
   fast_finish: true
