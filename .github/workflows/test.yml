@@ -10,6 +10,15 @@ jobs:
       matrix:
         ruby-version: ['2.7', '3.0', '3.1']
         rails-version: ['5.1.1', '5.2.0', '6.0.0', '6.1.0']
+        exclude:
+          - ruby-version: 3.0
+            rails-version: 5.1.1
+          - ruby-version: 3.1
+            rails-version: 5.1.1
+          - ruby-version: 3.0
+            rails-version: 5.2.0
+          - ruby-version: 3.1
+            rails-version: 5.2.0
     env:
       ACTIVERECORD: ${{ matrix.rails-version }}
     steps:
