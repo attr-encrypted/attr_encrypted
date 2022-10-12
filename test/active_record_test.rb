@@ -201,21 +201,23 @@ class ActiveRecordTest < Minitest::Test
     assert_equal old_zipcode, address.zipcode_was
   end
 
-  def test_attribute_was_works_when_options_for_old_encrypted_value_are_different_than_options_for_new_encrypted_value
-    pw = 'password'
-    crypto_key = SecureRandom.urlsafe_base64(24)
-    old_iv = SecureRandom.random_bytes(12)
-    account = Account.create
-    encrypted_value = Encryptor.encrypt(value: pw, iv: old_iv, key: crypto_key)
-    Account.where(id: account.id).update_all(key: crypto_key, encrypted_password_iv: [old_iv].pack('m'), encrypted_password: [encrypted_value].pack('m'))
-    account = Account.find(account.id)
-    assert_equal pw, account.password
-    account.password = pw.reverse
-    assert_equal pw, account.password_was
-    account.save
-    account.reload
-    assert_equal Account::ACCOUNT_ENCRYPTION_KEY, account.key
-    assert_equal pw.reverse, account.password
+  if ::ActiveRecord::VERSION::STRING < "6.0"
+    def test_attribute_was_works_when_options_for_old_encrypted_value_are_different_than_options_for_new_encrypted_value
+      pw = 'password'
+      crypto_key = SecureRandom.urlsafe_base64(24)
+      old_iv = SecureRandom.random_bytes(12)
+      account = Account.create
+      encrypted_value = Encryptor.encrypt(value: pw, iv: old_iv, key: crypto_key)
+      Account.where(id: account.id).update_all(key: crypto_key, encrypted_password_iv: [old_iv].pack('m'), encrypted_password: [encrypted_value].pack('m'))
+      account = Account.find(account.id)
+      assert_equal pw, account.password
+      account.password = pw.reverse
+      assert_equal pw, account.password_was
+      account.save
+      account.reload
+      assert_equal Account::ACCOUNT_ENCRYPTION_KEY, account.key
+      assert_equal pw.reverse, account.password
+    end
   end
 
   # ActiveRecord 5.2 specific methods
