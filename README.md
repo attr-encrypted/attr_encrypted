@@ -10,7 +10,8 @@ Forked from [attr-encrypted/attr_encrypted](https://github.com/attr-encrypted/at
 
 * Optional update encrypted attributes only when values changed  (#1)
 * Fix concurrency problem  (#2)
-* Support ActiveRecord 5.2  (#3)
+* Support ActiveRecord 5.2, 6.0 and 6.1 (#3, #6, #7)
+* Rename encrypt/decrypt methods (#8)
 
 ## Installation
 
