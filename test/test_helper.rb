@@ -25,7 +25,6 @@ unless defined?(MiniTest::Test)
 end
 
 require 'active_record'
-require 'data_mapper'
 require 'digest/sha2'
 require 'sequel'
 ActiveSupport::Deprecation.behavior = :raise
