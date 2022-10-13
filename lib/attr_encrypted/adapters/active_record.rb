@@ -53,21 +53,15 @@ if defined?(ActiveRecord::Base)
             super
             options = attrs.extract_options!
             attr = attrs.pop
-            attribute attr if ::ActiveRecord::VERSION::STRING >= "5.1.0"
+            attribute attr
             options.merge! encrypted_attributes[attr]
 
             define_method("#{attr}_was") do
               attribute_was(attr)
             end
 
-            if ::ActiveRecord::VERSION::STRING >= "4.1"
-              define_method("#{attr}_changed?") do |options = {}|
-                attribute_changed?(attr, options)
-              end
-            else
-              define_method("#{attr}_changed?") do
-                  attribute_changed?(attr)
-              end
+            define_method("#{attr}_changed?") do |options = {}|
+              attribute_changed?(attr, options)
             end
 
             define_method("#{attr}_change") do
@@ -75,6 +69,19 @@ if defined?(ActiveRecord::Base)
             end
 
             define_method("#{attr}_with_dirtiness=") do |value|
+              ## Source: https://github.com/priyankatapar/attr_encrypted/commit/7e8702bd5418c927a39d8dd72c0adbea522d5663
+              # In ActiveRecord 5.2+, due to changes to the way virtual
+              # attributes are handled, @attributes[attr].value is nil which
+              # breaks attribute_was. Setting it here returns us to the expected
+              # behavior.
+              if ::ActiveRecord::VERSION::STRING >= "5.2"
+                # This is needed support attribute_was before a record has
+                # been saved
+                set_attribute_was(attr, __send__(attr)) if value != __send__(attr)
+                # This is needed to support attribute_was after a record has
+                # been saved
+                @attributes.write_from_user(attr.to_s, value) if value != __send__(attr)
+              end
               attribute_will_change!(attr) if value != __send__(attr)
               __send__("#{attr}_without_dirtiness=", value)
             end
