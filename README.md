@@ -31,35 +31,35 @@ If you're using an ORM like `ActiveRecord`, `DataMapper`, or `Sequel`, using att
 
 ```ruby
   class User
-    attr_encrypted :ssn, key: 'This is a key that is 256 bits!!'
-  end
+  attr_encrypted :ssn, key: 'This is a key that is 256 bits!!'
+end
 ```
 
 If you're using a PORO, you have to do a little bit more work by extending the class:
 
 ```ruby
   class User
-    extend AttrEncrypted
-    attr_accessor :name
-    attr_encrypted :ssn, key: 'This is a key that is 256 bits!!'
+  extend AttrEncrypted
+  attr_accessor :name
+  attr_encrypted :ssn, key: 'This is a key that is 256 bits!!'
 
-    def load
-      # loads the stored data
-    end
-
-    def save
-      # saves the :name and :encrypted_ssn attributes somewhere (e.g. filesystem, database, etc)
-    end
+  def load
+    # loads the stored data
   end
 
-  user = User.new
-  user.ssn = '123-45-6789'
-  user.ssn # returns the unencrypted object ie. '123-45-6789'
-  user.encrypted_ssn # returns the encrypted version of :ssn
-  user.save
+  def save
+    # saves the :name and :encrypted_ssn attributes somewhere (e.g. filesystem, database, etc)
+  end
+end
 
-  user = User.load
-  user.ssn # decrypts :encrypted_ssn and returns '123-45-6789'
+user = User.new
+user.ssn = '123-45-6789'
+user.ssn # returns the unencrypted object ie. '123-45-6789'
+user.encrypted_ssn # returns the encrypted version of :ssn
+user.save
+
+user = User.load
+user.ssn # decrypts :encrypted_ssn and returns '123-45-6789'
 ```
 
 ### Encrypt/decrypt attribute class methods
@@ -68,9 +68,9 @@ Two class methods are available for each attribute: `User.encrypt_email` and `Us
 
 ```ruby
   key = SecureRandom.random_bytes(32)
-  iv = SecureRandom.random_bytes(12)
-  encrypted_email = User.encrypt_email('test@test.com', iv: iv, key: key)
-  email = User.decrypt_email(encrypted_email, iv: iv, key: key)
+iv = SecureRandom.random_bytes(12)
+encrypted_email = User.encrypt_email('test@test.com', iv: iv, key: key)
+email = User.decrypt_email(encrypted_email, iv: iv, key: key)
 ```
 
 The `attr_encrypted` class method is also aliased as `attr_encryptor` to conform to Ruby's `attr_` naming conventions. I should have called this project `attr_encryptor` but it was too late when I realized it ='(.
@@ -83,11 +83,11 @@ Create or modify the table that your model uses to add a column with the `encryp
 
 ```ruby
   create_table :users do |t|
-    t.string :name
-    t.string :encrypted_ssn
-    t.string :encrypted_ssn_iv
-    t.timestamps
-  end
+  t.string :name
+  t.string :encrypted_ssn
+  t.string :encrypted_ssn_iv
+  t.timestamps
+end
 ```
 
 You can use a string or binary column type. (See the encode option section below for more info)
@@ -114,12 +114,12 @@ Here is an example class that uses an instance method to determines the encrypti
 
 ```ruby
   class User
-    attr_encrypted :email, key: :encryption_key
+  attr_encrypted :email, key: :encryption_key
 
-    def encryption_key
-      # does some fancy logic and returns an encryption key
-    end
+  def encryption_key
+    # does some fancy logic and returns an encryption key
   end
+end
 ```
 
 
@@ -129,8 +129,8 @@ Here is an example of passing a proc/lambda object as the `:key` option as well:
 
 ```ruby
   class User
-    attr_encrypted :email, key: proc { |user| user.key }
-  end
+  attr_encrypted :email, key: proc { |user| user.key }
+end
 ```
 
 
@@ -140,23 +140,23 @@ The following are the default options used by `attr_encrypted`:
 
 ```ruby
   prefix:            'encrypted_',
-  suffix:            '',
-  if:                true,
-  unless:            false,
-  encode:            false,
-  encode_iv:         true,
-  encode_salt:       true,
-  default_encoding:  'm',
-  marshal:           false,
-  marshaler:         Marshal,
-  dump_method:       'dump',
-  load_method:       'load',
-  encryptor:         Encryptor,
-  encrypt_method:    'encrypt',
-  decrypt_method:    'decrypt',
-  mode:              :per_attribute_iv,
-  algorithm:         'aes-256-gcm',
-  allow_empty_value: false
+        suffix:            '',
+        if:                true,
+                unless:            false,
+                encode:            false,
+                encode_iv:         true,
+                encode_salt:       true,
+                default_encoding:  'm',
+        marshal:           false,
+                marshaler:         Marshal,
+                dump_method:       'dump',
+        load_method:       'load',
+        encryptor:         Encryptor,
+                encrypt_method:    'encrypt',
+        decrypt_method:    'decrypt',
+        mode:              :per_attribute_iv,
+        algorithm:         'aes-256-gcm',
+        allow_empty_value: false
 ```
 
 All of the aforementioned options are explained in depth below.
@@ -165,21 +165,21 @@ Additionally, you can specify default options for all encrypted attributes in yo
 
 ```ruby
   class User
-    attr_encrypted :email, key: 'This is a key that is 256 bits!!', prefix: '', suffix: '_crypted'
-    attr_encrypted :ssn, key: 'a different secret key', prefix: '', suffix: '_crypted'
-    attr_encrypted :credit_card, key: 'another secret key', prefix: '', suffix: '_crypted'
-  end
+  attr_encrypted :email, key: 'This is a key that is 256 bits!!', prefix: '', suffix: '_crypted'
+  attr_encrypted :ssn, key: 'a different secret key', prefix: '', suffix: '_crypted'
+  attr_encrypted :credit_card, key: 'another secret key', prefix: '', suffix: '_crypted'
+end
 ```
 
 You can simply define some default options like so:
 
 ```ruby
   class User
-    attr_encrypted_options.merge!(prefix: '', :suffix => '_crypted')
-    attr_encrypted :email, key: 'This is a key that is 256 bits!!'
-    attr_encrypted :ssn, key: 'a different secret key'
-    attr_encrypted :credit_card, key: 'another secret key'
-  end
+  attr_encrypted_options.merge!(prefix: '', :suffix => '_crypted')
+  attr_encrypted :email, key: 'This is a key that is 256 bits!!'
+  attr_encrypted :ssn, key: 'a different secret key'
+  attr_encrypted :credit_card, key: 'another secret key'
+end
 ```
 
 This should help keep your classes clean and DRY.
@@ -190,8 +190,8 @@ You can simply pass the name of the encrypted attribute as the `:attribute` opti
 
 ```ruby
   class User
-    attr_encrypted :email, key: 'This is a key that is 256 bits!!', attribute: 'email_encrypted'
-  end
+  attr_encrypted :email, key: 'This is a key that is 256 bits!!', attribute: 'email_encrypted'
+end
 ```
 
 This would generate an attribute named `email_encrypted`
@@ -203,8 +203,8 @@ If you don't like the `encrypted_#{attribute}` naming convention then you can sp
 
 ```ruby
   class User
-    attr_encrypted :email, key: 'This is a key that is 256 bits!!', prefix: 'secret_', suffix: '_crypted'
-  end
+  attr_encrypted :email, key: 'This is a key that is 256 bits!!', prefix: 'secret_', suffix: '_crypted'
+end
 ```
 
 This would generate the following attribute: `secret_email_crypted`.
@@ -221,9 +221,9 @@ You can specify unique keys for each attribute if you'd like:
 
 ```ruby
   class User
-    attr_encrypted :email, key: 'This is a key that is 256 bits!!'
-    attr_encrypted :ssn, key: 'a different secret key'
-  end
+  attr_encrypted :email, key: 'This is a key that is 256 bits!!'
+  attr_encrypted :ssn, key: 'a different secret key'
+end
 ```
 
 It is recommended to use a symbol or a proc for the key and to store information regarding what key was used to encrypt your data. (See below for more details.)
@@ -235,9 +235,9 @@ There may be times that you want to only encrypt when certain conditions are met
 
 ```ruby
   class User < ActiveRecord::Base
-    attr_encrypted :email, key: 'This is a key that is 256 bits!!', unless: Rails.env.development?
-    attr_encrypted :ssn, key: 'This is a key that is 256 bits!!', if: Rails.env.development?
-  end
+  attr_encrypted :email, key: 'This is a key that is 256 bits!!', unless: Rails.env.development?
+  attr_encrypted :ssn, key: 'This is a key that is 256 bits!!', if: Rails.env.development?
+end
 ```
 
 You can specify both `:if` and `:unless` options.
@@ -251,22 +251,22 @@ Lets suppose you'd like to use this custom encryptor class:
 
 ```ruby
   class SillyEncryptor
-    def self.silly_encrypt(options)
-      (options[:value] + options[:secret_key]).reverse
-    end
-
-    def self.silly_decrypt(options)
-      options[:value].reverse.gsub(/#{options[:secret_key]}$/, '')
-    end
+  def self.silly_encrypt(options)
+    (options[:value] + options[:secret_key]).reverse
   end
+
+  def self.silly_decrypt(options)
+    options[:value].reverse.gsub(/#{options[:secret_key]}$/, '')
+  end
+end
 ```
 
 Simply set up your class like so:
 
 ```ruby
   class User
-    attr_encrypted :email, secret_key: 'This is a key that is 256 bits!!', encryptor: SillyEncryptor, encrypt_method: :silly_encrypt, decrypt_method: :silly_decrypt
-  end
+  attr_encrypted :email, secret_key: 'This is a key that is 256 bits!!', encryptor: SillyEncryptor, encrypt_method: :silly_encrypt, decrypt_method: :silly_decrypt
+end
 ```
 
 Any options that you pass to `attr_encrypted` will be passed to the encryptor class along with the `:value` option which contains the string to encrypt/decrypt. Notice that the above example uses `:secret_key` instead of `:key`. See [encryptor](https://github.com/attr-encrypted/encryptor) for more info regarding the default encryptor class.
@@ -285,15 +285,15 @@ The default `Encryptor` class uses the standard ruby OpenSSL library. Its defaul
 
 ```ruby
   class User
-    attr_encrypted :email, key: 'This is a key that is 256 bits!!', algorithm: 'aes-256-cbc'
-  end
+  attr_encrypted :email, key: 'This is a key that is 256 bits!!', algorithm: 'aes-256-cbc'
+end
 ```
 
 To view a list of all cipher algorithms that are supported on your platform, run the following code in your favorite Ruby REPL:
 
 ```ruby
   require 'openssl'
-  puts OpenSSL::Cipher.ciphers
+puts OpenSSL::Cipher.ciphers
 ```
 See [Encryptor](https://github.com/attr-encrypted/encryptor#algorithms) for more information.
 
@@ -304,8 +304,8 @@ You're probably going to be storing your encrypted attributes somehow (e.g. file
 
 ```ruby
   class User
-    attr_encrypted :email, key: 'some secret key', encode: true, encode_iv: true, encode_salt: true
-  end
+  attr_encrypted :email, key: 'some secret key', encode: true, encode_iv: true, encode_salt: true
+end
 ```
 
 The default encoding is `m` (base64). You can change this by setting `encode: 'some encoding'`. See [`Array#pack`](http://ruby-doc.org/core-2.3.0/Array.html#method-i-pack) for more encoding options.
@@ -317,8 +317,8 @@ You may want to encrypt objects other than strings (e.g. hashes, arrays, etc). I
 
 ```ruby
   class User
-    attr_encrypted :credentials, key: 'some secret key', marshal: true
-  end
+  attr_encrypted :credentials, key: 'some secret key', marshal: true
+end
 ```
 
 You may also optionally specify `:marshaler`, `:dump_method`, and `:load_method` if you want to use something other than the default `Marshal` object.
@@ -329,8 +329,8 @@ You may want to encrypt empty strings or nil so as to not reveal which records a
 
 ```ruby
   class User
-    attr_encrypted :credentials, key: 'some secret key', marshal: true, allow_empty_value: true
-  end
+  attr_encrypted :credentials, key: 'some secret key', marshal: true, allow_empty_value: true
+end
 ```
 
 
@@ -350,9 +350,9 @@ Let's say you'd like to encrypt your user's email addresses, but you also need a
 
 ```ruby
   class User < ActiveRecord::Base
-    attr_encrypted :email, key: 'This is a key that is 256 bits!!'
-    attr_encrypted :password, key: 'some other secret key'
-  end
+  attr_encrypted :email, key: 'This is a key that is 256 bits!!'
+  attr_encrypted :password, key: 'some other secret key'
+end
 ```
 
 You can now lookup and login users like so:
@@ -389,8 +389,8 @@ Backwards compatibility is supported by providing a special option that is passe
 
 ```ruby
   class User
-    attr_encrypted :email, key: 'a secret key', algorithm: 'aes-256-cbc', mode: :single_iv_and_salt, insecure_mode: true
-  end
+  attr_encrypted :email, key: 'a secret key', algorithm: 'aes-256-cbc', mode: :single_iv_and_salt, insecure_mode: true
+end
 ```
 
 The `:insecure_mode` option will allow encryptor to ignore the new security requirements. It is strongly advised that if you use this older insecure behavior that you migrate to the newer more secure behavior.
@@ -422,18 +422,18 @@ It is recommended that you implement a strategy to insure that you do not mix th
 
 ```ruby
   class User
-    attr_encrypted :ssn, key: :encryption_key, v2_gcm_iv: is_decrypting?(:ssn)
+  attr_encrypted :ssn, key: :encryption_key, v2_gcm_iv: is_decrypting?(:ssn)
 
-    def is_decrypting?(attribute)
-      encrypted_attributes[attribute][:operation] == :decrypting
-    end
+  def is_decrypting?(attribute)
+    attr_encrypted_encrypted_attributes[attribute][:operation] == :decrypting
   end
+end
 
-  User.all.each do |user|
-    old_ssn = user.ssn
-    user.ssn= old_ssn
-    user.save
-  end
+User.all.each do |user|
+  old_ssn = user.ssn
+  user.ssn= old_ssn
+  user.save
+end
 ```
 
 ## Things to consider before using attr_encrypted

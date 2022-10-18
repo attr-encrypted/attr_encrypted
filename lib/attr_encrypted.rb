@@ -10,7 +10,7 @@ module AttrEncrypted
     base.class_eval do
       include InstanceMethods
       attr_writer :attr_encrypted_options
-      @attr_encrypted_options, @encrypted_attributes = {}, {}
+      @attr_encrypted_options, @attr_encrypted_encrypted_attributes = {}, {}
     end
   end
 
@@ -160,11 +160,11 @@ module AttrEncrypted
       end
 
       define_method(attribute) do
-        instance_variable_get("@#{attribute}") || instance_variable_set("@#{attribute}", decrypt(attribute, send(encrypted_attribute_name)))
+        instance_variable_get("@#{attribute}") || instance_variable_set("@#{attribute}", attr_encrypted_decrypt(attribute, send(encrypted_attribute_name)))
       end
 
       define_method("#{attribute}=") do |value|
-        send("#{encrypted_attribute_name}=", encrypt(attribute, value))
+        send("#{encrypted_attribute_name}=", attr_encrypted_encrypt(attribute, value))
         instance_variable_set("@#{attribute}", value)
       end
 
@@ -173,7 +173,7 @@ module AttrEncrypted
         value.respond_to?(:empty?) ? !value.empty? : !!value
       end
 
-      encrypted_attributes[attribute.to_sym] = options.merge(attribute: encrypted_attribute_name)
+      self.attr_encrypted_encrypted_attributes[attribute.to_sym] = options.merge(attribute: encrypted_attribute_name)
     end
   end
 
@@ -223,7 +223,7 @@ module AttrEncrypted
   #   User.attr_encrypted?(:name)  # false
   #   User.attr_encrypted?(:email) # true
   def attr_encrypted?(attribute)
-    encrypted_attributes.has_key?(attribute.to_sym)
+    attr_encrypted_encrypted_attributes.has_key?(attribute.to_sym)
   end
 
   # Decrypts a value for the attribute specified
@@ -234,9 +234,9 @@ module AttrEncrypted
   #     attr_encrypted :email
   #   end
   #
-  #   email = User.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
-  def decrypt(attribute, encrypted_value, options = {})
-    options = encrypted_attributes[attribute.to_sym].merge(options)
+  #   email = User.attr_encrypted_decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
+  def attr_encrypted_decrypt(attribute, encrypted_value, options = {})
+    options = attr_encrypted_encrypted_attributes[attribute.to_sym].merge(options)
     if options[:if] && !options[:unless] && not_empty?(encrypted_value)
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
       value = options[:encryptor].send(options[:decrypt_method], options.merge!(value: encrypted_value))
@@ -260,9 +260,9 @@ module AttrEncrypted
   #     attr_encrypted :email
   #   end
   #
-  #   encrypted_email = User.encrypt(:email, 'test@example.com')
-  def encrypt(attribute, value, options = {})
-    options = encrypted_attributes[attribute.to_sym].merge(options)
+  #   encrypted_email = User.attr_encrypted_encrypt(:email, 'test@example.com')
+  def attr_encrypted_encrypt(attribute, value, options = {})
+    options = attr_encrypted_encrypted_attributes[attribute.to_sym].merge(options)
     if options[:if] && !options[:unless] && (options[:allow_empty_value] || not_empty?(value))
       value = options[:marshal] ? options[:marshaler].send(options[:dump_method], value) : value.to_s
       encrypted_value = options[:encryptor].send(options[:encrypt_method], options.merge!(value: value))
@@ -286,9 +286,9 @@ module AttrEncrypted
   #     attr_encrypted :email, key: 'my secret key'
   #   end
   #
-  #   User.encrypted_attributes # { email: { attribute: 'encrypted_email', key: 'my secret key' } }
-  def encrypted_attributes
-    @encrypted_attributes ||= superclass.encrypted_attributes.dup
+  #   User.attr_encrypted_encrypted_attributes # { email: { attribute: 'encrypted_email', key: 'my secret key' } }
+  def attr_encrypted_encrypted_attributes
+    @attr_encrypted_encrypted_attributes ||= superclass.attr_encrypted_encrypted_attributes.dup
   end
 
   # Forwards calls to :encrypt_#{attribute} or :decrypt_#{attribute} to the corresponding encrypt or decrypt method
@@ -325,10 +325,10 @@ module AttrEncrypted
     #
     #  @user = User.new('some-secret-key')
     #  @user.decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
-    def decrypt(attribute, encrypted_value)
-      encrypted_attributes[attribute.to_sym][:operation] = :decrypting
-      encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(encrypted_value)
-      self.class.decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
+    def attr_encrypted_decrypt(attribute, encrypted_value)
+      attr_encrypted_encrypted_attributes[attribute.to_sym][:operation] = :decrypting
+      attr_encrypted_encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(encrypted_value)
+      self.class.attr_encrypted_decrypt(attribute, encrypted_value, evaluated_attr_encrypted_options_for(attribute))
     end
 
     # Encrypts a value for the attribute specified using options evaluated in the current object's scope
@@ -345,116 +345,116 @@ module AttrEncrypted
     #  end
     #
     #  @user = User.new('some-secret-key')
-    #  @user.encrypt(:email, 'test@example.com')
-    def encrypt(attribute, value)
-      encrypted_attributes[attribute.to_sym][:operation] = :encrypting
-      encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(value)
-      self.class.encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
+    #  @user.attr_encrypted_encrypt(:email, 'test@example.com')
+    def attr_encrypted_encrypt(attribute, value)
+      attr_encrypted_encrypted_attributes[attribute.to_sym][:operation] = :encrypting
+      attr_encrypted_encrypted_attributes[attribute.to_sym][:value_present] = self.class.not_empty?(value)
+      self.class.attr_encrypted_encrypt(attribute, value, evaluated_attr_encrypted_options_for(attribute))
     end
 
     # Copies the class level hash of encrypted attributes with virtual attribute names as keys
     # and their corresponding options as values to the instance
     #
-    def encrypted_attributes
-      @encrypted_attributes ||= begin
-        duplicated= {}
-        self.class.encrypted_attributes.map { |key, value| duplicated[key] = value.dup }
-        duplicated
-      end
+    def attr_encrypted_encrypted_attributes
+      @attr_encrypted_encrypted_attributes ||= begin
+                                                 duplicated= {}
+                                                 self.class.attr_encrypted_encrypted_attributes.map { |key, value| duplicated[key] = value.dup }
+                                                 duplicated
+                                               end
     end
 
     protected
 
-      # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
-      def evaluated_attr_encrypted_options_for(attribute)
-        evaluated_options = Hash.new
-        attributes = encrypted_attributes[attribute.to_sym]
-        attribute_option_value = attributes[:attribute]
+    # Returns attr_encrypted options evaluated in the current object's scope for the attribute specified
+    def evaluated_attr_encrypted_options_for(attribute)
+      evaluated_options = Hash.new
+      attributes = attr_encrypted_encrypted_attributes[attribute.to_sym]
+      attribute_option_value = attributes[:attribute]
 
-        [:if, :unless, :value_present, :allow_empty_value].each do |option|
-          evaluated_options[option] = evaluate_attr_encrypted_option(attributes[option])
-        end
+      [:if, :unless, :value_present, :allow_empty_value].each do |option|
+        evaluated_options[option] = evaluate_attr_encrypted_option(attributes[option])
+      end
 
-        evaluated_options[:attribute] = attribute_option_value
+      evaluated_options[:attribute] = attribute_option_value
 
-        evaluated_options.tap do |options|
-          if options[:if] && !options[:unless] && options[:value_present] || options[:allow_empty_value]
-            (attributes.keys - evaluated_options.keys).each do |option|
-              options[option] = evaluate_attr_encrypted_option(attributes[option])
-            end
+      evaluated_options.tap do |options|
+        if options[:if] && !options[:unless] && options[:value_present] || options[:allow_empty_value]
+          (attributes.keys - evaluated_options.keys).each do |option|
+            options[option] = evaluate_attr_encrypted_option(attributes[option])
+          end
 
-            unless options[:mode] == :single_iv_and_salt
-              load_iv_for_attribute(attribute, options)
-            end
+          unless options[:mode] == :single_iv_and_salt
+            load_iv_for_attribute(attribute, options)
+          end
 
-            if options[:mode] == :per_attribute_iv_and_salt
-              load_salt_for_attribute(attribute, options)
-            end
+          if options[:mode] == :per_attribute_iv_and_salt
+            load_salt_for_attribute(attribute, options)
           end
         end
       end
+    end
 
-      # Evaluates symbol (method reference) or proc (responds to call) options
-      #
-      # If the option is not a symbol or proc then the original option is returned
-      def evaluate_attr_encrypted_option(option)
-        if option.is_a?(Symbol) && respond_to?(option, true)
-          send(option)
-        elsif option.respond_to?(:call)
-          option.call(self)
-        else
-          option
+    # Evaluates symbol (method reference) or proc (responds to call) options
+    #
+    # If the option is not a symbol or proc then the original option is returned
+    def evaluate_attr_encrypted_option(option)
+      if option.is_a?(Symbol) && respond_to?(option, true)
+        send(option)
+      elsif option.respond_to?(:call)
+        option.call(self)
+      else
+        option
+      end
+    end
+
+    def load_iv_for_attribute(attribute, options)
+      encrypted_attribute_name = options[:attribute]
+      encode_iv = options[:encode_iv]
+      iv = options[:iv] || send("#{encrypted_attribute_name}_iv")
+      if options[:operation] == :encrypting
+        begin
+          iv = generate_iv(options[:algorithm])
+          iv = [iv].pack(encode_iv) if encode_iv
+          send("#{encrypted_attribute_name}_iv=", iv)
+        rescue RuntimeError
         end
       end
-
-      def load_iv_for_attribute(attribute, options)
-        encrypted_attribute_name = options[:attribute]
-        encode_iv = options[:encode_iv]
-        iv = options[:iv] || send("#{encrypted_attribute_name}_iv")
-        if options[:operation] == :encrypting
-          begin
-            iv = generate_iv(options[:algorithm])
-            iv = [iv].pack(encode_iv) if encode_iv
-            send("#{encrypted_attribute_name}_iv=", iv)
-          rescue RuntimeError
-          end
-        end
-        if iv && !iv.empty?
-          iv = iv.unpack(encode_iv).first if encode_iv
-          options[:iv] = iv
-        end
+      if iv && !iv.empty?
+        iv = iv.unpack(encode_iv).first if encode_iv
+        options[:iv] = iv
       end
+    end
 
-      def generate_iv(algorithm)
-        algo = OpenSSL::Cipher.new(algorithm)
-        algo.encrypt
-        algo.random_iv
-      end
+    def generate_iv(algorithm)
+      algo = OpenSSL::Cipher.new(algorithm)
+      algo.encrypt
+      algo.random_iv
+    end
 
-      def load_salt_for_attribute(attribute, options)
-        encrypted_attribute_name = options[:attribute]
-        encode_salt = options[:encode_salt]
-        salt = options[:salt] || send("#{encrypted_attribute_name}_salt")
-        if options[:operation] == :encrypting
-          salt = SecureRandom.random_bytes
-          salt = prefix_and_encode_salt(salt, encode_salt) if encode_salt
-          send("#{encrypted_attribute_name}_salt=", salt)
-        end
-        if salt && !salt.empty?
-          salt = decode_salt_if_encoded(salt, encode_salt) if encode_salt
-          options[:salt] = salt
-        end
+    def load_salt_for_attribute(attribute, options)
+      encrypted_attribute_name = options[:attribute]
+      encode_salt = options[:encode_salt]
+      salt = options[:salt] || send("#{encrypted_attribute_name}_salt")
+      if options[:operation] == :encrypting
+        salt = SecureRandom.random_bytes
+        salt = prefix_and_encode_salt(salt, encode_salt) if encode_salt
+        send("#{encrypted_attribute_name}_salt=", salt)
       end
+      if salt && !salt.empty?
+        salt = decode_salt_if_encoded(salt, encode_salt) if encode_salt
+        options[:salt] = salt
+      end
+    end
 
-      def prefix_and_encode_salt(salt, encoding)
-        prefix = '_'
-        prefix + [salt].pack(encoding)
-      end
+    def prefix_and_encode_salt(salt, encoding)
+      prefix = '_'
+      prefix + [salt].pack(encoding)
+    end
 
-      def decode_salt_if_encoded(salt, encoding)
-        prefix = '_'
-        salt.slice(0).eql?(prefix) ? salt.slice(1..-1).unpack(encoding).first : salt
-      end
+    def decode_salt_if_encoded(salt, encoding)
+      prefix = '_'
+      salt.slice(0).eql?(prefix) ? salt.slice(1..-1).unpack(encoding).first : salt
+    end
   end
 
   protected
