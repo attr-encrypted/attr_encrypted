@@ -47,7 +47,10 @@ Gem::Specification.new do |s|
   end
   s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('pry')
-  s.add_development_dependency('simplecov')
+
+  # CodeClimate doesn't work with higher version per:
+  # https://github.com/codeclimate/test-reporter/issues/413#issuecomment-580747855
+  s.add_development_dependency('simplecov', '~> 0.17')
   s.add_development_dependency('simplecov-rcov')
 
   s.cert_chain  = ['certs/saghaulor.pem']
