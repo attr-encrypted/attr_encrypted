@@ -10,6 +10,11 @@ env:
   - ACTIVERECORD=5.2.8
 jobs:
   fast_finish: true
-addons:
-  code_climate:
-    repo_token: a90435ed4954dd6e9f3697a20c5bc3754f67d94703f870e8fc7b00f69f5b2d06
+before_install:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+script:
+  - bundle exec rake test
+after_script:
+  - ./cc-test-reporter format-coverage -t simplecov -o coverage/codeclimate.backend.json coverage/.resultset.json
+  - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage; fi
