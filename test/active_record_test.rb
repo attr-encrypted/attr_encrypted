@@ -2,6 +2,7 @@
 
 require_relative 'test_helper'
 
+RAILS_VERSION = Gem::Version.new(::ActiveRecord::VERSION::STRING).freeze
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
 
 def create_tables
@@ -218,7 +219,7 @@ class ActiveRecordTest < Minitest::Test
     assert_equal pw.reverse, account.password
   end
 
-  if ::ActiveRecord::VERSION::STRING >= "5.2"
+  if Gem::Requirement.new('>= 5.2').satisfied_by?(RAILS_VERSION)
     def test_should_create_will_save_change_to_predicate
       person = Person.create!(email: 'test@example.com')
       refute person.will_save_change_to_email?
