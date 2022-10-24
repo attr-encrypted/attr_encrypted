@@ -8,6 +8,7 @@ rvm:
 env:
   - ACTIVERECORD=5.1.1
   - ACTIVERECORD=5.2.8
+  - ACTIVERECORD=6.0.6
 jobs:
   fast_finish: true
 addons:

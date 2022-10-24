@@ -4,7 +4,7 @@ if defined?(ActiveRecord::Base)
   module AttrEncrypted
     module Adapters
       module ActiveRecord
-        RAILS_VERSION = Gem::Version.new(::ActiveRecord::VERSION::STRING).freeze
+        RAILS_VERSION = Gem::Version.new(::ActiveRecord.version)
 
         def self.extended(base) # :nodoc:
           base.class_eval do
@@ -76,13 +76,17 @@ if defined?(ActiveRecord::Base)
               # attributes are handled, @attributes[attr].value is nil which
               # breaks attribute_was. Setting it here returns us to the expected
               # behavior.
-              if Gem::Requirement.new('>= 5.2').satisfied_by?(RAILS_VERSION)
+              if Gem::Requirement.new('~> 5.2').satisfied_by?(RAILS_VERSION)
                 # This is needed support attribute_was before a record has
                 # been saved
                 set_attribute_was(attr, __send__(attr)) if value != __send__(attr)
                 # This is needed to support attribute_was after a record has
                 # been saved
                 @attributes.write_from_user(attr.to_s, value) if value != __send__(attr)
+              elsif Gem::Requirement.new('~> 6').satisfied_by?(RAILS_VERSION)
+                unless attribute_changed?(attr)
+                  @attributes[attr] = ActiveModel::Attribute.from_user(attr, __send__(attr), ActiveModel::Type::Value.new)
+                end
               end
               attribute_will_change!(attr) if value != __send__(attr)
               __send__("#{attr}_without_dirtiness=", value)
