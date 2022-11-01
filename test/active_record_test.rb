@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 require_relative 'test_helper'
-
+Rails.try(:backtrace_cleaner).try(:remove_silencers!) if defined?(Rails)
 RAILS_VERSION = Gem::Version.new(::ActiveRecord.version)
-ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
 
-def create_tables
-  ActiveRecord::Schema.define(version: 1) do
+def find_or_create_schema(force: false)
+  @schema = nil if force
+  @schema ||= ActiveRecord::Schema.define(version: 1) do
     self.verbose = false
     create_table :people do |t|
       t.string   :encrypted_email
@@ -127,7 +127,8 @@ class ActiveRecordTest < Minitest::Test
 
   def setup
     drop_all_tables
-    create_tables
+    find_or_create_schema(force: true)
+
   end
 
   def test_should_encrypt_email
@@ -191,15 +192,15 @@ class ActiveRecordTest < Minitest::Test
   def test_should_create_was_predicate
     original_email = 'test@example.com'
     person = Person.create!(email: original_email)
-    assert_equal original_email, person.email_was
+    assert_equal original_email, person.email_in_database
     person.email = 'test2@example.com'
-    assert_equal original_email, person.email_was
+    assert_equal original_email, person.email_in_database
     old_pm_name = "Winston Churchill"
     pm = PrimeMinister.create!(name: old_pm_name)
-    assert_equal old_pm_name, pm.name_was
+    assert_equal old_pm_name, pm.name_in_database
     old_zipcode = "90210"
     address = Address.create!(zipcode: old_zipcode, mode: "single_iv_and_salt")
-    assert_equal old_zipcode, address.zipcode_was
+    assert_equal old_zipcode, address.zipcode_in_database
   end
 
   def test_attribute_was_works_when_options_for_old_encrypted_value_are_different_than_options_for_new_encrypted_value
@@ -212,7 +213,8 @@ class ActiveRecordTest < Minitest::Test
     account = Account.find(account.id)
     assert_equal pw, account.password
     account.password = pw.reverse
-    assert_equal pw, account.password_was
+    account.password
+    assert_equal pw, account.password_in_database
     account.save
     account.reload
     assert_equal Account::ACCOUNT_ENCRYPTION_KEY, account.key
@@ -270,6 +272,7 @@ class ActiveRecordTest < Minitest::Test
   end
 
   def test_should_allow_assignment_of_nil_attributes
+    skip unless Gem::Requirement.new('< 6').satisfied_by?(::AttrEncrypted::RAILS_VERSION)
     @person = Person.new
     assert_nil(@person.attributes = nil)
   end
@@ -291,6 +294,7 @@ class ActiveRecordTest < Minitest::Test
   end
 
   def test_should_allow_assign_attributes_with_nil
+    skip unless Gem::Requirement.new('< 6').satisfied_by?(::AttrEncrypted::RAILS_VERSION)
     @person = Person.new
     assert_nil(@person.assign_attributes nil)
   end

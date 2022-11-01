@@ -1,18 +1,21 @@
 # frozen_string_literal: true
 
 require 'pry'
-require 'simplecov'
-require 'simplecov-rcov'
 
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
-  [
-    SimpleCov::Formatter::HTMLFormatter,
-    SimpleCov::Formatter::RcovFormatter
-  ]
-)
+unless ENV.key?('SIMPLECOV_DISABLE')
+  require 'simplecov'
+  require 'simplecov-rcov'
 
-SimpleCov.start do
-  add_filter 'test'
+  SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
+    [
+      SimpleCov::Formatter::HTMLFormatter,
+      SimpleCov::Formatter::RcovFormatter
+    ]
+  )
+
+  SimpleCov.start do
+    add_filter 'test'
+  end
 end
 
 require 'minitest/autorun'
@@ -45,6 +48,16 @@ end
 Sequel::Model.plugin :after_initialize
 
 SECRET_KEY = SecureRandom.random_bytes(32)
+
+begin
+  ActiveRecord::Base.connection_pool.disconnect!
+rescue ActiveRecord::ConnectionNotEstablished
+  nil
+ensure
+  config = { primary: { adapter: 'sqlite3', database: ':memory:' } }
+  ActiveRecord::Base.configurations = config
+  ActiveRecord::Base.establish_connection(:primary)
+end
 
 def base64_encoding_regex
   /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{4})$/

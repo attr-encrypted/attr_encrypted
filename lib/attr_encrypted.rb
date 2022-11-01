@@ -159,21 +159,28 @@ module AttrEncrypted
         attr_writer salt_name unless instance_methods_as_symbols.include?(:"#{salt_name}=")
       end
 
-      define_method(attribute) do
-        instance_variable_get("@#{attribute}") || instance_variable_set("@#{attribute}", decrypt(attribute, send(encrypted_attribute_name)))
-      end
+      encrypted_attributes[attribute.to_sym] = options.merge(
+        attribute: encrypted_attribute_name,
+        # name: attribute.to_sym
+      )
 
-      define_method("#{attribute}=") do |value|
-        send("#{encrypted_attribute_name}=", encrypt(attribute, value))
-        instance_variable_set("@#{attribute}", value)
-      end
+      unless defined?(Adapters::ActiveRecord::InstanceMethods) && included_modules.include?(Adapters::ActiveRecord::InstanceMethods)
+        define_method(attribute) do |force_reload=false|
+          return instance_variable_get("@#{attribute}") if !force_reload && instance_variable_defined?("@#{attribute}")
 
-      define_method("#{attribute}?") do
-        value = send(attribute)
-        value.respond_to?(:empty?) ? !value.empty? : !!value
-      end
+          decrypted = decrypt(attribute, send(encrypted_attribute_name))
+        end
 
-      encrypted_attributes[attribute.to_sym] = options.merge(attribute: encrypted_attribute_name)
+        define_method("#{attribute}=") do |value|
+          send("#{encrypted_attribute_name}=", encrypt(attribute, value))
+          instance_variable_set("@#{attribute}", value)
+        end
+
+        define_method("#{attribute}?") do
+          value = send(attribute)
+          value.respond_to?(:empty?) ? !value.empty? : !!value
+        end
+      end
     end
   end
 
