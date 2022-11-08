@@ -29,8 +29,8 @@ if defined?(ActiveRecord::Base)
             def perform_attribute_assignment(method, new_attributes, *args)
               return if new_attributes.blank?
 
-              send method, new_attributes.reject { |k, _|  self.class.encrypted_attributes.key?(k.to_sym) }, *args
-              send method, new_attributes.reject { |k, _| !self.class.encrypted_attributes.key?(k.to_sym) }, *args
+              send method, new_attributes.reject { |k, _|  self&.class&.encrypted_attributes&.key?(k.to_sym) }, *args
+              send method, new_attributes.reject { |k, _| !self&.class&.encrypted_attributes&.key?(k.to_sym) }, *args
             end
             private :perform_attribute_assignment
 
