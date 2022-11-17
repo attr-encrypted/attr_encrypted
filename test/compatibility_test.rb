@@ -3,13 +3,13 @@
 # -*- encoding: utf-8 -*-
 require_relative 'test_helper'
 
-Rails.application.config.after_initialize do
+ActiveSupport.on_load(:active_record) do
   ActiveRecord::Base.connection_pool.disconnect!
   config = {
     primary: { adapter: 'sqlite3', database: ':memory:' }
   }
-  ActiveRecord::Base.configurations[Rails.env] = config
-  ActiveRecord::Base.establish_connection(config)
+  ActiveRecord::Base.configurations = config
+  ActiveRecord::Base.establish_connection(:primary)
 end
 
 # Test to ensure that existing representations in database do not break on

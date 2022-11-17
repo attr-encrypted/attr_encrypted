@@ -5,6 +5,9 @@ cache: bundler
 rvm:
   - 2.6.10
   - 2.7.6
+install:
+  - rm -f Gemfile.lock
+  - bundle install --jobs=3 --retry=3
 env:
   - ACTIVERECORD=5.1.1
   - ACTIVERECORD=5.2.8
