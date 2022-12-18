@@ -76,7 +76,7 @@ if defined?(ActiveRecord::Base)
               # attributes are handled, @attributes[attr].value is nil which
               # breaks attribute_was. Setting it here returns us to the expected
               # behavior.
-              if Gem::Requirement.new('>= 5.2').satisfied_by?(RAILS_VERSION)
+              if RAILS_VERSION < Gem::Version.new(6.0) && RAILS_VERSION >= Gem::Version.new(5.2)
                 # This is needed support attribute_was before a record has
                 # been saved
                 set_attribute_was(attr, __send__(attr)) if value != __send__(attr)
