@@ -8,8 +8,19 @@ rvm:
 env:
   - ACTIVERECORD=5.1.1
   - ACTIVERECORD=5.2.8
+  - ACTIVERECORD=6.0.6
+  - ACTIVERECORD=6.1.7
+  - ACTIVERECORD=7.0.4
 jobs:
   fast_finish: true
+  allow_failures:
+    - env: ACTIVERECORD=6.0.6
+    - env: ACTIVERECORD=6.1.7
+    - env: ACTIVERECORD=7.0.4
+  exclude:
+    - rvm: 2.6.10
+      env: ACTIVERECORD=7.0.4
+
 addons:
   code_climate:
     repo_token: a90435ed4954dd6e9f3697a20c5bc3754f67d94703f870e8fc7b00f69f5b2d06
