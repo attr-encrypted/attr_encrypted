@@ -12,11 +12,7 @@ env:
   - ACTIVERECORD=6.1.7
   - ACTIVERECORD=7.0.4
 jobs:
-  fast_finish: true
-  allow_failures:
-    - env: ACTIVERECORD=6.0.6
-    - env: ACTIVERECORD=6.1.7
-    - env: ACTIVERECORD=7.0.4
+  fast_finish: false
   exclude:
     - rvm: 2.6.10
       env: ACTIVERECORD=7.0.4
