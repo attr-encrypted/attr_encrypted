@@ -45,6 +45,12 @@ if defined?(ActiveRecord::Base)
             def attributes=(*args)
               perform_attribute_assignment :attributes_without_attr_encrypted=, *args
             end
+
+            alias_method :attributes_without_attr_encrypted, :attributes
+            def attributes
+              encrypted_keys = self.class.encrypted_attributes.keys
+              attributes_without_attr_encrypted.reject { |k, _| encrypted_keys.include?(k.to_sym) }
+            end
           end
         end
 

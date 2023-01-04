@@ -334,4 +334,9 @@ class ActiveRecordTest < Minitest::Test
     refute_equal address.encrypted_zipcode, zipcode
     assert_equal address.zipcode, zipcode
   end
+
+  def test_should_filter_decrypted_attributes
+    @person = Person.new(email: 'test@example.com')
+    refute @person.attributes.keys.include? "email"
+  end
 end
