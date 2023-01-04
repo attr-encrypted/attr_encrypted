@@ -160,12 +160,11 @@ module AttrEncrypted
       end
 
       define_method(attribute) do
-        instance_variable_get("@#{attribute}") || instance_variable_set("@#{attribute}", decrypt(attribute, send(encrypted_attribute_name)))
+        read_encrypted_attribute(attribute)
       end
 
       define_method("#{attribute}=") do |value|
-        send("#{encrypted_attribute_name}=", encrypt(attribute, value))
-        instance_variable_set("@#{attribute}", value)
+        write_encrypted_attribute(attribute, value)
       end
 
       define_method("#{attribute}?") do
@@ -405,6 +404,17 @@ module AttrEncrypted
         else
           option
         end
+      end
+
+      def read_encrypted_attribute(attribute)
+        encrypted_attribute_name = encrypted_attributes[attribute.to_sym][:attribute]
+        instance_variable_get("@#{attribute}") || instance_variable_set("@#{attribute}", decrypt(attribute, send(encrypted_attribute_name)))
+      end
+
+      def write_encrypted_attribute(attribute, value)
+        encrypted_attribute_name = encrypted_attributes[attribute.to_sym][:attribute]
+        send("#{encrypted_attribute_name}=", encrypt(attribute, value))
+        instance_variable_set("@#{attribute}", value)
       end
 
       def load_iv_for_attribute(attribute, options)
