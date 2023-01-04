@@ -10,13 +10,11 @@ if defined?(ActiveRecord::Base)
           base.class_eval do
 
             # https://github.com/attr-encrypted/attr_encrypted/issues/68
-            alias_method :reload_without_attr_encrypted, :reload
             def reload(*args, &block)
-              result = reload_without_attr_encrypted(*args, &block)
               self.class.encrypted_attributes.keys.each do |attribute_name|
                 instance_variable_set("@#{attribute_name}", nil)
               end
-              result
+              super
             end
 
             attr_encrypted_options[:encode] = true
