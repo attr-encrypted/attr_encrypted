@@ -1,6 +1,6 @@
-## Maintainer(s) wanted!!!
+## Reverb Fork of attr_encrypted
 
-**If you have an interest in maintaining this project... please see https://github.com/attr-encrypted/attr_encrypted/issues/379**
+please see this ticket for additional context: https://reverb.atlassian.net/browse/PLAT-1435
 
 # attr_encrypted
 
