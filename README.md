@@ -1,6 +1,4 @@
-## Reverb Fork of attr_encrypted
-
-please see this ticket for additional context: https://reverb.atlassian.net/browse/PLAT-1435
+Please see this ticket for additional context on why this fork is neccessary: https://reverb.atlassian.net/browse/PLAT-1435
 
 # attr_encrypted
 
