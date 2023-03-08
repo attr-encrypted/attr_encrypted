@@ -50,7 +50,6 @@ Gem::Specification.new do |s|
   else
     s.add_development_dependency('sqlite3')
   end
-  s.add_development_dependency('dm-sqlite-adapter')
 
   s.cert_chain  = ['certs/saghaulor.pem']
   s.signing_key = File.expand_path("~/.ssh/gem-private_key.pem") if $0 =~ /gem\z/

@@ -1,0 +1,37 @@
+name: Default
+
+# This workflow runs on all pushes to the repo so we can test changes and provide
+# fast feedback.
+on:
+  push:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preflight_check:
+    name: Preflight Check
+    runs-on: ubuntu-latest
+    # do a matrix for ACTIVERECORD_VERSION of 6.1 and 7.0
+    strategy:
+      matrix:
+        activerecord_version:
+          - 6.1
+          - 7.0
+    steps:
+      # Need to fetch all refs, so we can check if the version has been bumped
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+        env:
+          ACTIVERECORD: ${{ matrix.activerecord_version }}
+
+      - name: Test
+        run: bundle exec rake
+        env:
+          ACTIVERECORD: ${{ matrix.activerecord_version }}
