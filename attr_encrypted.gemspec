@@ -37,7 +37,6 @@ Gem::Specification.new do |s|
   end
   s.add_development_dependency('activerecord', activerecord_version)
   s.add_development_dependency('actionpack', activerecord_version)
-  s.add_development_dependency('datamapper')
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
   s.add_development_dependency('sequel')
@@ -52,9 +51,6 @@ Gem::Specification.new do |s|
     s.add_development_dependency('sqlite3')
   end
   s.add_development_dependency('dm-sqlite-adapter')
-  s.add_development_dependency('simplecov')
-  s.add_development_dependency('simplecov-rcov')
-  s.add_development_dependency("codeclimate-test-reporter", '<= 0.6.0')
 
   s.cert_chain  = ['certs/saghaulor.pem']
   s.signing_key = File.expand_path("~/.ssh/gem-private_key.pem") if $0 =~ /gem\z/

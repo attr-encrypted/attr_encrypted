@@ -1,23 +1,5 @@
 # frozen_string_literal: true
 
-require 'simplecov'
-require 'simplecov-rcov'
-require "codeclimate-test-reporter"
-
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
-  [
-    SimpleCov::Formatter::HTMLFormatter,
-    SimpleCov::Formatter::RcovFormatter,
-    CodeClimate::TestReporter::Formatter
-  ]
-)
-
-SimpleCov.start do
-  add_filter 'test'
-end
-
-CodeClimate::TestReporter.start
-
 require 'minitest/autorun'
 
 # Rails 4.0.x pins to an old minitest
@@ -26,7 +8,6 @@ unless defined?(MiniTest::Test)
 end
 
 require 'active_record'
-require 'data_mapper'
 require 'digest/sha2'
 require 'sequel'
 ActiveSupport::Deprecation.behavior = :raise
