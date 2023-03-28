@@ -1,6 +1,14 @@
-# attr_encrypted #
+# attr_encrypted
 
-## 3.1.0 ##
+## 4.0.0
+
+* Added: Support for Ruby >= 3.0.
+* Added: Rails 7 support.
+* Changed: Using `#encrypted_attributes` is no longer supported. Instead, use `#attr_encrypted_encrypted_attributes` to avoid
+  collision with Active Record 7 native encryption.
+
+## 3.1.0
+
 * Added: Abitilty to encrypt empty values. (@tamird)
 * Added: MIT license
 * Added: MRI 2.5.x support (@saghaulor)
@@ -11,23 +19,28 @@
 * Fixed: Only check empty on strings, allows for encrypting non-string type objects
 * Fixed: Fixed how accessors for db columns are defined in the ActiveRecord adapter, preventing premature definition. (@nagachika)
 
-## 3.0.3 ##
+## 3.0.3
+
 * Fixed: attr_was would decrypt the attribute upon every call. This is inefficient and introduces problems when the options change between decrypting an old value and encrypting a new value; for example, when rotating the encryption key. As such, the new approach caches the decrypted value of the old encrypted value such that the old options are no longer needed. (@johnny-lai) (@saghaulor)
 
-## 3.0.2 ##
+## 3.0.2
+
 * Changed: Removed alias_method_chain for compatibility with Rails v5.x (@grosser)
 * Changed: Updated Travis build matrix to include Rails 5. (@saghaulor) (@connorshea)
 * Changed: Removed `.silence_stream` from tests as it has been removed from Rails 5. (@sblackstone)
 
-## 3.0.1 ##
+## 3.0.1
+
 * Fixed: attr_was method no longer calls undefined methods. (@saghaulor)
 
-## 3.0.0 ##
+## 3.0.0
+
 * Changed: Updated gemspec to use Encryptor v3.0.0. (@saghaulor)
 * Changed: Updated README with instructions related to moving from v2.0.0 to v3.0.0. (@saghaulor)
 * Fixed: ActiveModel::Dirty methods in the ActiveRecord adapter. (@saghaulor)
 
-## 2.0.0 ##
+## 2.0.0
+
 * Added: Now using Encryptor v2.0.0 (@saghaulor)
 * Added: Options are copied to the instance. (@saghaulor)
 * Added: Operation option is set during encryption/decryption to allow options to be evaluated in the context of the current operation. (@saghaulor)
@@ -48,51 +61,62 @@
 * Removed: Support for Rails < 3.x (@saghaulor)
 * Removed: Unnecessary use of `alias_method` from ActiveRecord adapter. (@saghaulor)
 
-## 1.4.0 ##
+## 1.4.0
+
 * Added: ActiveModel::Dirty#attribute_was (@saghaulor)
 * Added: ActiveModel::Dirty#attribute_changed? (@mwean)
 
-## 1.3.5 ##
+## 1.3.5
+
 * Changed: Fixed gemspec to explicitly depend on Encryptor v1.3.0 (@saghaulor)
 * Fixed: Evaluate `:mode` option as a symbol or proc. (@cheynewallace)
 
-## 1.3.4 ##
+## 1.3.4
+
 * Added: ActiveRecord::Base.reload support. (@rcook)
 * Fixed: ActiveRecord adapter no longer forces attribute hashes to be string-keyed. (@tamird)
 * Fixed: Mass assignment protection in ActiveRecord 4. (@tamird)
 * Changed: Now using rubygems over https. (@tamird)
 * Changed: Let ActiveRecord define attribute methods. (@saghaulor)
 
-## 1.3.3 ##
+## 1.3.3
+
 * Added: Alias attr_encryptor and attr_encrpted. (@Billy Monk)
 
-## 1.3.2 ##
+## 1.3.2
+
 * Fixed: Bug regarding strong parameters. (@S. Brent Faulkner)
 * Fixed: Bug regarding loading per instance IV and salt. (@S. Brent Faulkner)
 * Fixed: Bug regarding assigning nil. (@S. Brent Faulkner)
 * Added: Support for protected attributes. (@S. Brent Faulkner)
 * Added: Support for ActiveRecord 4. (@S. Brent Faulkner)
 
-## 1.3.1 ##
+## 1.3.1
+
 * Added: Support for Rails 2.3.x and 3.1.x. (@S. Brent Faulkner)
 
-## 1.3.0 ##
+## 1.3.0
+
 * Fixed: Serialization bug. (@Billy Monk)
 * Added: Support for :per_attribute_iv_and_salt mode. (@rcook)
 * Fixed: Added dependencies to gemspec. (@jmazzi)
 
-## 1.2.1 ##
+## 1.2.1
+
 * Added: Force encoding when not marshaling. (@mosaicxm)
 * Fixed: Issue specifying multiple attributes on the same line. (@austintaylor)
 * Added: Typecasting to String before encryption (@shuber)
 * Added: `"#{attribute}?"` method. (@shuber)
 
-## 1.2.0 ##
+## 1.2.0
+
 * Changed: General code refactoring (@shuber)
 
-## 1.1.2 ##
+## 1.1.2
+
 * No significant changes
 
-## 1.1.1 ##
+## 1.1.1
+
 * Changled: Updated README. (@shuber)
 * Added: `before_type_cast` alias to ActiveRecord adapter. (@shuber)
