@@ -50,9 +50,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency('simplecov')
   s.add_development_dependency('simplecov-rcov')
 
-  s.cert_chain  = ['certs/saghaulor.pem']
-  s.signing_key = File.expand_path("~/.ssh/gem-private_key.pem") if $0 =~ /gem\z/
-
   s.post_install_message = "\n\n\nWARNING: Using `#encrypted_attributes` is no longer supported. Instead, use `#attr_encrypted_encrypted_attributes` to avoid
   collision with Active Record 7 native encryption.\n\n\n"
 
