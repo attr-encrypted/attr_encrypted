@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.add_dependency('encryptor', ['~> 3.0.0'])
   # support for testing with specific active record version
   activerecord_version = if ENV.key?('ACTIVERECORD')
-    "~> #{ENV['ACTIVERECORD']}"
+    "~> #{ENV['ACTIVERECORD']}.0"
   else
     '>= 2.0.0'
   end
