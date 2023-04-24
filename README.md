@@ -4,7 +4,7 @@
 
 Generates attr_accessors that transparently encrypt and decrypt attributes.
 
-It works with ANY class, however, you get a few extra features when you're using it with `ActiveRecord`, `DataMapper`, or `Sequel`.
+It works with ANY class, however, you get a few extra features when you're using it with `ActiveRecord` or `Sequel`.
 
 
 ## Installation
@@ -23,7 +23,7 @@ Then install the gem:
 
 ## Usage
 
-If you're using an ORM like `ActiveRecord`, `DataMapper`, or `Sequel`, using attr_encrypted is easy:
+If you're using an ORM like `ActiveRecord` or `Sequel`, using attr_encrypted is easy:
 
 ```ruby
   class User
@@ -364,7 +364,7 @@ NOTE: This only works if all records are encrypted with the same encryption key 
 __NOTE: This feature is deprecated and will be removed in the next major release.__
 
 
-### DataMapper and Sequel
+### Sequel
 
 #### Default options
 
