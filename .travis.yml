@@ -18,6 +18,14 @@ jobs:
   exclude:
     - rvm: 2.6.10
       env: ACTIVERECORD=7.0.4
+    - rvm: 3.1.4
+      env: ACTIVERECORD=5.1.1
+    - rvm: 3.1.4
+      env: ACTIVERECORD=5.2.8
+    - rvm: 3.2.2
+      env: ACTIVERECORD=5.1.1
+    - rvm: 3.2.2
+      env: ACTIVERECORD=5.2.8
 
 addons:
   code_climate:
