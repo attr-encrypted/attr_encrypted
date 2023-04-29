@@ -29,9 +29,15 @@ class LegacyPerson < ActiveRecord::Base
   attr_encrypted :email, :key => 'a secret key'
   attr_encrypted :credentials, :key => Proc.new { |user| Encryptor.encrypt(:value => user.salt, :key => 'some private key', insecure_mode: true, algorithm: 'aes-256-cbc') }, :marshal => true
 
-  ActiveSupport::Deprecation.silenced = true
-  def after_initialize; end
-  ActiveSupport::Deprecation.silenced = false
+  if ActiveRecord.respond_to?(:deprecator)
+    ActiveRecord.deprecator.silence do
+      def after_initialize; end
+    end
+  else
+    ActiveSupport::Deprecation.silenced = true
+    def after_initialize; end
+    ActiveSupport::Deprecation.silenced = false
+  end
 
   after_initialize :initialize_salt_and_credentials
 
