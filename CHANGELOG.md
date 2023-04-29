@@ -1,5 +1,10 @@
 # attr_encrypted
 
+## Unreleased
+
+* Drop support for `datamapper` which has not had a release since October 2011. This is in an attempt to make
+  maintenance and testing easier moving forward.
+
 ## 4.0.0
 
 * Added: Support for Ruby >= 3.0.

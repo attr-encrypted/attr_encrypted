@@ -1,10 +1,10 @@
 # attr_encrypted
 
-[![Build Status](https://secure.travis-ci.org/attr-encrypted/attr_encrypted.svg)](https://travis-ci.org/attr-encrypted/attr_encrypted) [![Test Coverage](https://codeclimate.com/github/attr-encrypted/attr_encrypted/badges/coverage.svg)](https://codeclimate.com/github/attr-encrypted/attr_encrypted/coverage) [![Code Climate](https://codeclimate.com/github/attr-encrypted/attr_encrypted/badges/gpa.svg)](https://codeclimate.com/github/attr-encrypted/attr_encrypted) [![Gem Version](https://badge.fury.io/rb/attr_encrypted.svg)](https://badge.fury.io/rb/attr_encrypted) [![security](https://hakiri.io/github/attr-encrypted/attr_encrypted/master.svg)](https://hakiri.io/github/attr-encrypted/attr_encrypted/master)
+[![Build Status](https://app.travis-ci.com/attr-encrypted/attr_encrypted.svg?branch=master)](https://travis-ci.org/attr-encrypted/attr_encrypted) [![Test Coverage](https://codeclimate.com/github/attr-encrypted/attr_encrypted/badges/coverage.svg)](https://codeclimate.com/github/attr-encrypted/attr_encrypted/coverage) [![Code Climate](https://codeclimate.com/github/attr-encrypted/attr_encrypted/badges/gpa.svg)](https://codeclimate.com/github/attr-encrypted/attr_encrypted) [![Gem Version](https://badge.fury.io/rb/attr_encrypted.svg)](https://badge.fury.io/rb/attr_encrypted)
 
 Generates attr_accessors that transparently encrypt and decrypt attributes.
 
-It works with ANY class, however, you get a few extra features when you're using it with `ActiveRecord`, `DataMapper`, or `Sequel`.
+It works with ANY class, however, you get a few extra features when you're using it with `ActiveRecord` or `Sequel`.
 
 
 ## Installation
@@ -23,7 +23,7 @@ Then install the gem:
 
 ## Usage
 
-If you're using an ORM like `ActiveRecord`, `DataMapper`, or `Sequel`, using attr_encrypted is easy:
+If you're using an ORM like `ActiveRecord` or `Sequel`, using attr_encrypted is easy:
 
 ```ruby
   class User
@@ -364,7 +364,7 @@ NOTE: This only works if all records are encrypted with the same encryption key 
 __NOTE: This feature is deprecated and will be removed in the next major release.__
 
 
-### DataMapper and Sequel
+### Sequel
 
 #### Default options
 
