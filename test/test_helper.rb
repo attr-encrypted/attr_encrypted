@@ -16,15 +16,10 @@ SimpleCov.start do
 end
 
 require 'minitest/autorun'
-
-# Rails 4.0.x pins to an old minitest
-unless defined?(MiniTest::Test)
-  MiniTest::Test = MiniTest::Unit::TestCase
-end
-
 require 'active_record'
 require 'digest/sha2'
 require 'sequel'
+
 if ActiveRecord.respond_to?(:deprecator)
   ActiveRecord.deprecator.behavior = :raise
 else
