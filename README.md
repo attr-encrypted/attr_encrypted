@@ -1,6 +1,6 @@
 # attr_encrypted
 
-[![Build Status]((https://github.com/attr_encrypted/attr_encrypted/actions/workflows/CI.yml/badge.svg))]([https://travis-ci.org/attr-encrypted/attr_encrypted](https://github.com/attr-encrypted/attr_encrypted/actions/workflows/CI.yml)) [![Gem Version](https://badge.fury.io/rb/attr_encrypted.svg)](https://badge.fury.io/rb/attr_encrypted)
+![workflow](https://github.com/attr-encrypted/attr_encrypted/actions/workflows/CI.yml/badge.svg) [![Gem Version](https://badge.fury.io/rb/attr_encrypted.svg)](https://badge.fury.io/rb/attr_encrypted)
 
 Generates attr_accessors that transparently encrypt and decrypt attributes.
 
