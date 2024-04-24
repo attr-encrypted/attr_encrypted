@@ -58,11 +58,11 @@ end
 class LegacyAttrEncryptedTest < Minitest::Test
 
   def test_should_store_email_in_encrypted_attributes
-    assert LegacyUser.encrypted_attributes.include?(:email)
+    assert LegacyUser.attr_encrypted_encrypted_attributes.include?(:email)
   end
 
   def test_should_not_store_salt_in_encrypted_attributes
-    assert !LegacyUser.encrypted_attributes.include?(:salt)
+    assert !LegacyUser.attr_encrypted_encrypted_attributes.include?(:salt)
   end
 
   def test_attr_encrypted_should_return_true_for_email
@@ -70,7 +70,7 @@ class LegacyAttrEncryptedTest < Minitest::Test
   end
 
   def test_attr_encrypted_should_not_use_the_same_attribute_name_for_two_attributes_in_the_same_line
-    refute_equal LegacyUser.encrypted_attributes[:email][:attribute], LegacyUser.encrypted_attributes[:without_encoding][:attribute]
+    refute_equal LegacyUser.attr_encrypted_encrypted_attributes[:email][:attribute], LegacyUser.attr_encrypted_encrypted_attributes[:without_encoding][:attribute]
   end
 
   def test_attr_encrypted_should_return_false_for_salt
@@ -201,7 +201,7 @@ class LegacyAttrEncryptedTest < Minitest::Test
   end
 
   def test_should_inherit_encrypted_attributes
-    assert_equal [LegacyUser.encrypted_attributes.keys, :testing].flatten.collect { |key| key.to_s }.sort, LegacyAdmin.encrypted_attributes.keys.collect { |key| key.to_s }.sort
+    assert_equal [LegacyUser.attr_encrypted_encrypted_attributes.keys, :testing].flatten.collect { |key| key.to_s }.sort, LegacyAdmin.attr_encrypted_encrypted_attributes.keys.collect { |key| key.to_s }.sort
   end
 
   def test_should_inherit_attr_encrypted_options
@@ -211,7 +211,7 @@ class LegacyAttrEncryptedTest < Minitest::Test
 
   def test_should_not_inherit_unrelated_attributes
     assert LegacySomeOtherClass.attr_encrypted_options.empty?
-    assert LegacySomeOtherClass.encrypted_attributes.empty?
+    assert LegacySomeOtherClass.attr_encrypted_encrypted_attributes.empty?
   end
 
   def test_should_evaluate_a_symbol_option
@@ -268,7 +268,7 @@ class LegacyAttrEncryptedTest < Minitest::Test
   end
 
   def test_should_work_with_aliased_attr_encryptor
-    assert LegacyUser.encrypted_attributes.include?(:aliased)
+    assert LegacyUser.attr_encrypted_encrypted_attributes.include?(:aliased)
   end
 
   def test_should_always_reset_options

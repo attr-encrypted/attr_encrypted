@@ -24,40 +24,33 @@ Gem::Specification.new do |s|
   s.files      = `git ls-files`.split("\n")
   s.test_files = `git ls-files -- test/*`.split("\n")
 
-  s.required_ruby_version = '>= 2.0.0'
+  s.required_ruby_version = '>= 2.6.0'
 
   s.add_dependency('encryptor', ['~> 3.0.0'])
   # support for testing with specific active record version
   activerecord_version = if ENV.key?('ACTIVERECORD')
-    "~> #{ENV['ACTIVERECORD']}"
+    "~> #{ENV['ACTIVERECORD']}.0"
   else
     '>= 2.0.0'
   end
   s.add_development_dependency('activerecord', activerecord_version)
   s.add_development_dependency('actionpack', activerecord_version)
-  s.add_development_dependency('datamapper')
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
   s.add_development_dependency('sequel')
-  s.add_development_dependency('pry-byebug')
-  if RUBY_VERSION < '2.1.0'
-    s.add_development_dependency('nokogiri', '< 1.7.0')
-    s.add_development_dependency('public_suffix', '< 3.0.0')
-  end
+
   if defined?(RUBY_ENGINE) && RUBY_ENGINE.to_sym == :jruby
     s.add_development_dependency('activerecord-jdbcsqlite3-adapter')
     s.add_development_dependency('jdbc-sqlite3', '< 3.8.7') # 3.8.7 is nice and broke
   else
-    s.add_development_dependency('sqlite3', '~> 1.3.0', '>= 1.3.6')
+    s.add_development_dependency('sqlite3', '= 1.5.4')
   end
   s.add_development_dependency('dm-sqlite-adapter')
+  s.add_development_dependency('pry')
   s.add_development_dependency('simplecov')
   s.add_development_dependency('simplecov-rcov')
-  s.add_development_dependency("codeclimate-test-reporter", '<= 0.6.0')
 
-  s.post_install_message = "\n\n\nWARNING: Several insecure default options and features were deprecated in attr_encrypted v2.0.0.\n
-Additionally, there was a bug in Encryptor v2.0.0 that insecurely encrypted data when using an AES-*-GCM algorithm.\n
-This bug was fixed but introduced breaking changes between v2.x and v3.x.\n
-Please see the README for more information regarding upgrading to attr_encrypted v3.0.0.\n\n\n"
+  s.post_install_message = "\n\n\nWARNING: Using `#encrypted_attributes` is no longer supported. Instead, use `#attr_encrypted_encrypted_attributes` to avoid
+  collision with Active Record 7 native encryption.\n\n\n"
 
 end

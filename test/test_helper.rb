@@ -1,15 +1,13 @@
 # frozen_string_literal: true
 
+require 'pry'
 require 'simplecov'
 require 'simplecov-rcov'
-require 'codeclimate-test-reporter'
-require 'pry-byebug'
 
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
   [
     SimpleCov::Formatter::HTMLFormatter,
-    SimpleCov::Formatter::RcovFormatter,
-    CodeClimate::TestReporter::Formatter
+    SimpleCov::Formatter::RcovFormatter
   ]
 )
 
@@ -17,20 +15,16 @@ SimpleCov.start do
   add_filter 'test'
 end
 
-CodeClimate::TestReporter.start
-
 require 'minitest/autorun'
-
-# Rails 4.0.x pins to an old minitest
-unless defined?(MiniTest::Test)
-  MiniTest::Test = MiniTest::Unit::TestCase
-end
-
 require 'active_record'
-require 'data_mapper'
 require 'digest/sha2'
 require 'sequel'
-ActiveSupport::Deprecation.behavior = :raise
+
+if ActiveRecord.respond_to?(:deprecator)
+  ActiveRecord.deprecator.behavior = :raise
+else
+  ActiveSupport::Deprecation.behavior = :raise
+end
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $:.unshift(File.dirname(__FILE__))
