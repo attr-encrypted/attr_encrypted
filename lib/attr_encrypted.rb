@@ -343,7 +343,7 @@ module AttrEncrypted
         # catch this scenario and optionally give the host application
         # the ability to handle unrecoverable data
         begin
-          value = self.class.decrypt(
+          value = self.class.attr_encrypted_decrypt(
             attribute,
             encrypted_value,
             options.merge(

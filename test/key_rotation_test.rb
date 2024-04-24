@@ -35,10 +35,10 @@ class KeyRotationTest < Minitest::Test
   end
 
   def test_decrypt_error_while_not_rotataing_keys_raises_cipher_error
-    original = instance_with_attr_encrypted_config(@old_config)
+    original = instance_with_attr_encrypted_config(**@old_config)
     original.value = "cleartext-value"
 
-    with_wrong_key = instance_with_attr_encrypted_config(@new_config)
+    with_wrong_key = instance_with_attr_encrypted_config(**@new_config)
     with_wrong_key.encrypted_value = original.encrypted_value
 
     assert_raises(OpenSSL::Cipher::CipherError, "expected OpenSSL::Cipher::CipherError was not raised") do
@@ -47,7 +47,7 @@ class KeyRotationTest < Minitest::Test
   end
 
   def test_decrypt_error_when_rotating_keys_retries_with_the_old_key
-    original = instance_with_attr_encrypted_config(@old_config)
+    original = instance_with_attr_encrypted_config(**@old_config)
     original.value = "cleartext-value"
     rotation_handler_instance = Minitest::Mock.new
     rotation_handler_instance.expect(:call, true)
@@ -62,7 +62,7 @@ class KeyRotationTest < Minitest::Test
   end
 
   def test_rotation_invokes_the_rotation_handler
-    original = instance_with_attr_encrypted_config(@old_config)
+    original = instance_with_attr_encrypted_config(**@old_config)
     original.value = "cleartext-value"
     rotation_handler_instance = Minitest::Mock.new
     rotation_handler_instance.expect(:call, true)
@@ -83,7 +83,7 @@ class KeyRotationTest < Minitest::Test
     rotation_error_handler_instance = Minitest::Mock.new
     rotation_error_handler_instance.expect(:call, true)
     wrong_key = generate_key
-    original = instance_with_attr_encrypted_config(@old_config)
+    original = instance_with_attr_encrypted_config(**@old_config)
     original.value = "cleartext-value"
     rotating = setup_key_rotation(
       from_config: @old_config.merge(key: wrong_key),
@@ -111,7 +111,7 @@ class KeyRotationTest < Minitest::Test
   end
 
   def setup_key_rotation(from_config: @old_config, to_config: @new_config, rotation_handler: proc {}, rotation_error_handler: proc {})
-    original = instance_with_attr_encrypted_config(from_config)
+    original = instance_with_attr_encrypted_config(**from_config)
     original.value = "cleartext-value"
     FakeRotatable.class_eval do
       attr_encrypted(
