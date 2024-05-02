@@ -17,6 +17,7 @@ jobs:
           - '6.0'
           - '6.1'
           - '7.0'
+          - '7.1'
         ruby:
           - '2.7'
           - '3.0'
@@ -27,6 +28,8 @@ jobs:
             ruby: '2.7'
           - active_record: '5.2'
             ruby: '2.7'
+          - active_record: '7.1'
+            ruby: '3.3'
     env:
       ACTIVERECORD: ${{ matrix.active_record }}
     steps:
