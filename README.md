@@ -6,7 +6,6 @@ Generates attr_accessors that transparently encrypt and decrypt attributes.
 
 It works with ANY class, however, you get a few extra features when you're using it with `ActiveRecord` or `Sequel`.
 
-
 ## Installation
 
 Add attr_encrypted to your gemfile:
