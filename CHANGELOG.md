@@ -1,5 +1,9 @@
 # attr_encrypted
 
+## 4.1.1
+
+* Fixed: Fix SystemStackError when extending the reload method with Module#prepend.
+
 ## 4.1.0
 
 * Changed: Dropped support for `datamapper` which has not had a release since October 2011. This is in an attempt to make
