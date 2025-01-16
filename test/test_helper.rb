@@ -16,6 +16,7 @@ SimpleCov.start do
 end
 
 require 'minitest/autorun'
+require 'active_support'
 require 'active_record'
 require 'digest/sha2'
 require 'sequel'
