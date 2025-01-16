@@ -31,7 +31,7 @@ Gem::Specification.new do |s|
   activerecord_version = if ENV.key?('ACTIVERECORD')
     "~> #{ENV['ACTIVERECORD']}.0"
   else
-    '>= 2.0.0'
+    '>= 6.0.0'
   end
   s.add_development_dependency('activerecord', activerecord_version)
   s.add_development_dependency('actionpack', activerecord_version)
@@ -44,7 +44,6 @@ Gem::Specification.new do |s|
   else
     s.add_development_dependency('sqlite3', '= 1.5.4')
   end
-  s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('pry')
   s.add_development_dependency('simplecov')
   s.add_development_dependency('simplecov-rcov')
