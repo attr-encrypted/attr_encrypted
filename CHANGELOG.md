@@ -1,5 +1,11 @@
 # attr_encrypted
 
+## 4.2.0
+
+* Changed: Set minimum Ruby version as 2.7.
+* Added: Rails 7.2 and 8.0 support.
+* Fixed: Further removal of `datamapper` support.
+
 ## 4.1.1
 
 * Fixed: Fix SystemStackError when extending the reload method with Module#prepend.
