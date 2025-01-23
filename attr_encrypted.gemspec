@@ -44,7 +44,6 @@ Gem::Specification.new do |s|
   else
     s.add_development_dependency('sqlite3', '= 1.5.4')
   end
-  s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('pry')
   s.add_development_dependency('simplecov')
   s.add_development_dependency('simplecov-rcov')
