@@ -42,9 +42,12 @@ Gem::Specification.new do |s|
     s.add_development_dependency('activerecord-jdbcsqlite3-adapter')
     s.add_development_dependency('jdbc-sqlite3', '< 3.8.7') # 3.8.7 is nice and broke
   else
-    s.add_development_dependency('sqlite3', '= 1.5.4')
+    if ENV['ACTIVERECORD'] && Gem::Version.new(ENV['ACTIVERECORD']) >= Gem::Version.new('8.0')
+      s.add_development_dependency('sqlite3', '> 2.1.0')
+    else
+      s.add_development_dependency('sqlite3', '= 1.5.4')
+    end
   end
-  s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('pry')
   s.add_development_dependency('simplecov')
   s.add_development_dependency('simplecov-rcov')
