@@ -328,6 +328,12 @@ You may want to encrypt empty strings or nil so as to not reveal which records a
   end
 ```
 
+**Caveat:** The default encryptor doesn't support this option. Doing so will throw an error:
+```
+ArgumentError: data must not be empty
+```
+
+Make sure that your encryptor supports encryption of empty values when setting this to true.
 
 ## ORMs
 
