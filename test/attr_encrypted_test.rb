@@ -13,6 +13,16 @@ class SillyEncryptor
   end
 end
 
+class FreezingDecryptor
+  def self.frozen_encrypt(options)
+    options[:value].freeze
+  end
+
+  def self.frozen_decrypt(options)
+    options[:value].freeze
+  end
+end
+
 class User
   extend AttrEncrypted
   self.attr_encrypted_options[:key] = Proc.new { |user| SECRET_KEY } # default key
@@ -22,6 +32,7 @@ class User
   attr_encrypted :password, :prefix => 'crypted_', :suffix => '_test'
   attr_encrypted :ssn, :key => :secret_key, :attribute => 'ssn_encrypted'
   attr_encrypted :credit_card, :encryptor => SillyEncryptor, :encrypt_method => :silly_encrypt, :decrypt_method => :silly_decrypt, :some_arg => 'test'
+  attr_encrypted :frozen_string, :encryptor => FreezingDecryptor, :encrypt_method => :frozen_encrypt, :decrypt_method => :frozen_decrypt
   attr_encrypted :with_encoding, :key => SECRET_KEY, :encode => true
   attr_encrypted :with_custom_encoding, :key => SECRET_KEY, :encode => 'm'
   attr_encrypted :with_marshaling, :key => SECRET_KEY, :marshal => true
@@ -37,7 +48,8 @@ class User
   attr_accessor :salt
   attr_accessor :should_encrypt
 
-  def initialize(email: nil)
+  def initialize(email: nil, frozen_string: nil)
+    self.frozen_string = frozen_string
     self.email = email
     self.salt = Time.now.to_i.to_s
     self.should_encrypt = true
@@ -372,6 +384,12 @@ class AttrEncryptedTest < Minitest::Test
   def test_should_not_generate_salt_per_attribute_by_default
     thing = YetAnotherClass.new(email: 'thing@thing.com')
     assert_nil thing.encrypted_email_salt
+  end
+
+  def test_should_decrypt_and_encode_frozen_strings
+    user = User.new(frozen_string: 'test')
+    result = user.decrypt(:frozen_string, user.encrypted_frozen_string)
+    assert_equal 'test', result
   end
 
   def test_should_decrypt_second_record
