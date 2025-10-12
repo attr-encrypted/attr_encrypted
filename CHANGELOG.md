@@ -1,5 +1,9 @@
 # attr_encrypted
 
+## Unreleased
+
+* Reduce gem size by excluding test files
+
 ## 4.2.0
 
 * Changed: Set minimum Ruby version as 2.7.

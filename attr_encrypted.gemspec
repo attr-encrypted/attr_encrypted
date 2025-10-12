@@ -21,8 +21,11 @@ Gem::Specification.new do |s|
 
   s.require_paths = ['lib']
 
-  s.files      = `git ls-files`.split("\n")
-  s.test_files = `git ls-files -- test/*`.split("\n")
+  s.files = Dir.glob('lib/**/*') + [
+    'CHANGELOG.md',
+    'MIT-LICENSE',
+    'README.md'
+  ]
 
   s.required_ruby_version = '>= 2.7.0'
 
