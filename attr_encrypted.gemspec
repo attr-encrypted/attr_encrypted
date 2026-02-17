@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.files      = `git ls-files`.split("\n")
   s.test_files = `git ls-files -- test/*`.split("\n")
 
-  s.required_ruby_version = '>= 2.6.0'
+  s.required_ruby_version = '>= 3.3.0'
 
   s.add_dependency('encryptor', ['~> 3.0.0'])
   # support for testing with specific active record version
@@ -35,7 +35,7 @@ Gem::Specification.new do |s|
   end
   s.add_development_dependency('activerecord', activerecord_version)
   s.add_development_dependency('actionpack', activerecord_version)
-  s.add_development_dependency('datamapper')
+  # DataMapper removed - incompatible with Ruby 3.x (uses removed Fixnum constant)
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
   s.add_development_dependency('sequel')
@@ -45,10 +45,8 @@ Gem::Specification.new do |s|
   else
     s.add_development_dependency('sqlite3')
   end
-  s.add_development_dependency('dm-sqlite-adapter')
   s.add_development_dependency('pry')
   s.add_development_dependency('simplecov')
-  s.add_development_dependency('simplecov-rcov')
 
   s.cert_chain  = ['certs/saghaulor.pem']
   s.signing_key = File.expand_path("~/.ssh/gem-private_key.pem") if $0 =~ /gem\z/

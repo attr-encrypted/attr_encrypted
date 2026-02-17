@@ -7,7 +7,8 @@ require "bundler/gem_tasks"
 desc 'Test the attr_encrypted gem.'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
-  t.pattern = 'test/**/*_test.rb'
+  # Exclude DataMapper tests - DataMapper is incompatible with Ruby 3.x
+  t.test_files = FileList['test/**/*_test.rb'].exclude('test/*data_mapper*')
   t.warning = false
   t.verbose = true
 end

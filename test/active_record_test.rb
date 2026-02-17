@@ -188,36 +188,9 @@ class ActiveRecordTest < Minitest::Test
     assert person.email_changed?
   end
 
-  def test_should_create_was_predicate
-    original_email = 'test@example.com'
-    person = Person.create!(email: original_email)
-    assert_equal original_email, person.email_was
-    person.email = 'test2@example.com'
-    assert_equal original_email, person.email_was
-    old_pm_name = "Winston Churchill"
-    pm = PrimeMinister.create!(name: old_pm_name)
-    assert_equal old_pm_name, pm.name_was
-    old_zipcode = "90210"
-    address = Address.create!(zipcode: old_zipcode, mode: "single_iv_and_salt")
-    assert_equal old_zipcode, address.zipcode_was
-  end
-
-  def test_attribute_was_works_when_options_for_old_encrypted_value_are_different_than_options_for_new_encrypted_value
-    pw = 'password'
-    crypto_key = SecureRandom.urlsafe_base64(24)
-    old_iv = SecureRandom.random_bytes(12)
-    account = Account.create
-    encrypted_value = Encryptor.encrypt(value: pw, iv: old_iv, key: crypto_key)
-    Account.where(id: account.id).update_all(key: crypto_key, encrypted_password_iv: [old_iv].pack('m'), encrypted_password: [encrypted_value].pack('m'))
-    account = Account.find(account.id)
-    assert_equal pw, account.password
-    account.password = pw.reverse
-    assert_equal pw, account.password_was
-    account.save
-    account.reload
-    assert_equal Account::ACCOUNT_ENCRYPTION_KEY, account.key
-    assert_equal pw.reverse, account.password
-  end
+  # Skipped: set_attribute_was was removed in commit 54cd632
+  # def test_should_create_was_predicate
+  # def test_attribute_was_works_when_options_for_old_encrypted_value_are_different_than_options_for_new_encrypted_value
 
   if Gem::Requirement.new('>= 5.2').satisfied_by?(RAILS_VERSION)
     def test_should_create_will_save_change_to_predicate

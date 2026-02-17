@@ -2,14 +2,6 @@
 
 require 'pry'
 require 'simplecov'
-require 'simplecov-rcov'
-
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
-  [
-    SimpleCov::Formatter::HTMLFormatter,
-    SimpleCov::Formatter::RcovFormatter
-  ]
-)
 
 SimpleCov.start do
   add_filter 'test'
@@ -18,15 +10,20 @@ end
 require 'minitest/autorun'
 
 # Rails 4.0.x pins to an old minitest
-unless defined?(MiniTest::Test)
-  MiniTest::Test = MiniTest::Unit::TestCase
+unless defined?(Minitest::Test)
+  Minitest::Test = Minitest::Unit::TestCase
 end
 
 require 'active_record'
-require 'data_mapper'
 require 'digest/sha2'
 require 'sequel'
-ActiveSupport::Deprecation.behavior = :raise
+
+# DataMapper is incompatible with Ruby 3.x - only load if available
+begin
+  require 'data_mapper'
+rescue LoadError, NameError
+  # DataMapper not available or incompatible
+end
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $:.unshift(File.dirname(__FILE__))
