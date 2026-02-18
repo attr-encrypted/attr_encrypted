@@ -6,19 +6,18 @@ if defined?(ActiveRecord::Base)
       module ActiveRecord
         RAILS_VERSION = Gem::Version.new(::ActiveRecord::VERSION::STRING).freeze
 
+        module Reload
+          def reload(...)
+            result = super
+            self.class.attr_encrypted_encrypted_attributes.keys.each do |attribute_name|
+              instance_variable_set("@#{attribute_name}", nil)
+            end
+            result
+          end
+        end
+
         def self.extended(base) # :nodoc:
           base.class_eval do
-
-            # https://github.com/attr-encrypted/attr_encrypted/issues/68
-            alias_method :reload_without_attr_encrypted, :reload
-            def reload(*args, &block)
-              result = reload_without_attr_encrypted(*args, &block)
-              self.class.attr_encrypted_encrypted_attributes.keys.each do |attribute_name|
-                instance_variable_set("@#{attribute_name}", nil)
-              end
-              result
-            end
-
             attr_encrypted_options[:encode] = true
 
             class << self
@@ -71,6 +70,19 @@ if defined?(ActiveRecord::Base)
             end
 
             define_method("#{attr}_with_dirtiness=") do |value|
+              ## Source: https://github.com/priyankatapar/attr_encrypted/commit/7e8702bd5418c927a39d8dd72c0adbea522d5663
+              # In ActiveRecord 5.2+, due to changes to the way virtual
+              # attributes are handled, @attributes[attr].value is nil which
+              # breaks attribute_was. Setting it here returns us to the expected
+              # behavior.
+              if RAILS_VERSION >= Gem::Version.new(5.2)
+                # This is needed support attribute_was before a record has
+                # been saved
+                @attributes.write_cast_value(attr.to_s, __send__(attr)) if value != __send__(attr)
+                # This is needed to support attribute_was after a record has
+                # been saved
+                @attributes.write_from_user(attr.to_s, value) if value != __send__(attr)
+              end
               attribute_will_change!(attr) if value != __send__(attr)
               __send__("#{attr}_without_dirtiness=", value)
             end
@@ -135,5 +147,6 @@ if defined?(ActiveRecord::Base)
   ActiveSupport.on_load(:active_record) do
     extend AttrEncrypted
     extend AttrEncrypted::Adapters::ActiveRecord
+    prepend AttrEncrypted::Adapters::ActiveRecord::Reload
   end
 end

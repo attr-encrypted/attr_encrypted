@@ -14,28 +14,30 @@ Gem::Specification.new do |s|
   s.summary     = 'Encrypt and decrypt attributes'
   s.description = 'Generates attr_accessors that encrypt and decrypt attributes transparently'
 
-  s.authors   = ['Sean Huber', 'S. Brent Faulkner', 'William Monk', 'Stephen Aghaulor']
-  s.email    = ['seah@shuber.io', 'sbfaulkner@gmail.com', 'billy.monk@gmail.com', 'saghaulor@gmail.com']
+  s.authors   = ['Sean Huber', 'S. Brent Faulkner', 'William Monk', 'Stephen Aghaulor', 'Josh Branham', 'Mike Vastola']
+  s.email    = ['seah@shuber.io', 'sbfaulkner@gmail.com', 'billy.monk@gmail.com', 'saghaulor@gmail.com', 'josh.php@gmail.com', 'Mike@Vasto.la']
   s.homepage = 'http://github.com/attr-encrypted/attr_encrypted'
   s.license = 'MIT'
 
   s.require_paths = ['lib']
 
-  s.files      = `git ls-files`.split("\n")
-  s.test_files = `git ls-files -- test/*`.split("\n")
+  s.files = Dir.glob('lib/**/*') + [
+    'CHANGELOG.md',
+    'MIT-LICENSE',
+    'README.md'
+  ]
 
   s.required_ruby_version = '>= 3.3.0'
 
   s.add_dependency('encryptor', ['~> 3.0.0'])
   # support for testing with specific active record version
   activerecord_version = if ENV.key?('ACTIVERECORD')
-    "~> #{ENV['ACTIVERECORD']}"
+    "~> #{ENV['ACTIVERECORD']}.0"
   else
-    '>= 2.0.0'
+    '>= 6.0.0'
   end
   s.add_development_dependency('activerecord', activerecord_version)
   s.add_development_dependency('actionpack', activerecord_version)
-  # DataMapper removed - incompatible with Ruby 3.x (uses removed Fixnum constant)
   s.add_development_dependency('rake')
   s.add_development_dependency('minitest')
   s.add_development_dependency('sequel')
@@ -43,17 +45,16 @@ Gem::Specification.new do |s|
     s.add_development_dependency('activerecord-jdbcsqlite3-adapter')
     s.add_development_dependency('jdbc-sqlite3', '< 3.8.7') # 3.8.7 is nice and broke
   else
-    s.add_development_dependency('sqlite3')
+    if ENV['ACTIVERECORD'] && Gem::Version.new(ENV['ACTIVERECORD']) >= Gem::Version.new('8.0')
+      s.add_development_dependency('sqlite3', '> 2.1.0')
+    else
+      s.add_development_dependency('sqlite3', '= 1.5.4')
+    end
   end
   s.add_development_dependency('pry')
   s.add_development_dependency('simplecov')
 
-  s.cert_chain  = ['certs/saghaulor.pem']
-  s.signing_key = File.expand_path("~/.ssh/gem-private_key.pem") if $0 =~ /gem\z/
-
-  s.post_install_message = "\n\n\nWARNING: Several insecure default options and features were deprecated in attr_encrypted v2.0.0.\n
-Additionally, there was a bug in Encryptor v2.0.0 that insecurely encrypted data when using an AES-*-GCM algorithm.\n
-This bug was fixed but introduced breaking changes between v2.x and v3.x.\n
-Please see the README for more information regarding upgrading to attr_encrypted v3.0.0.\n\n\n"
+  s.post_install_message = "\n\n\nWARNING: Using `#encrypted_attributes` is no longer supported. Instead, use `#attr_encrypted_encrypted_attributes` to avoid
+  collision with Active Record 7 native encryption.\n\n\n"
 
 end

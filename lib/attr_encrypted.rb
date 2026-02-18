@@ -54,7 +54,7 @@ module AttrEncrypted
   #                         string instead of just 'true'. See
   #                         http://www.ruby-doc.org/core/classes/Array.html#M002245
   #                         for more encoding directives.
-  #                         Defaults to false unless you're using it with ActiveRecord, DataMapper, or Sequel.
+  #                         Defaults to false unless you're using it with ActiveRecord or Sequel.
   #
   #   encode_iv:            Defaults to true.
 
@@ -144,9 +144,8 @@ module AttrEncrypted
     attributes.each do |attribute|
       encrypted_attribute_name = (options[:attribute] ? options[:attribute] : [options[:prefix], attribute, options[:suffix]].join).to_sym
 
-      instance_methods_as_symbols = attribute_instance_methods_as_symbols
-
       if attribute_instance_methods_as_symbols_available?
+        instance_methods_as_symbols = attribute_instance_methods_as_symbols
         attr_reader encrypted_attribute_name unless instance_methods_as_symbols.include?(encrypted_attribute_name)
         attr_writer encrypted_attribute_name unless instance_methods_as_symbols.include?(:"#{encrypted_attribute_name}=")
 

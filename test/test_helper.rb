@@ -8,21 +8,14 @@ SimpleCov.start do
 end
 
 require 'minitest/autorun'
-
-# Rails 4.0.x pins to an old minitest
-unless defined?(Minitest::Test)
-  Minitest::Test = Minitest::Unit::TestCase
-end
-
 require 'active_record'
 require 'digest/sha2'
 require 'sequel'
 
-# DataMapper is incompatible with Ruby 3.x - only load if available
-begin
-  require 'data_mapper'
-rescue LoadError, NameError
-  # DataMapper not available or incompatible
+if ActiveRecord.respond_to?(:deprecator)
+  ActiveRecord.deprecator.behavior = :raise
+else
+  ActiveSupport::Deprecation.behavior = :raise
 end
 
 $:.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
